@@ -1,0 +1,122 @@
+CUSTOMER_ID;ADDRESS_NAME;ZIP;COUNTRY;CITY;DISTRICT;STREET;SEC;LANE;ALLEY;NUMBER;FLOOR;ROOM;BUILDING;VILLAGE;PROVINCE;STATE;OTHER;ERROR_MESSAGE
+0001;2067 Oak St, Phoenix, WA 10087, Mexico;10087;Mexico;Phoenix;;Oak St.;;;;2067;;;;;;WA;;
+0002;678 Main St, Austin, NY 72292, UK;72292;UK;Austin;;Main St.;;;;678;;;;;;NY;;
+0003;3412 Washington Blvd, Chicago, MI 39403, France;39403;France;Chicago;;Washington Blvd.;;;;3412;;;;;;MI;;
+0004;4931 Broadway, Chicago, AZ 73758, Germany;73758;Germany;Chicago;;Broadway;;;;4931;;;;;;AZ;;
+0005;9190 Oak St, Houston, CA 36440, Germany;36440;Germany;Houston;;Oak St.;;;;9190;;;;;;CA;;
+0006;735 Pine Rd, Houston, AZ 13779, Italy;13779;Italy;Houston;;Pine Rd.;;;;735;;;;;;AZ;;
+0007;9216 Pine Rd, Chicago, WA 68385, Mexico;68385;Mexico;Chicago;;Pine Rd.;;;;9216;;;;;;WA;;
+0008;6407 Main St, Chicago, FL 30340, Mexico;30340;Mexico;Chicago;;Main St.;;;;6407;;;;;;FL;;
+0009;7647 Broadway, Jacksonville, IL 60427, Japan;60427;Japan;Jacksonville;;Broadway;;;;7647;;;;;;IL;;
+0010;8195 Main St, Phoenix, NC 75506, UK;75506;UK;Phoenix;;Main St.;;;;8195;;;;;;NC;;
+0011;9314 Maple St, Los Angeles, MI 53360, Mexico;53360;Mexico;Los Angeles;;Maple St.;;;;9314;;;;;;MI;;
+0012;8117 Elm St, Jacksonville, WA 21685, UK;21685;UK;Jacksonville;;Elm St.;;;;8117;;;;;;WA;;
+0013;902 Lakeview Dr, San Francisco, MI 54767, Australia;54767;Australia;San Francisco;;Lakeview Dr.;;;;902;;;;;;MI;;
+0014;9830 Elm St, New York, NY 57307, Mexico;57307;Mexico;New York;;Elm St.;;;;9830;;;;;;NY;;
+0015;1224 Oak St, Houston, OH 12439, USA;12439;USA;Houston;;Oak St.;;;;1224;;;;;;OH;;
+0016;6789 Lakeview Dr, Dallas, NC 41664, France;41664;France;Dallas;;Lakeview Dr.;;;;6789;;;;;;NC;;
+0017;9462 Oak St, San Francisco, FL 75813, Australia;75813;Australia;San Francisco;;Oak St.;;;;9462;;;;;;FL;;
+0018;8994 Washington Blvd, Chicago, NY 83087, UK;83087;UK;Chicago;;Washington Blvd.;;;;8994;;;;;;NY;;
+0019;5266 Washington Blvd, San Jose, NY 12521, Germany;12521;Germany;San Jose;;Washington Blvd.;;;;5266;;;;;;NY;;
+0020;4294 Elm St, Phoenix, WA 74792, Spain;74792;Spain;Phoenix;;Elm St.;;;;4294;;;;;;WA;;
+0021;4678 Broadway, Austin, WA 83821, UK;83821;UK;Austin;;Broadway;;;;4678;;;;;;WA;;
+0022;2148 Broadway, Los Angeles, WA 11207, France;11207;France;Los Angeles;;Broadway;;;;2148;;;;;;WA;;
+0023;9245 Elm St, Phoenix, AZ 84588, Italy;84588;Italy;Phoenix;;Elm St.;;;;9245;;;;;;AZ;;
+0024;9788 Main St, Houston, WA 97068, USA;97068;USA;Houston;;Main St.;;;;9788;;;;;;WA;;
+0025;2030 Cedar Ave, Phoenix, AZ 59525, Australia;59525;Australia;Phoenix;;Cedar Ave.;;;;2030;;;;;;AZ;;
+0026;3714 Maple St, Chicago, NC 61534, Mexico;61534;Mexico;Chicago;;Maple St.;;;;3714;;;;;;NC;;
+0027;2235 Broadway, San Francisco, FL 83576, Mexico;83576;Mexico;San Francisco;;Broadway;;;;2235;;;;;;FL;;
+0028;9561 Oak St, Jacksonville, MI 46459, France;46459;France;Jacksonville;;Oak St.;;;;9561;;;;;;MI;;
+0029;8751 Elm St, Houston, WA 21251, UK;21251;UK;Houston;;Elm St.;;;;8751;;;;;;WA;;
+0030;3626 Elm St, Houston, WA 81398, Canada;81398;Canada;Houston;;Elm St.;;;;3626;;;;;;WA;;
+0031;8019 Highland Ave, San Jose, FL 96991, France;96991;France;San Jose;;Highland Ave.;;;;8019;;;;;;FL;;
+0032;4093 Highland Ave, San Francisco, AZ 95087, Mexico;95087;Mexico;San Francisco;;Highland Ave.;;;;4093;;;;;;AZ;;
+0033;5438 Cedar Ave, Austin, AZ 38037, Japan;38037;Japan;Austin;;Cedar Ave.;;;;5438;;;;;;AZ;;
+0034;9223 Lakeview Dr, New York, NC 25137, UK;25137;UK;New York;;Lakeview Dr.;;;;9223;;;;;;NC;;
+0035;6473 Elm St, New York, CA 94310, USA;94310;USA;New York;;Elm St.;;;;6473;;;;;;CA;;
+0036;5633 Oak St, Austin, MI 84985, UK;84985;UK;Austin;;Oak St.;;;;5633;;;;;;MI;;
+0037;5785 Broadway, Austin, FL 77217, Australia;77217;Australia;Austin;;Broadway;;;;5785;;;;;;FL;;
+0038;4192 Washington Blvd, Jacksonville, NC 95082, France;95082;France;Jacksonville;;Washington Blvd.;;;;4192;;;;;;NC;;
+0039;4580 Highland Ave, San Jose, OH 27062, Australia;27062;Australia;San Jose;;Highland Ave.;;;;4580;;;;;;OH;;
+0040;5360 Maple St, Dallas, NY 42191, France;42191;France;Dallas;;Maple St.;;;;5360;;;;;;NY;;
+0041;2504 Washington Blvd, San Francisco, MI 84025, Japan;84025;Japan;San Francisco;;Washington Blvd.;;;;2504;;;;;;MI;;
+0042;626 Oak St, Phoenix, CA 86824, France;86824;France;Phoenix;;Oak St.;;;;626;;;;;;CA;;
+0043;5052 Maple St, Phoenix, WA 34930, USA;34930;USA;Phoenix;;Maple St.;;;;5052;;;;;;WA;;
+0044;6913 Main St, San Jose, NY 11855, UK;11855;UK;San Jose;;Main St.;;;;6913;;;;;;NY;;
+0045;5361 Main St, San Jose, TX 49074, Germany;49074;Germany;San Jose;;Main St.;;;;5361;;;;;;TX;;
+0046;2471 Lakeview Dr, Jacksonville, FL 80680, USA;80680;USA;Jacksonville;;Lakeview Dr.;;;;2471;;;;;;FL;;
+0047;1041 Cedar Ave, Chicago, IL 48663, Australia;48663;Australia;Chicago;;Cedar Ave.;;;;1041;;;;;;IL;;
+0048;713 Highland Ave, Austin, CA 25109, Canada;25109;Canada;Austin;;Highland Ave.;;;;713;;;;;;CA;;
+0049;2938 Washington Blvd, New York, TX 77593, Italy;77593;Italy;New York;;Washington Blvd.;;;;2938;;;;;;TX;;
+0050;6913 Oak St, San Francisco, CA 52225, Japan;52225;Japan;San Francisco;;Oak St.;;;;6913;;;;;;CA;;
+0051;1659 Oak St, Los Angeles, WA 93332, Spain;93332;Spain;Los Angeles;;Oak St.;;;;1659;;;;;;WA;;
+0052;7652 Oak St, Phoenix, CA 90044, Mexico;90044;Mexico;Phoenix;;Oak St.;;;;7652;;;;;;CA;;
+0053;183 Lakeview Dr, Austin, WA 13352, Canada;13352;Canada;Austin;;Lakeview Dr.;;;;183;;;;;;WA;;
+0054;6391 Lakeview Dr, New York, WA 80505, Spain;80505;Spain;New York;;Lakeview Dr.;;;;6391;;;;;;WA;;
+0055;5350 Maple St, Austin, TX 83776, France;83776;France;Austin;;Maple St.;;;;5350;;;;;;TX;;
+0056;8556 Broadway, San Jose, CA 27122, Spain;27122;Spain;San Jose;;Broadway;;;;8556;;;;;;CA;;
+0057;1178 Highland Ave, New York, CA 96265, Australia;96265;Australia;New York;;Highland Ave.;;;;1178;;;;;;CA;;
+0058;9433 Oak St, Austin, IL 99459, Canada;99459;Canada;Austin;;Oak St.;;;;9433;;;;;;IL;;
+0059;9982 Pine Rd, Dallas, WA 80951, Germany;80951;Germany;Dallas;;Pine Rd.;;;;9982;;;;;;WA;;
+0060;7953 Cedar Ave, New York, WA 44832, Germany;44832;Germany;New York;;Cedar Ave.;;;;7953;;;;;;WA;;
+0061;1005 Cedar Ave, Austin, AZ 13182, Italy;13182;Italy;Austin;;Cedar Ave.;;;;1005;;;;;;AZ;;
+0062;1090 Oak St, New York, NY 49755, Spain;49755;Spain;New York;;Oak St.;;;;1090;;;;;;NY;;
+0063;839 Maple St, Houston, NC 69710, Japan;69710;Japan;Houston;;Maple St.;;;;839;;;;;;NC;;
+0064;5880 Highland Ave, New York, FL 18613, Japan;18613;Japan;New York;;Highland Ave.;;;;5880;;;;;;FL;;
+0065;4775 Lakeview Dr, San Jose, IL 60922, France;60922;France;San Jose;;Lakeview Dr.;;;;4775;;;;;;IL;;
+0066;889 Oak St, Austin, CA 41748, Japan;41748;Japan;Austin;;Oak St.;;;;889;;;;;;CA;;
+0067;8080 Pine Rd, San Jose, NY 22287, Italy;22287;Italy;San Jose;;Pine Rd.;;;;8080;;;;;;NY;;
+0068;9457 Main St, Chicago, MI 43030, Spain;43030;Spain;Chicago;;Main St.;;;;9457;;;;;;MI;;
+0069;4344 Oak St, San Francisco, MI 66921, Japan;66921;Japan;San Francisco;;Oak St.;;;;4344;;;;;;MI;;
+0070;3055 Main St, Dallas, FL 66517, Canada;66517;Canada;Dallas;;Main St.;;;;3055;;;;;;FL;;
+0071;6835 Elm St, Jacksonville, CA 62666, Japan;62666;Japan;Jacksonville;;Elm St.;;;;6835;;;;;;CA;;
+0072;9097 Broadway, Chicago, TX 82448, France;82448;France;Chicago;;Broadway;;;;9097;;;;;;TX;;
+0073;8571 Broadway, San Francisco, FL 67408, Australia;67408;Australia;San Francisco;;Broadway;;;;8571;;;;;;FL;;
+0074;2935 Main St, San Francisco, AZ 20204, France;20204;France;San Francisco;;Main St.;;;;2935;;;;;;AZ;;
+0075;8246 Cedar Ave, Houston, CA 58693, France;58693;France;Houston;;Cedar Ave.;;;;8246;;;;;;CA;;
+0076;1643 Oak St, Dallas, CA 76778, Japan;76778;Japan;Dallas;;Oak St.;;;;1643;;;;;;CA;;
+0077;846 Pine Rd, Dallas, WA 70964, Canada;70964;Canada;Dallas;;Pine Rd.;;;;846;;;;;;WA;;
+0078;3352 Elm St, San Francisco, IL 19660, Australia;19660;Australia;San Francisco;;Elm St.;;;;3352;;;;;;IL;;
+0079;8549 Maple St, Chicago, NY 90844, Mexico;90844;Mexico;Chicago;;Maple St.;;;;8549;;;;;;NY;;
+0080;1618 Main St, Austin, FL 35322, Spain;35322;Spain;Austin;;Main St.;;;;1618;;;;;;FL;;
+0081;2438 Oak St, Dallas, AZ 58273, USA;58273;USA;Dallas;;Oak St.;;;;2438;;;;;;AZ;;
+0082;3245 Maple St, New York, TX 58550, France;58550;France;New York;;Maple St.;;;;3245;;;;;;TX;;
+0083;3818 Washington Blvd, Dallas, OH 74074, UK;74074;UK;Dallas;;Washington Blvd.;;;;3818;;;;;;OH;;
+0084;9910 Broadway, Los Angeles, TX 13228, Spain;13228;Spain;Los Angeles;;Broadway;;;;9910;;;;;;TX;;
+0085;9206 Washington Blvd, Austin, MI 87006, France;87006;France;Austin;;Washington Blvd.;;;;9206;;;;;;MI;;
+0086;5970 Broadway, Phoenix, FL 60982, UK;60982;UK;Phoenix;;Broadway;;;;5970;;;;;;FL;;
+0087;2762 Elm St, Austin, IL 45809, Italy;45809;Italy;Austin;;Elm St.;;;;2762;;;;;;IL;;
+0088;5007 Highland Ave, San Francisco, NC 87729, Germany;87729;Germany;San Francisco;;Highland Ave.;;;;5007;;;;;;NC;;
+0089;7956 Lakeview Dr, Austin, WA 90886, Mexico;90886;Mexico;Austin;;Lakeview Dr.;;;;7956;;;;;;WA;;
+0090;5505 Oak St, Los Angeles, NC 14223, Spain;14223;Spain;Los Angeles;;Oak St.;;;;5505;;;;;;NC;;
+0091;5427 Broadway, Dallas, TX 39352, Germany;39352;Germany;Dallas;;Broadway;;;;5427;;;;;;TX;;
+0092;9862 Washington Blvd, Chicago, IL 28483, Canada;28483;Canada;Chicago;;Washington Blvd.;;;;9862;;;;;;IL;;
+0093;3473 Pine Rd, New York, FL 53919, USA;53919;USA;New York;;Pine Rd.;;;;3473;;;;;;FL;;
+0094;8364 Washington Blvd, Austin, AZ 74707, UK;74707;UK;Austin;;Washington Blvd.;;;;8364;;;;;;AZ;;
+0095;6537 Elm St, Dallas, AZ 76689, Germany;76689;Germany;Dallas;;Elm St.;;;;6537;;;;;;AZ;;
+0096;9368 Main St, San Jose, NC 45562, Mexico;45562;Mexico;San Jose;;Main St.;;;;9368;;;;;;NC;;
+0097;4611 Main St, Phoenix, NC 94424, UK;94424;UK;Phoenix;;Main St.;;;;4611;;;;;;NC;;
+0098;3994 Washington Blvd, New York, FL 40246, Canada;40246;Canada;New York;;Washington Blvd.;;;;3994;;;;;;FL;;
+0099;8501 Washington Blvd, Jacksonville, FL 69347, Canada;69347;Canada;Jacksonville;;Washington Blvd.;;;;8501;;;;;;FL;;
+0100;5265 Main St, New York, CA 64618, Mexico;64618;Mexico;New York;;Main St.;;;;5265;;;;;;CA;;
+0101;Rm. 9, 5 F.-1, No. 656-88, Aly. 321, Ln. 123, Sec. 4, Bade Rd., Songshan Dist., Taipei City 105034, Taiwan (R.O.C.);105034;Taiwan (R.O.C.);Taipei City;Songshan Dist.;Bade Rd.;4;123;321;656-88;5-1;9;;;;;;
+0102;2911 Chino Ave., Unit F2, Chino Hills, CA 91709, USA;91709;USA;Chino Hills;;Chino Ave.;;;;2911;;F2;;;;CA;;
+0103;1600 Amphitheatre Parkway, Mountain View, CA 94043, USA;94043;USA;Mountain View;;Amphitheatre Parkway;;;;1600;;;;;;CA;;
+0104;Potsdamer Platz 1, 10785 Berlin, Germany;10785;Germany;Berlin;;Potsdamer Platz;;;;1;;;;;;;;
+0105;Piazza del Colosseo, 1, 00184 Roma RM, Italy;00184;Italy;Roma;;Piazza del Colosseo;;;;1;;;;;;RM;;
+0106;175 Queen Street, Auckland 1010, New Zealand;1010;New Zealand;Auckland;;Queen Street;;;;175;;;;;;;;
+0107;200 Bourke Street, Melbourne VIC 3000, Australia;3000;Australia;Melbourne;;Bourke Street;;;;200;;;;;;VIC;;
+0108;221B Baker Street, London NW1 6XE, UK;NW1 6XE;UK;London;;Baker Street;;;;221B;;;;;;;;
+0109;10 Downing Street, Westminster, London SW1A 2AA, UK;SW1A 2AA;UK;London;Westminster;Downing Street;;;;10;;;;;;;;
+0110;1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-8634, Japan;131-8634;Japan;Tokyo;Sumida City;Chome-1-2 Oshiage;;;;1;;;;;;;;
+0111;3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837;18837;;asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk;Greenville;Highland Ave.;;;;3989;;;;;;NY;;ADDRESS DATA IS TOO LONG.
+0112;3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcv Greenville, NY 18837;18837;;asdfghjklqwertyuASDFGHJizxcv;Greenville;Highland Ave.;;;;3989;;;;;;NY;;PLEASE ENTER COUNTRY.
+0113;12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ;;;ABCDEFGHIJKLMNOPQRSTUVWXYZ;Name Without Keyword;Long Road;;;;12345;;;;;;;;PLEASE ENTER POSTAL CODE, COUNTRY.
+0114;3989 Highland Ave asdfghjklqwer Rivertown tyuASDFGHJizxcvb,Greenville City, NY 18837;18837;;asdfghjklqwer Rivertown tyuASDFGHJizxcvb;Greenville City;Highland Ave.;;;;3989;;;;;;NY;;ADDRESS DATA IS TOO LONG.
+0115;3759 Elm St, Rivertown, MI 91179;91179;;Rivertown;;Elm St.;;;;3759;;;;;;MI;;PLEASE ENTER COUNTRY.
+0116;3861 Elm St, Rivertown, CA 72976;72976;;Rivertown;;Elm St.;;;;3861;;;;;;CA;;PLEASE ENTER COUNTRY.
+0117;5341 Elm St, Clinton, NC 68405;68405;;Clinton;;Elm St.;;;;5341;;;;;;NC;;PLEASE ENTER COUNTRY.
+0118;1740 Highland Ave, Lakeside, NC 95349;95349;;Lakeside;;Highland Ave.;;;;1740;;;;;;NC;;PLEASE ENTER COUNTRY.
+0119;6806 Oak St, Hillcrest, OH 30159;30159;;Hillcrest;;Oak St.;;;;6806;;;;;;OH;;PLEASE ENTER COUNTRY.
+0120;6769 Highland Ave, Springfield, GA 92721;92721;;Springfield;;Highland Ave.;;;;6769;;;;;;GA;;PLEASE ENTER COUNTRY.
+RESULT SUMMARY->;TOTAL ITEMS:  120, ERROR ITEMS:   10

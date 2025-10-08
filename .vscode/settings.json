@@ -1,0 +1,13 @@
+{
+    // コンパイル用の検索パス
+    "cobol.copybookdirs": [
+        "src/main",
+        "src/copy"
+    ],
+
+    // エディタ補助用の検索パス
+    "coboleditor.copybookdirs": [
+        "src/main",
+        "src/copy"
+    ]
+}

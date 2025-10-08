@@ -1,0 +1,26 @@
+name: ZAPPドキュメントの生成
+description: >-
+  CRRZG5299I このデフォルト・ファイルは、開いているすべてのVS
+  Codeワークスペースのローカル・フォルダを検索するので、非常に効率が悪いことに注意してください。 ロケーション」の項目をできるだけ具体的に修正する。
+  リモートロケーションを指定するために、" MVS "というタイプの新しいエントリーを追加する。 詳しくはドキュメントを参照： <
+  https://ibm.github.io/zopeneditor-about/Docs/setting_propertygroup.html >
+author: IBM Z Open Editor
+propertyGroups:
+  - name: search-all
+    libraries:
+      - name: copylib
+        type: local
+        locations:
+          - c:\Cobol\src\copy
+      - name: syslib
+        type: local
+        locations:
+          - '**'
+      - name: maclib
+        type: local
+        locations:
+          - '**'
+      - name: proclib
+        type: local
+        locations:
+          - '**'
