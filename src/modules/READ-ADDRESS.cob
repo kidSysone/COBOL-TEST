@@ -184,7 +184,6 @@
                    LENGTH OF FUNCTION TRIM(WS-TRIMMED)
              END-IF
            END-PERFORM
-              DISPLAY "ERROR? "LENGTH OF FUNCTION TRIM(INPUT-DATA(KDX))
 
              *> 若包含特殊字體
              MOVE "N" TO ERROR-FLAG

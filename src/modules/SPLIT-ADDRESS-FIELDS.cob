@@ -295,11 +295,7 @@
            END-IF
            *> =============== 完成 郵遞區號判斷 ===============
 
-           *> =============== CITY -> STATE -> OTHER ===============
-               *> CITY欄 確認
-                 IF DTLS(3) = SPACES AND PR-FLAG NOT = IDX
-                   MOVE FUNCTION TRIM(TEMP-PART(IDX)) TO DTLS(3)
-                 ELSE
+           *> =============== STATE -> OTHER ===============
                *> STATE欄 確認 (ZIP)
                *> 2~3大寫英文
                    IF DTLS(3) NOT = SPACES AND PR-FLAG NOT = IDX AND
@@ -326,7 +322,6 @@
                     END-IF     *> STREET欄 確認
                   END-IF       *> DISTRICT欄 確認
                  END-IF        *> STATE欄 確認
-              END-IF           *> CITY欄 確認
 
            END-IF
            END-IF

@@ -2,8 +2,8 @@
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
 |0111            |3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837                                                      |ADDRESS DATA IS TOO LONG.                |
 |0112            |3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcv Greenville, NY 18837                                                                |PLEASE ENTER COUNTRY.                    |
-|0113            |12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ                                                                    |PLEASE ENTER POSTAL CODE, COUNTRY.       |
-|0114            |3989 Highland Ave asdfghjklqwer Rivertown tyuASDFGHJizxcvb,Greenville City, NY 18837                                               |ADDRESS DATA IS TOO LONG.                |
+|0113            |12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ                                                                    |ADDRESS DATA IS TOO LONG.                |
+|0114            |3989 Highland Ave asdfghjklqwer Rivertown tyuASDFGHJizxcvb,Greenville City, NY 18837                                               |PARSING FAILED. PLEASE CHECK INPUT.      |
 |0115            |3759 Elm St, Rivertown, MI 91179                                                                                                   |PLEASE ENTER COUNTRY.                    |
 |0116            |3861 Elm St, Rivertown, CA 72976                                                                                                   |PLEASE ENTER COUNTRY.                    |
 |0117            |5341 Elm St, Clinton, NC 68405                                                                                                     |PLEASE ENTER COUNTRY.                    |
