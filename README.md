@@ -2,6 +2,8 @@
 * STATE需要判斷全名?目前僅判斷簡寫
 * sa文件?
 * 國家名 → 是否要追加 ISO 2位數的國家CODE（例：JP, US, TW）
+* 新增多種測試地址
+* 原文 + 英文
 
 
 # Cobol-Test
@@ -198,3 +200,6 @@ IF ( CNT-U(IDX) = "Y" AND (
 * 客戶統編資料
   * 目前於 `EXECUTE` 設定，並依照處理順序安插序號(MOVE JDX TO CUSTOMER_ID(JDX))(15字)
 
+## 爭議點?
+* FLOOR
+  * `Lower Ground Floor`、`Mezzanine Floor`、`M/F`，是否需要變更簡短?

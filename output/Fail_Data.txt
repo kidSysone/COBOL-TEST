@@ -1,6 +1,6 @@
-|  CUSTOMER_ID   |                                                           ADDRESS_NAME                                                            |             ERROR_MESSAGE               |
+|  CUSTOMER_ID   |                                                           ADDRESS_LINE                                                            |             ERROR_MESSAGE               |
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-|0111            |3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837                                                      |ADDRESS DATA IS TOO LONG.                |
+|0111            |3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837                                                      |PLEASE ENTER COUNTRY.                    |
 |0112            |3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcv Greenville, NY 18837                                                                |PLEASE ENTER COUNTRY.                    |
 |0113            |12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ                                                                    |ADDRESS DATA IS TOO LONG.                |
 |0114            |3989 Highland Ave asdfghjklqwer Rivertown tyuASDFGHJizxcvb,Greenville City, NY 18837                                               |PARSING FAILED. PLEASE CHECK INPUT.      |

@@ -9,8 +9,10 @@
        LOCAL-STORAGE SECTION.
        01 TEMP-ARRAY.
            05 TEMP-PART        PIC X(500) OCCURS 30 TIMES.
-           05 CNT              PIC 9(3) OCCURS 30 TIMES.
-           05 CNT-U            PIC X OCCURS 30 TIMES.
+           05 TEMP-PART-CHECK  PIC 99     OCCURS 30 TIMES.
+           05 MATCH-NEW        PIC 999.
+           05 CNT              PIC 9(3)   OCCURS 30 TIMES.
+           05 CNT-U            PIC X      OCCURS 30 TIMES.
            05 TEMP-A           PIC X(100).
            05 TEMP-B           PIC X(100).
            05 TEMP-COL         PIC X(500).
@@ -23,7 +25,6 @@
 
            05 CNT-F            PIC 9.
            05 CNT-FL           PIC 9.
-           05 CNT-FLOOR        PIC 9.
 
            05 PRE-COL          PIC X(100).
            05 PRE-LEN          PIC 999.
@@ -68,10 +69,12 @@
       *PROCEDURE DIVISION.
        MAIN SECTION.
 
-           *> TEMP-PART 初期化
+           *> TEMP-PART TEMP-PART-CHECK MATCH-NEW 初期化
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
               MOVE SPACES TO TEMP-PART(IDX) 
+              MOVE 0     TO TEMP-PART-CHECK(IDX)
            END-PERFORM.
+           MOVE 0 TO MATCH-NEW.
 
            *> AFTER-DATA 初期化
            MOVE SPACES TO AFTER-DATA.
@@ -454,7 +457,7 @@
            *> (NEXT-COL)~(NEXT-FLAG)
       *******************************************************
            MOVE SPACES TO TEMP-COL.
-           MOVE "Y" TO TEMP-FLAG.
+           MOVE "N" TO TEMP-FLAG.
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
               IF TEMP-PART(IDX) = SPACES
                  EXIT PERFORM
@@ -483,6 +486,7 @@
 
 
        *>  ====================== 判斷開始 ======================
+              *> =================== NUMBER 判斷 ===================
               *> 是否為 單純數字
               IF CNT(IDX) = TEMP-LEN
                 MOVE "Y" TO TEMP-FLAG
@@ -499,20 +503,56 @@
                     FUNCTION TRIM(NEXT-COL(1:2)) IS ALPHABETIC-UPPER AND
                     (DTLS-LF(2) = "NETHERLANDS" OR DTLS-LF(2) = "NLD")
                    MOVE "Y" TO NEXT-FLAG
-                   MOVE 1 TO DTLS-FLAG
+                   MOVE 1   TO DTLS-FLAG
                  END-IF
               END-IF
 
-              *> 下一段是否為 樓層 FLOOR,FL.,F.
-              MOVE 0 TO CNT-F CNT-FL CNT-FLOOR
+              *> =================== NUMBER 判斷結束 ===================
+              *> =================== FLOOR 判斷 ===================
+              MOVE 0 TO CNT-F CNT-FL
               INSPECT NEXT-COL TALLYING CNT-F FOR ALL "F."
               INSPECT NEXT-COL TALLYING CNT-FL FOR ALL "FL."
-              INSPECT NEXT-COL TALLYING CNT-FLOOR FOR ALL "FLOOR"
-             IF CNT-F > 0 OR CNT-FL > 0 OR CNT-FLOOR > 0
+             IF CNT(IDX) > 0 AND
+                (CNT-F > 0 OR CNT-FL > 0)
+
+                INSPECT TEMP-COL
+                  REPLACING ALL "ST" BY SPACES
+                INSPECT TEMP-COL
+                  REPLACING ALL "ND" BY SPACES
+                INSPECT TEMP-COL
+                  REPLACING ALL "RD" BY SPACES
+                INSPECT TEMP-COL
+                  REPLACING ALL "TH" BY SPACES
+
+                INSPECT NEXT-COL
+                  REPLACING ALL "F." BY SPACES
+                INSPECT NEXT-COL
+                  REPLACING ALL "FL." BY SPACES
+                
+                MOVE SPACES TO TEMP-A
+                STRING
+                  FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
+                  FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
+                  INTO TEMP-A
+                END-STRING
+
+                MOVE TEMP-A TO TEMP-COL
+                MOVE SPACES TO NEXT-COL
                 MOVE "Y" TO NEXT-FLAG
                 MOVE "Y" TO TEMP-FLAG
-                MOVE 11 TO DTLS-FLAG
+                MOVE 11  TO DTLS-FLAG
               END-IF
+
+              IF TEMP-COL(TEMP-LEN:1) = "F" AND 
+                 (TEMP-COL(TEMP-LEN - 1:1) IS NUMERIC OR
+                  TEMP-COL)
+                MOVE TEMP-COL(1 : TEMP-LEN - 1) TO TEMP-COL
+                MOVE "Y" TO TEMP-FLAG
+                MOVE 11  TO DTLS-FLAG
+
+              END-IF
+              *> =================== FLOOR 判斷結束 ===================
+              *> =================== 特殊ZIP 判斷 ===================
 
               *> 是否為 郵遞區號 (英國等地區用)
       *       標準寫法: "XXX XXX" (有空白，分2段)
@@ -525,7 +565,7 @@
       *      前半：總字數1~2
       *      前半：總字數3~4，包含數字*1
       *      後半：包含數字*1、總字數3
-            IF (
+            IF (DTLS-FLAG = 0 AND(
                *> 1. 非英國 標準寫法
                (
                (TEMP-LEN = 3                    AND CNT(IDX) = 1)) AND
@@ -539,7 +579,7 @@
                (TEMP-LEN >= 3 AND TEMP-LEN <= 4 AND CNT(IDX) = 1)) AND
                (NEXT-LEN >= 3 AND NEXT-LEN <= 4 AND CNT(IDX + 1) = 1))
 
-               )
+               ))
                 MOVE "Y" TO ZIP-FLAG
                 *> 前半
                 PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > TEMP-LEN
@@ -565,12 +605,12 @@
 
               IF ZIP-FLAG = "Y" AND TEMP-FLAG NOT = "Y"
                 MOVE "Y" TO TEMP-FLAG
-                MOVE 1 TO DTLS-FLAG
                 MOVE "Y" TO NEXT-FLAG
+                MOVE 1   TO DTLS-FLAG
                 MOVE "," TO PRE-FLAG
               END-IF
 
-            IF ( CNT-U(IDX) = "Y" AND (
+            IF ( DTLS-FLAG = 0 AND CNT-U(IDX) = "Y" AND (
                *> 1. 非英國 手寫常見
                (TEMP-LEN >= 6 AND TEMP-LEN <= 7 AND CNT(IDX) >= 2)
 
@@ -604,24 +644,13 @@
                 MOVE 9 TO DTLS-FLAG
               END-IF
 
-              *> 本身便帶有","
-              IF TEMP-COL(TEMP-LEN + 1:1) = ","
-                MOVE "Y" TO TEMP-FLAG
-              END-IF
-
-       
-           *> ===== (NEXT-COL)特定字判斷 =====
+              *> =================== 特殊ZIP 判斷結束 ===================
+              *> =================== CategoryRule 判斷 ===================
               IF TEMP-FLAG NOT = "Y"
-              MOVE FUNCTION UPPER-CASE(TEMP-COL) TO TEMP-UPPER-COL
-              IF TEMP-UPPER-COL(TEMP-LEN:1) = ","
-                MOVE TEMP-UPPER-COL(1:TEMP-LEN - 1) TO TEMP-UPPER-COL
-              END-IF
-
-              MOVE FUNCTION UPPER-CASE(NEXT-COL) TO NEXT-UPPER-COL
-              IF NEXT-UPPER-COL(NEXT-LEN:1) = ","
-                MOVE NEXT-UPPER-COL(1:NEXT-LEN - 1) TO NEXT-UPPER-COL
-              END-IF
-
+              MOVE FUNCTION UPPER-CASE(TEMP-COL(1:TEMP-LEN)) 
+                TO TEMP-UPPER-COL
+              MOVE FUNCTION UPPER-CASE(NEXT-COL(1:NEXT-LEN)) 
+                TO NEXT-UPPER-COL
               *> 以CategoryRule.csv 為準則切割
               PERFORM VARYING JDX FROM 4 BY 1 UNTIL JDX > 16
               PERFORM VARYING KDX FROM 2 BY 1 UNTIL KDX > 40
@@ -630,24 +659,65 @@
                   EXIT PERFORM
                 END-IF
 
-                *> 段巷弄號樓室
-                IF JDX >= 6 AND JDX <= 13 AND
-                   TEMP-UPPER-COL = CHECK-COL
+                *> ===== 段巷弄號樓室 判斷 =====
+                IF JDX >= 6 AND JDX <= 13 AND TEMP-UPPER-COL = CHECK-COL
                   MOVE "Y" TO TEMP-FLAG
-                  MOVE "Y" TO NEXT-FLAG
                   MOVE JDX TO DTLS-FLAG
-                  MOVE ";" TO NEXT-UPPER-COL
+
+                  *> BASEMENT 1 -> B1
+                  IF TEMP-UPPER-COL = "BASEMENT"
+                    MOVE SPACES TO TEMP-COL
+                    STRING
+                      "B" DELIMITED BY SIZE
+                      FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
+                      INTO TEMP-COL
+                    END-STRING
+                    MOVE TEMP-COL TO NEXT-COL
+                  END-IF
+
+                  *> 後接字串判斷 特殊狀況(IF)需跳過
+                  IF CHECK-COL NOT = "M/F"
+                    MOVE "Y" TO NEXT-FLAG
+                    MOVE ";" TO NEXT-UPPER-COL
+                    MOVE NEXT-COL TO TEMP-COL
+                    MOVE SPACES TO NEXT-COL
+                  END-IF
                 END-IF
 
                          
+           *> ===== (NEXT-COL)特定字判斷 =====
                 *> 若找到相符內容
                 IF NEXT-UPPER-COL = CHECK-COL
-      *            DISPLAY "NEXT-UPPER-COL: "
-      *                FUNCTION TRIM(NEXT-UPPER-COL)
                   MOVE "Y" TO TEMP-FLAG
                   MOVE "Y" TO NEXT-FLAG
                   MOVE JDX TO DTLS-FLAG
+                  *> FLOOR 字串判斷
+                  IF JDX = 11
+                    IF CNT(IDX) > 0 AND NEXT-UPPER-COL = "FLOOR"
+                      INSPECT TEMP-COL REPLACING ALL "ST" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "st" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "ND" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "nd" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "RD" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "rd" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "TH" BY SPACES
+                      INSPECT TEMP-COL REPLACING ALL "th" BY SPACES
+                      MOVE SPACES TO NEXT-COL
+                    END-IF
+                    STRING
+                      FUNCTION TRIM(PRE-COL) DELIMITED BY SIZE
+                      " " DELIMITED BY SIZE
+                      FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
+                      " " DELIMITED BY SIZE
+                      FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
+                      INTO TEMP-A
+                    END-STRING
+                    MOVE TEMP-A TO TEMP-COL
+                    MOVE SPACES TO PRE-COL
+                    MOVE SPACES TO NEXT-COL
+                  ELSE *> FLOOR 字串判斷 結束
 
+                  *> STREET 後接字串判斷
                   MOVE FUNCTION UPPER-CASE(TEMP-PART(IDX + 2))
                     TO NEXT-UPPER-COL
                   IF NEXT-UPPER-COL(LENGTH OF 
@@ -682,12 +752,38 @@
                        ADD 1 TO IDX
 
                     END-IF
+                  END-IF
+
                   EXIT PERFORM
                 END-IF
               END-PERFORM
               END-PERFORM
               END-IF
+              *> =================== CategoryRule 判斷結束 ===================
 
+              *> 尚未分類完成 但本身便帶有","
+              *> 特殊處理欄位/ AFTER-DATA納入主判斷
+              IF TEMP-COL(TEMP-LEN + 1:1) = "," AND DTLS-FLAG = 0
+                DISPLAY "OTHER!!!!" 
+                  FUNCTION TRIM(PRE-COL)"/ "
+                  FUNCTION TRIM(TEMP-COL)"/ "
+                  FUNCTION TRIM(NEXT-COL)"/ "
+                  MATCH-NEW"/ "IDX"/ "TEMP-PART-CHECK(MATCH-NEW)
+
+                MOVE "Y" TO TEMP-FLAG
+
+                *> 樓層 + 大樓
+                IF IDX NOT = 1 AND TEMP-PART-CHECK(MATCH-NEW) = 11
+                  MOVE 14 TO DTLS-FLAG
+                END-IF
+
+                *> 若尚未填入 路以上之欄位
+                IF TEMP-PART-CHECK(MATCH-NEW) > 5 OR 
+                   MATCH-NEW = 0
+                  MOVE 5 TO DTLS-FLAG
+                
+                END-IF
+              END-IF
 
        *>  ====================== 判斷結束 ======================
            *> NEXT-FLAG
@@ -727,11 +823,15 @@
 
            *> DTLS-FLAG判斷
            IF DTLS-FLAG NOT = 0
-             MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN
-             IF TEMP-COL(TEMP-LEN:1) = ","
-               MOVE TEMP-COL(1:TEMP-LEN - 1) TO TEMP-COL
+             MOVE FUNCTION TRIM(PRE-COL) TO PRE-COL
+             MOVE LENGTH OF FUNCTION TRIM(PRE-COL) TO PRE-LEN
+             IF PRE-COL(PRE-LEN:1) = ","
+               MOVE PRE-COL(1:PRE-LEN - 1) TO PRE-COL
              END-IF
-             MOVE FUNCTION TRIM(TEMP-COL) TO DTLS-LF(DTLS-FLAG)
+
+             MOVE FUNCTION TRIM(PRE-COL) TO DTLS-LF(DTLS-FLAG)
+             MOVE DTLS-FLAG TO TEMP-PART-CHECK(IDX)
+             MOVE IDX TO MATCH-NEW
            END-IF
 
            *> 納入 AFTER-DATA
@@ -805,6 +905,7 @@
            END-IF.
 
            *> 結尾,
+           MOVE FUNCTION TRIM(AFTER-DATA) TO AFTER-DATA.
            MOVE LENGTH OF FUNCTION TRIM(AFTER-DATA) TO TEMP-LEN.
            IF AFTER-DATA(TEMP-LEN:1) = ","
              MOVE FUNCTION TRIM(AFTER-DATA(1:TEMP-LEN - 1))
@@ -813,15 +914,12 @@
 
            *> 處理結束
            IF AFTER-DATA NOT = SPACES
-           DISPLAY "MOTO : "FUNCTION TRIM(BEFORE-DATA)
-           DISPLAY "KEKKA: "FUNCTION TRIM(AFTER-DATA)
+                 DISPLAY "MOTO : "FUNCTION TRIM(BEFORE-DATA)
+                 DISPLAY "KEKKA: "FUNCTION TRIM(AFTER-DATA)
+                 DISPLAY "================================="
            END-IF.
+           MOVE FUNCTION TRIM(AFTER-DATA) TO DTLS-LF(18).
 
-
-           *> CHECK
-      *    PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
-      *      DISPLAY "DTLS-LF(" IDX ") : " FUNCTION TRIM(DTLS-LF(IDX))
-      *    END-PERFORM.
 
            *> 處理結束
            EXIT PROGRAM.

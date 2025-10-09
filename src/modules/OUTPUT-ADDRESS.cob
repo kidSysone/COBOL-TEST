@@ -147,7 +147,7 @@
               MOVE "OTHER"    TO WS-COL-TEXT(18).
               MOVE "ERROR_MESSAGE"    TO WS-COL-TEXT(19).
               MOVE "CUSTOMER_ID"      TO WS-COL-TEXT(20).
-              MOVE "ADDRESS_NAME"     TO WS-COL-TEXT(21).
+              MOVE "ADDRESS_LINE"     TO WS-COL-TEXT(21).
 
            MOVE "|" TO TMP-REC.          *> 標題記錄
            MOVE "|" TO DIVIDING-LINE.    *> 分隔線記錄
@@ -397,7 +397,7 @@
               MOVE 40  TO WS-COL-LEN(3).
 
               MOVE "CUSTOMER_ID"    TO WS-COL-TEXT(1).
-              MOVE "ADDRESS_NAME"   TO WS-COL-TEXT(2).
+              MOVE "ADDRESS_LINE"   TO WS-COL-TEXT(2).
               MOVE "ERROR_MESSAGE"  TO WS-COL-TEXT(3).
 
            MOVE "|" TO TMP-REC.          *> 標題記錄

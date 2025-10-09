@@ -115,7 +115,7 @@
               MOVE "OTHER"    TO WS-COL-TEXT(18).
               MOVE "ERROR_MESSAGE"    TO WS-COL-TEXT(19).
               MOVE "CUSTOMER_ID"      TO WS-COL-TEXT(20).
-              MOVE "ADDRESS_NAME"     TO WS-COL-TEXT(21).
+              MOVE "ADDRESS_LINE"     TO WS-COL-TEXT(21).
 
 
            *>   ============  標題 ============
@@ -218,7 +218,7 @@
       *******************************************************
            *> 標題設定
               MOVE "CUSTOMER_ID"    TO WS-COL-TEXT(1).
-              MOVE "ADDRESS_NAME"   TO WS-COL-TEXT(2).
+              MOVE "ADDRESS_LINE"   TO WS-COL-TEXT(2).
               MOVE "ERROR_MESSAGE"  TO WS-COL-TEXT(3).
               MOVE SPACES TO ERROR-REC TMP-REC.
 

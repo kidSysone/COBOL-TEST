@@ -91,11 +91,6 @@
            PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > 1000
                  MOVE FUNCTION TRIM(INPUT-DATA(JDX)) 
                    TO ADDRESS-FULLNAME(JDX)
-                 DISPLAY "*********************************************"
-                 DISPLAY "RECORD NO. " JDX
-                         " /" FUNCTION TRIM(ADDRESS-FULLNAME(JDX))
-                 DISPLAY "RECORD NO. " JDX
-                         " /" FUNCTION TRIM(FORMATTER-DATA(JDX))
                  IF INPUT-DATA(JDX) = SPACES
                         EXIT PERFORM
                  END-IF
@@ -114,8 +109,6 @@
                  *> 接收欄位清單
                  PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 5
                     MOVE ADDRESS-LIST(JDX IDX) TO NMADR
-                    MOVE IDX TO LOOP-NO
-                    CALL 'SPLIT-ADDRESS-FIELDS' USING LS-SAF LS-LIST-REC
                  END-PERFORM
 
 
@@ -238,30 +231,36 @@
       *******************************************************
       *> 測試輸出
       *******************************************************
-           *> 確認地址欄位
-           DISPLAY "-:+:-:+:-:+:-:+:- :+:-:+: -:+:-:+:-:+:-:+:-"
-           DISPLAY "-:+:-:+:-:+:-     OUTPUT     -:+:-:+:-:+:-"
-           DISPLAY "-:+:-:+:-:+:-:+:- :+:-:+: -:+:-:+:-:+:-:+:-"
-           DISPLAY "01 ZIP     :" ZIP(JDX)
-           DISPLAY "02 COUNTRY :" COUNTRY(JDX)
-           DISPLAY "03 CITY    :" CITY(JDX)
-           DISPLAY "04 DISTRICT:" DISTRICT(JDX)
-           DISPLAY "05 STREET  :" STREET(JDX)
-           DISPLAY "06 SEC     :" SEC(JDX)
-           DISPLAY "07 LANE    :" LANE(JDX)
-           DISPLAY "08 ALLEY   :" ALLEY(JDX)
-           DISPLAY "09 M-NO    :" M-NO(JDX)
-      *    DISPLAY "10 S-NO    :" S-NO(JDX)
-           DISPLAY "11 M-FLOOR :" M-FLOOR(JDX)
-      *    DISPLAY "12 S-FLOOR :" S-FLOOR(JDX)
-           DISPLAY "13 ROOM    :" ROOM(JDX)
-           DISPLAY "14 BUILDING:" BUILDING(JDX)
-           DISPLAY "15 VILLAGE :" VILLAGE(JDX)
-           DISPLAY "16 PROVINCE:" PROVINCE(JDX)
-           DISPLAY "17 STATE   :" STATE(JDX)
-           DISPLAY "18 OTHER   :" OTHER-COL(JDX)
-           DISPLAY "19 ERROR   :" ERROR-ADDRESS(JDX)
-           DISPLAY "19 ERROR   :" ERROR-COMMENT(JDX)
+      *    DISPLAY "*********************************************"
+      *    DISPLAY "RECORD NO. " JDX
+      *            " /" FUNCTION TRIM(ADDRESS-FULLNAME(JDX))
+      *    DISPLAY "RECORD NO. " JDX
+      *            " /" FUNCTION TRIM(FORMATTER-DATA(JDX))
+      *
+      *     *> 確認地址欄位
+      *    DISPLAY "-:+:-:+:-:+:-:+:- :+:-:+: -:+:-:+:-:+:-:+:-"
+      *    DISPLAY "-:+:-:+:-:+:-     OUTPUT     -:+:-:+:-:+:-"
+      *    DISPLAY "-:+:-:+:-:+:-:+:- :+:-:+: -:+:-:+:-:+:-:+:-"
+      *    DISPLAY "01 ZIP     :" ZIP(JDX)
+      *    DISPLAY "02 COUNTRY :" COUNTRY(JDX)
+      *    DISPLAY "03 CITY    :" CITY(JDX)
+      *    DISPLAY "04 DISTRICT:" DISTRICT(JDX)
+      *    DISPLAY "05 STREET  :" STREET(JDX)
+      *    DISPLAY "06 SEC     :" SEC(JDX)
+      *    DISPLAY "07 LANE    :" LANE(JDX)
+      *    DISPLAY "08 ALLEY   :" ALLEY(JDX)
+      *    DISPLAY "09 M-NO    :" M-NO(JDX)
+      **    DISPLAY "10 S-NO    :" S-NO(JDX)
+      *    DISPLAY "11 M-FLOOR :" M-FLOOR(JDX)
+      **    DISPLAY "12 S-FLOOR :" S-FLOOR(JDX)
+      *    DISPLAY "13 ROOM    :" ROOM(JDX)
+      *    DISPLAY "14 BUILDING:" BUILDING(JDX)
+      *    DISPLAY "15 VILLAGE :" VILLAGE(JDX)
+      *    DISPLAY "16 PROVINCE:" PROVINCE(JDX)
+      *    DISPLAY "17 STATE   :" STATE(JDX)
+      *    DISPLAY "18 OTHER   :" OTHER-COL(JDX)
+      *    DISPLAY "19 ERROR   :" ERROR-ADDRESS(JDX)
+      *    DISPLAY "19 ERROR   :" ERROR-COMMENT(JDX)
 
            *> 紀錄拆解處理結束
            END-PERFORM.

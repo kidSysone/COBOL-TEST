@@ -107,7 +107,7 @@ Piazza del Colosseo, 1, 00184 Roma RM, Italy
 200 Bourke Street, Melbourne VIC 3000, Australia
 221B Baker Street, London NW1 6XE, UK
 10 Downing Street, Westminster, London SW1A 2AA, UK
-1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-8634, Japan
+1-2, 1-Chome Oshiage, Sumida City, Tokyo 131-8634, Japan
 3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837
 3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcv Greenville, NY 18837
 12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -118,3 +118,23 @@ Piazza del Colosseo, 1, 00184 Roma RM, Italy
 1740 Highland Ave, Lakeside, NC 95349
 6806 Oak St, Hillcrest, OH 30159
 6769 Highland Ave, Springfield, GA 92721
+
+
+
+// FLOOR 判斷確認使用
+5th Floor, 4678 Broadway, Austin, WA 83821, UK
+Fl. 5, 4678 Broadway, Austin, WA 83821, UK
+Level 5, 4678 Broadway, Austin, WA 83821, UK
+Unit 501, 5th Floor, 4678 Broadway, Austin, WA 83821, UK
+Suite 501, Fl. 5, 4678 Broadway, Austin, WA 83821, UK
+B1F, 4678 Broadway, Austin, WA 83821, UK
+Basement 1, 4678 Broadway, Austin, WA 83821, UK
+Lower Ground Floor, 4678 Broadway, Austin, WA 83821, UK
+Unit B101, B1F, 4678 Broadway, Austin, WA 83821, UK
+M/F, 4678 Broadway, Austin, WA 83821, UK
+Mezzanine Floor, 4678 Broadway, Austin, WA 83821, UK
+Unit F1, M/F, 4678 Broadway, Austin, WA 83821, UK
+
+
+B1F, Ikebukuro P'PARCO, 1-50-35 Higashi-Ikebukuro, Toshima-ku, Tokyo, Japan
+Suite 501, 5th Floor, Sunshine Tower, 3-1-1 Higashiikebukuro, Toshima-ku, Tokyo 170-6059, Japan
