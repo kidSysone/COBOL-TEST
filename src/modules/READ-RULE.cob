@@ -55,7 +55,7 @@
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
            05  LS-COUNTRY-COL       PIC X(50) OCCURS 500 TIMES.
-           05  LS-CITY-COL          PIC X(50) OCCURS 50000 TIMES. 
+           05  LS-CITY-COL          PIC X(50) OCCURS 50000 TIMES.
 
 
       *******************************************************

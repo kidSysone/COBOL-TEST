@@ -1,7 +1,4 @@
        01  ADDRESS-DATA.
-           03 ADDRESS-COLUMNS OCCURS 1000 TIMES.
-              05  ADDRESS-FULLNAME PIC X(2000).
-              05  ADDRESS-DTLS     PIC X(100) OCCURS 20 TIMES.
               05  ZIP              PIC X(35).  *> 1 郵遞區號
               05  COUNTRY          PIC X(100). *> 2 國家
               05  CITY             PIC X(100). *> 3 縣市
@@ -22,7 +19,10 @@
               05  OTHER-COL        PIC X(100). *> 18 其他
 
               05  ERROR-COMMENT    PIC X(40).  *> 19 錯誤
-              05  CUSTOMER_ID      PIC X(15).  *> 客戶 ID
+              05  CUSTOMER_ID      PIC X(15).  *> 20 客戶 ID
+              05  ADDR_LINE_ORIG   PIC X(150). *> 21 讀取_原文
+              05  ADDR_LINE_EN     PIC X(100). *> 22 讀取_英文 
+              05  ADDR_LINE_REBUILD     PIC X(100). *> 23 重組地址
        
       *    ZIP
       *    COUNTRY

@@ -138,3 +138,32 @@ Unit F1, M/F, 4678 Broadway, Austin, WA 83821, UK
 
 B1F, Ikebukuro P'PARCO, 1-50-35 Higashi-Ikebukuro, Toshima-ku, Tokyo, Japan
 Suite 501, 5th Floor, Sunshine Tower, 3-1-1 Higashiikebukuro, Toshima-ku, Tokyo 170-6059, Japan
+
+
+// 1010追加
+No. 125, Xinxing Rd., Xincheng Township, Hualien County 971001, Taiwan (R.O.C.)
+No. 2, Guangfu Rd., Jiatai Industrial Park, Taibao City, Chiayi County 612012, Taiwan (R.O.C.)
+Shuangrencuo, Tuku Township, Yunlin County, Taiwan (R.O.C.)
+B1F, Ikebukuro P'PARCO, 1-50-35 Higashi-Ikebukuro, Toshima-ku, Tokyo, Japan
+129 Samseong Road, Maetan, Yeongtong District, Suwon City, Gyeonggi Province, South Korea
+129, Samseong-ro, Maetan-dong, Yeongtong-gu, Suwon-si, Gyeonggi-do, South Korea
+12th Floor, Room 1205, Tower A, 88 Wangjing Street, Chaoyang District, Beijing 100020, China
+5th Floor, Room 502, Tower B, 500 Lujiazui Road, Pudong New Area, Shanghai 200120, China
+3rd Floor, Room 301, Tower C, 10 Huali Road, Zhujiang New Town, Tianhe District, Guangzhou 510623, China
+8th Floor, Room 801, Tower D, 200 Zhongshan North Road, Gulou District, Nanjing 210009, China
+6th Floor, Room 602, Tower E, 150 Wensan Road, Xihu District, Hangzhou 310013, China
+9th Floor, Room 901, Tower F, 50 Kehua North Road, Wuhou District, Chengdu 610041, China
+11th Floor, Room 1105, Tower G, 88 Lumo Road, Hongshan District, Wuhan 430074, China
+7th Floor, Room 702, Tower H, 20 Shuguang Road, Yuhua District, Changsha 410013, China
+4th Floor, Room 402, Tower I, 30 Hubin East Road, Siming District, Xiamen 361001, China
+10th Floor, Room 1001, Tower J, 100 Zhongshan Road, Shahekou District, Dalian 116001, China
+1-1 Chiyoda, Chiyoda-ku, Tokyo 100-0001, Japan
+5-2 Odori Nishi 10-chome, Chuo-ku, Sapporo, Hokkaido 060-0042, Japan
+3-4-15 Umeda, Kita-ku, Osaka, Osaka 530-0001, Japan
+2-12-8 Sakae, Naka-ku, Nagoya, Aichi 460-0008, Japan
+1-6-3 Tenjin, Chuo-ku, Fukuoka, Fukuoka 810-0001, Japan
+4-7-12 Ichibancho, Aoba-ku, Sendai, Miyagi 980-0811, Japan
+7-10 Kyomachi, Chuo-ku, Kobe, Hyogo 650-0034, Japan
+2-5-9 Kamiyacho, Naka-ku, Hiroshima, Hiroshima 730-0031, Japan
+1-4-22 Honmachi, Kanazawa, Ishikawa 920-0853, Japan
+3-2-18 Kumoji, Naha, Okinawa 900-0015, Japan
