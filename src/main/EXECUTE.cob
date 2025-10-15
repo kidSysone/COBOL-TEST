@@ -716,6 +716,7 @@
            WRITE OUT-FILE-REC.
 
            *> 總筆數
+           MOVE SPACES TO TOTAL-COMMENT.
            STRING
              "TOTAL ITEMS: " DELIMITED BY SIZE
              DATA-FMT DELIMITED BY SIZE
