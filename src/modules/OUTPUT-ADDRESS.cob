@@ -25,13 +25,13 @@
        01 LS-OUTPUT.
            05 TMP-TOTAL    PIC X(2000).
            05 TMP-ERROR    PIC X(2000).
-           05 WS-COL-TEXT  PIC X(50) OCCURS 25 TIMES.
-           05 WS-COL-LEN   PIC 9(3) OCCURS 25 TIMES.
+           05 WS-COL-TEXT  PIC X(50) OCCURS 25 TIMES. *> 欄首名稱
+           05 WS-COL-LEN   PIC 9(3) OCCURS 25 TIMES.  *> 欄位寬度
 
            05 TMP-TOTAL-TXT       PIC X(2000).
            05 TMP-ERROR-TXT       PIC X(2000).
-           05 WS-COL-TEXT-ERROR   PIC X(50) OCCURS 25 TIMES.
-           05 WS-COL-LEN-ERROR    PIC 9(3)  OCCURS 4 TIMES.
+           05 WS-COL-TEXT-ERROR   PIC X(50) OCCURS 25 TIMES. *> 欄首名稱
+           05 WS-COL-LEN-ERROR    PIC 9(3)  OCCURS 4 TIMES.  *> 欄位寬度
 
       *******************************************************
       *> 程序部

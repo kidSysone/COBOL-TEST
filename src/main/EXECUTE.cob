@@ -111,6 +111,7 @@
               05 TMP-REC-TXT-ERROR   PIC X(2000).
               05 DIVIDING-LINE-ERROR PIC X(2000).
               05 TMP-DATA            PIC X(500).
+
       *******************************************************
       *> 呼叫函式用的變數
       *******************************************************
@@ -121,23 +122,24 @@
            05 ORIGIN-DATA  PIC X(500). *> 原文
            05 DTLS-LF      PIC X(500) OCCURS 25 TIMES. *> 地址欄位
 
-       *> LIST-REC 用 (從 LIST.csv 讀取 18行*40列)
+       *> READ-RULE 用 (從 LIST.csv 讀取 18行*40列)
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
            05  LS-COUNTRY-COL       PIC X(50) OCCURS 500 TIMES.
            05  LS-CITY-COL          PIC X(50) OCCURS 50000 TIMES.
 
+       *> OUTPUT-ADDRESS 用
        01 LS-OUTPUT.
            05 TMP-TOTAL    PIC X(2000).
            05 TMP-ERROR    PIC X(2000).
-           05 WS-COL-TEXT  PIC X(50) OCCURS 25 TIMES.
-           05 WS-COL-LEN   PIC 9(3) OCCURS 25 TIMES.
+           05 WS-COL-TEXT  PIC X(50) OCCURS 25 TIMES. *> 欄首名稱
+           05 WS-COL-LEN   PIC 9(3) OCCURS 25 TIMES.  *> 欄位寬度
 
            05 TMP-TOTAL-TXT       PIC X(2000).
            05 TMP-ERROR-TXT       PIC X(2000).
-           05 WS-COL-TEXT-ERROR   PIC X(50) OCCURS 25 TIMES.
-           05 WS-COL-LEN-ERROR    PIC 9(3)  OCCURS 4 TIMES.
+           05 WS-COL-TEXT-ERROR   PIC X(50) OCCURS 25 TIMES. *> 欄首名稱
+           05 WS-COL-LEN-ERROR    PIC 9(3)  OCCURS 4 TIMES.  *> 欄位寬度
 
 
       *******************************************************

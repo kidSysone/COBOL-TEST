@@ -53,6 +53,7 @@
        01 ERROR-ARRAY.
            05 ERROR-TEMP PIC X(40).
            05 COMMA-FLAG PIC XX.
+           05 CHARACTERS-FLAG PIC X(40).
 
        01 IDX PIC 99999.
        01 JDX PIC 999.
@@ -140,6 +141,36 @@
            *> "," -> ", "
            MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN.
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > TEMP-LEN
+               IF BEFORE-DATA(IDX:1) = "," AND IDX = 1
+                 SUBTRACT 1 FROM TEMP-LEN IDX
+                 MOVE FUNCTION TRIM(BEFORE-DATA(2:TEMP-LEN))
+                   TO BEFORE-DATA
+                 MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+               END-IF
+
+               IF BEFORE-DATA(IDX:1) = "," AND IDX = TEMP-LEN
+                 SUBTRACT 2 FROM IDX
+                 MOVE FUNCTION TRIM(BEFORE-DATA(1:TEMP-LEN - 1))
+                   TO BEFORE-DATA
+                 MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+               END-IF
+
+               IF BEFORE-DATA(IDX:2) = ",,"
+                 MOVE SPACES TO TEMP-COL
+
+                 STRING
+                   BEFORE-DATA(1:IDX) DELIMITED BY SIZE
+                   BEFORE-DATA(IDX + 2:TEMP-LEN - IDX - 1)
+                     DELIMITED BY SIZE
+                   INTO TEMP-COL
+                 END-STRING
+                 SUBTRACT 1 FROM IDX
+                 MOVE TEMP-COL TO BEFORE-DATA
+                 MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+
+               END-IF
+
+
                IF BEFORE-DATA(IDX:1) = ","
                   AND BEFORE-DATA(IDX + 1:1 - NEXT-LEN) NOT = " "
                      STRING
@@ -150,7 +181,7 @@
                        INTO TEMP-COL
                      END-STRING
                     MOVE TEMP-COL TO BEFORE-DATA
-                    ADD 1 TO TEMP-LEN
+                  MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
                END-IF
            END-PERFORM.
 
@@ -657,13 +688,27 @@
               END-IF
 
               IF TEMP-COL(TEMP-LEN:1) = "F" AND 
-                 (TEMP-COL(TEMP-LEN - 1:1) IS NUMERIC OR
-                  TEMP-COL)
+                  TEMP-COL(TEMP-LEN - 1:1) IS NUMERIC
                 MOVE TEMP-COL(1 : TEMP-LEN - 1) TO TEMP-COL
                 MOVE "Y" TO TEMP-FLAG
                 MOVE 11  TO DTLS-FLAG
-
               END-IF
+
+              IF TEMP-COL(TEMP-LEN:2) = "F," AND 
+                  TEMP-COL(TEMP-LEN - 2:1) IS NUMERIC
+                MOVE TEMP-COL(1 : TEMP-LEN - 2) TO TEMP-COL
+                MOVE "Y" TO TEMP-FLAG
+                MOVE 11  TO DTLS-FLAG
+              END-IF
+
+              IF TEMP-COL(1:1) = "B" AND
+                (TEMP-COL(2:TEMP-LEN - 1) IS NUMERIC OR
+                (TEMP-COL(TEMP-LEN:1) = "," AND
+                 TEMP-COL(2:TEMP-LEN - 2) IS NUMERIC))
+                MOVE "Y" TO TEMP-FLAG
+                MOVE 11  TO DTLS-FLAG
+              END-IF
+
               *> =================== FLOOR 判斷結束 ===================
               *> =================== 特殊ZIP 判斷 ===================
 
@@ -742,7 +787,8 @@
 
               *> 是否為 州
               IF FUNCTION TRIM(TEMP-COL) IS ALPHABETIC-UPPER AND
-                 (TEMP-LEN >= 2 AND TEMP-LEN <= 3)
+                 (TEMP-LEN >= 2 AND TEMP-LEN <= 3) AND
+                 DTLS-FLAG = 0
                 MOVE "Y" TO TEMP-FLAG
                 MOVE 17 TO DTLS-FLAG
                 MOVE "," TO PRE-FLAG
@@ -751,8 +797,9 @@
 
               *> 是否為 號
               IF TEMP-LEN - CNT(IDX) = 1 AND
-                 TEMP-LEN + CNT(IDX) > 2 AND
-                 TEMP-COL(TEMP-LEN:1) IS ALPHABETIC-UPPER
+                 TEMP-LEN > 1 AND CNT(IDX) > 1 AND
+                 TEMP-COL(TEMP-LEN:1) IS ALPHABETIC-UPPER AND
+                 DTLS-FLAG < 11
                 MOVE "," TO PRE-FLAG
                 MOVE "Y" TO TEMP-FLAG
                 MOVE 9 TO DTLS-FLAG
@@ -905,7 +952,6 @@
                   END-PERFORM
 
                   IF DIR-FLAG = "Y"
-                       
                        STRING
                           FUNCTION TRIM(TEMP-PART(IDX + 1))
                             DELIMITED BY SIZE
@@ -922,6 +968,7 @@
 
                   EXIT PERFORM
                 END-IF
+           *> ===== (NEXT-COL)特定字判斷 完成 =====
               END-PERFORM
               END-PERFORM
               END-IF
@@ -1075,10 +1122,6 @@
       *            FUNCTION TRIM(NEXT-COL)"/ "NEXT-LEN"/ "CNT(IDX + 1)
       *    DISPLAY "DTLS:"DTLS-FLAG"/ "FUNCTION TRIM(DTLS-LF(DTLS-FLAG))
       *    DISPLAY FUNCTION TRIM(AFTER-DATA)"/ "MATCH-NEW
-
-      *    IF PRE-FLAG = "," 
-      *      DISPLAY "PRE-FLAG: ," 
-      *    ELSE
       *    DISPLAY "------------- ------------- -------------"
 
            ADD IDX-PLUS TO IDX
@@ -1126,105 +1169,8 @@
                TO AFTER-DATA
            END-IF.
 
-
-      *******************************************************
-      *> 處理錯誤資料
-      *******************************************************
-       ERROR-SECTION.
-           MOVE FUNCTION TRIM(AFTER-DATA) TO DTLS-LF(18). *> OTHER 欄位
-
-           MOVE "N" TO ERROR-FLAG.
-           MOVE "PLEASE ENTER" TO ERROR-TEMP.
-           MOVE SPACES TO COMMA-FLAG.
-           
-           *> ZIP 為空值
-           IF DTLS-LF(1) = SPACES
-             STRING 
-               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
-               COMMA-FLAG DELIMITED BY SPACES
-               " POSTAL CODE" DELIMITED BY SIZE
-               INTO ERROR-TEMP
-             END-STRING
-             MOVE "Y" TO ERROR-FLAG
-             MOVE "," TO COMMA-FLAG
-           END-IF.
-           
-           *> COUNTRY 為空值
-           IF DTLS-LF(2) = SPACES
-             STRING 
-               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
-               COMMA-FLAG DELIMITED BY SPACES
-               " COUNTRY" DELIMITED BY SIZE
-               INTO ERROR-TEMP
-             END-STRING
-             MOVE "Y" TO ERROR-FLAG
-             MOVE "," TO COMMA-FLAG
-           END-IF.
-           
-           *> CITY 為空值 PROVINCE 皆為空值
-           IF DTLS-LF(3) = SPACES  AND DTLS-LF(16) = SPACES
-             STRING 
-               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
-               COMMA-FLAG DELIMITED BY SPACES
-               " CITY OR PROVINCE" DELIMITED BY SIZE
-               INTO ERROR-TEMP
-             END-STRING
-             MOVE "Y" TO ERROR-FLAG
-             MOVE "," TO COMMA-FLAG
-           END-IF.
-           
-           *> OTHER 有值: PARSING FAILED. PLEASE CHECK INPUT
-           IF DTLS-LF(18) NOT = SPACES
-             MOVE "PARSING FAILED. PLEASE CHECK INPUT" TO ERROR-TEMP
-             MOVE "Y" TO ERROR-FLAG
-           END-IF.
-
-           IF ERROR-FLAG = "Y"
-             STRING 
-               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
-               "." DELIMITED BY SIZE
-               INTO ERROR-TEMP
-             END-STRING
-             
-             MOVE ERROR-TEMP TO DTLS-LF(19)
-           ELSE
-             MOVE SPACES TO DTLS-LF(19)
-           END-IF.
-
-
-           *> 錯誤分析: 若 TRIM(DTLS-LF(IDX)) 字數 > 35 -> ERROR
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
-             IF LENGTH OF FUNCTION TRIM(DTLS-LF(IDX)) > 35
-               MOVE "ADDRESS DATA IS TOO LONG" TO DTLS-LF(19)
-             END-IF
-           END-PERFORM
-    
-           *> 錯誤分析: 若包含特殊字體 -> ERROR
-           MOVE "N" TO ERROR-FLAG
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 
-             LENGTH OF FUNCTION TRIM(ORIGIN-DATA)
-
-             MOVE ORIGIN-DATA(IDX:1) TO WS-CH
-             COMPUTE WS-CODE = FUNCTION ORD(WS-CH)
-             IF WS-CODE < 32 OR WS-CODE > 126
-               MOVE "Y" TO ERROR-FLAG
-               EXIT PERFORM
-             ELSE
-               INSPECT ALLOWED-CH TALLYING WS-CODE FOR ALL WS-CH
-               IF NOT((WS-CH >= "0" AND WS-CH <= "9") OR 
-                  (WS-CH >= "A" AND WS-CH <= "Z") OR
-                  (WS-CH >= "a" AND WS-CH <= "z") OR
-                  WS-CH = SPACE OR
-                  WS-CODE > 0)
-                   MOVE "Y" TO ERROR-FLAG
-                   EXIT PERFORM
-               END-IF
-             END-IF
-           END-PERFORM.
-
-           IF ERROR-FLAG = "Y"
-             MOVE "CONTAINS INVALID CHARACTERS" TO DTLS-LF(19)
-           END-IF.
+           *> OTHER 欄位
+           MOVE FUNCTION TRIM(AFTER-DATA) TO DTLS-LF(18). 
 
 
       *> ===================== REBUILD =====================
@@ -1309,6 +1255,102 @@
            END-PERFORM.
            MOVE DTLS-LF(23)(3:LENGTH OF FUNCTION TRIM(DTLS-LF(23)) - 2)
              TO DTLS-LF(23).
+
+
+      *******************************************************
+      *> 處理錯誤資料
+      *******************************************************
+       ERROR-SECTION.
+           MOVE "N" TO ERROR-FLAG.
+           MOVE "PLEASE ENTER" TO ERROR-TEMP.
+           MOVE SPACES TO COMMA-FLAG.
+           
+           *> ZIP 為空值
+           IF DTLS-LF(1) = SPACES
+             STRING 
+               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
+               COMMA-FLAG DELIMITED BY SPACES
+               " POSTAL CODE" DELIMITED BY SIZE
+               INTO ERROR-TEMP
+             END-STRING
+             MOVE "Y" TO ERROR-FLAG
+             MOVE "," TO COMMA-FLAG
+           END-IF.
+           
+           *> COUNTRY 為空值
+           IF DTLS-LF(2) = SPACES
+             STRING 
+               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
+               COMMA-FLAG DELIMITED BY SPACES
+               " COUNTRY" DELIMITED BY SIZE
+               INTO ERROR-TEMP
+             END-STRING
+             MOVE "Y" TO ERROR-FLAG
+             MOVE "," TO COMMA-FLAG
+           END-IF.
+           
+           *> CITY 為空值 PROVINCE 皆為空值
+           IF DTLS-LF(3) = SPACES  AND DTLS-LF(16) = SPACES
+             STRING 
+               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
+               COMMA-FLAG DELIMITED BY SPACES
+               " CITY OR PROVINCE" DELIMITED BY SIZE
+               INTO ERROR-TEMP
+             END-STRING
+             MOVE "Y" TO ERROR-FLAG
+             MOVE "," TO COMMA-FLAG
+           END-IF.
+           
+           *> OTHER 有值: PARSING FAILED. PLEASE CHECK INPUT
+           IF DTLS-LF(18) NOT = SPACES
+             MOVE "PARSING FAILED. PLEASE CHECK INPUT" TO ERROR-TEMP
+             MOVE "Y" TO ERROR-FLAG
+           END-IF.
+
+
+           *> 錯誤分析: 若 TRIM(DTLS-LF(IDX)) 字數 > 35 -> ERROR
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
+             IF LENGTH OF FUNCTION TRIM(DTLS-LF(IDX)) > 35
+               MOVE "ADDRESS DATA IS TOO LONG" TO ERROR-TEMP
+             END-IF
+           END-PERFORM
+    
+           *> 錯誤分析: 若包含特殊字體 -> ERROR
+           MOVE "N" TO CHARACTERS-FLAG
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 
+             LENGTH OF FUNCTION TRIM(ORIGIN-DATA)
+
+             MOVE ORIGIN-DATA(IDX:1) TO WS-CH
+             COMPUTE WS-CODE = FUNCTION ORD(WS-CH)
+             IF WS-CODE < 32 OR WS-CODE > 126
+               MOVE "Y" TO ERROR-FLAG
+               MOVE "CONTAINS INVALID CHARACTERS" TO ERROR-TEMP
+               EXIT PERFORM
+             ELSE
+               INSPECT ALLOWED-CH TALLYING WS-CODE FOR ALL WS-CH
+               IF NOT((WS-CH >= "0" AND WS-CH <= "9") OR 
+                  (WS-CH >= "A" AND WS-CH <= "Z") OR
+                  (WS-CH >= "a" AND WS-CH <= "z") OR
+                  WS-CH = SPACE OR
+                  WS-CODE > 0)
+                   MOVE "Y" TO ERROR-FLAG
+                   MOVE "CONTAINS INVALID CHARACTERS" TO ERROR-TEMP
+                   EXIT PERFORM
+               END-IF
+             END-IF
+           END-PERFORM.
+
+           IF ERROR-FLAG = "Y"
+             STRING 
+               FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
+               "." DELIMITED BY SIZE
+               INTO ERROR-TEMP
+             END-STRING
+             
+             MOVE ERROR-TEMP TO DTLS-LF(19)
+           ELSE
+             MOVE SPACES TO DTLS-LF(19)
+           END-IF.
 
 
       *******************************************************
