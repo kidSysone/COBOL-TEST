@@ -233,6 +233,6 @@ IF ( CNT-U(IDX) = "Y" AND (
 ***
 ## 爭議點?
 * 輸入的地址格式
-  * 目前設定國家必定會位於字尾
+  * 國家必定會位於字尾
 * FLOOR
   * `Lower Ground Floor`、`Mezzanine Floor`、`M/F`，是否需要變更簡短?

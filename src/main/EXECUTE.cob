@@ -16,7 +16,6 @@
              STATUS IN-FILE-STATUS.
 
       *******************************************************
-      *> 環境部
       *> OUT-FILE-CSV
       *> 檔案名稱：Address_Split.csv
       *> 檔案組織：LINE SEQUENTIAL（以行為單位）
@@ -34,7 +33,6 @@
              ORGANIZATION IS LINE SEQUENTIAL.
 
       *******************************************************
-      *> 環境部
       *> 檔案名稱：Address_Split.txt
       *> 檔案組織：LINE SEQUENTIAL（以行為單位）
 
@@ -666,7 +664,7 @@
            MOVE ERROR-COUNT TO ERROR-FMT.
            MOVE DATA-COUNT  TO DATA-FMT.
            STRING
-             "RESULT SUMMARY->;TOTAL ITEMS: " DELIMITED BY SIZE
+             ";RESULT SUMMARY->;TOTAL ITEMS: " DELIMITED BY SIZE
              DATA-FMT DELIMITED BY SIZE
              ", ERROR ITEMS: " DELIMITED BY SIZE
              ERROR-FMT DELIMITED BY SIZE
@@ -689,7 +687,7 @@
            IF ERROR-COUNT > 0
              MOVE SPACES TO TMP-REC-ERROR
              STRING
-               "RESULT SUMMARY->;ERROR ITEMS: " DELIMITED BY SIZE
+               ";RESULT SUMMARY->;ERROR ITEMS: " DELIMITED BY SIZE
                ERROR-FMT DELIMITED BY SIZE
                INTO TMP-REC-ERROR
              END-STRING
@@ -700,7 +698,7 @@
 
            *> ===============       無錯誤資料       ===============
            ELSE
-             MOVE "RESULT SUMMARY->;NO ERROR DATA;;" TO TMP-REC-ERROR
+             MOVE ";RESULT SUMMARY->;NO ERROR DATA" TO TMP-REC-ERROR
              MOVE TMP-REC-ERROR TO ERROR-REC-CSV
              WRITE ERROR-REC-CSV
            END-IF.

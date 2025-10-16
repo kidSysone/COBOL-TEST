@@ -1,8 +1,9 @@
 CUSTOMER_ID;ADDRESS_LINE_ORIGIN;ADDRESS_LINE_EN;ERROR_MESSAGE
 513;雲林縣土庫鎮雙人厝;Shuangrencuo, Tuku Township, Yunlin County, Taiwan (R.O.C.);PLEASE ENTER POSTAL CODE.
-7214;東京都豊島?東池袋1-50-35 池袋P'PARCO B1F;B1F, Ikebukuro P'PARCO, 1-50-35 Higashi-Ikebukuro, Toshima-ku, Tokyo, Japan;PLEASE ENTER POSTAL CODE.
 5333;??? ??? ??? ??? 129(???);129 Samseong Road, Maetan, Yeongtong District, Suwon City, Gyeonggi Province, South Korea;PLEASE ENTER POSTAL CODE.
 2677;??? ??? ??? ??? 129(???);129, Samseong-ro, Maetan-dong, Yeongtong-gu, Suwon-si, Gyeonggi-do, South Korea;PLEASE ENTER POSTAL CODE.
+6669475541;美國北馬里亞納群島薩伊潘市海洋大道456號;456 Ocean Drive, Saipan, Northern Mariana Islands 96950, USA;PARSING FAILED. PLEASE CHECK INPUT.
+7214;東京都豊島?東池袋1-50-35 池袋P'PARCO B1F;B1F, Ikebukuro P'PARCO, 1-50-35 Higashi-Ikebukuro, Toshima-ku, Tokyo, Japan;PLEASE ENTER POSTAL CODE.
 1106;3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837;3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcvbaqsdfghjk Greenville, NY 18837;ADDRESS DATA IS TOO LONG.
 8650;3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcv Greenville, NY 18837;3989 Highland Ave,asdfghjklqwertyuASDFGHJizxcv Greenville, NY 18837;PARSING FAILED. PLEASE CHECK INPUT.
 3088;12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ;12345 Long Road Name Without Keyword ABCDEFGHIJKLMNOPQRSTUVWXYZ;ADDRESS DATA IS TOO LONG.
@@ -13,4 +14,4 @@ CUSTOMER_ID;ADDRESS_LINE_ORIGIN;ADDRESS_LINE_EN;ERROR_MESSAGE
 3744;1740 Highland Ave, Lakeside, NC 95349;1740 Highland Ave, Lakeside, NC 95349;PLEASE ENTER COUNTRY.
 1057;6806 Oak St, Hillcrest, OH 30159;6806 Oak St, Hillcrest, OH 30159;PLEASE ENTER COUNTRY.
 5808;6769 Highland Ave, Springfield, GA 92721;6769 Highland Ave, Springfield, GA 92721;PLEASE ENTER COUNTRY.
-RESULT SUMMARY->;ERROR ITEMS:   14
+;RESULT SUMMARY->;ERROR ITEMS:   15

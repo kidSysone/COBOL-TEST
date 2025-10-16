@@ -45,8 +45,8 @@
 
        *> 全方向
        01 DIR.
-             05 DIR-NAMES OCCURS 20 TIMES PIC X(8).
-             05 DIR-LEN PIC 99 VALUE 20.
+             05 DIR-NAMES OCCURS 21 TIMES PIC X(8).
+             05 DIR-LEN PIC 99 VALUE 21.
              05 DIR-COL  PIC X(8).
              05 DIR-FLAG PIC X(1).
 
@@ -136,6 +136,7 @@
            MOVE "MINAMI"  TO DIR-NAMES(18).
            MOVE "HIGASHI" TO DIR-NAMES(19).
            MOVE "NISHI"   TO DIR-NAMES(20).
+           MOVE "LOOP"    TO DIR-NAMES(21).
 
 
            *> "," -> ", "
@@ -429,7 +430,7 @@
                  END-IF
                  MOVE NEXT-UPPER-COL(1:CHECK-LEN) TO NEXT-UPPER-COL
 
-                 *> 尋找 "*** {方向}( /,)" 字串
+                 *> 尋找 " {方向}( /,)" 字串
                  IF NEXT-UPPER-COL = CHECK-COL AND DIR-FLAG = "Y"
                    MOVE "Y" TO CHECK-FLAG
                    STRING
@@ -442,7 +443,7 @@
                      INTO TEMP-COL-2
                    END-STRING
 
-                   *> 尋找 "*** {方向} ROAD /ROAD," 字串
+                   *> 尋找 " {方向} ROAD /ROAD," 字串
                    IF FUNCTION TRIM(FUNCTION UPPER-CASE(
                      PROCESSING-DATA(END-JDX + NEXT-LEN + CHECK-LEN
                        :5))) = "ROAD" OR
@@ -525,36 +526,36 @@
            *> 資料分類
            UNSTRING PROCESSING-DATA
              DELIMITED BY SPACE
-             INTO TEMP-PART (1)
-               TEMP-PART (2)
-               TEMP-PART (3)
-               TEMP-PART (4)
-               TEMP-PART (5)
-               TEMP-PART (6)
-               TEMP-PART (7)
-               TEMP-PART (8)
-               TEMP-PART (9)
-               TEMP-PART (10)
-               TEMP-PART (11)
-               TEMP-PART (12)
-               TEMP-PART (13)
-               TEMP-PART (14)
-               TEMP-PART (15)
-               TEMP-PART (16)
-               TEMP-PART (17)
-               TEMP-PART (18)
-               TEMP-PART (19)
-               TEMP-PART (20)
-               TEMP-PART (21)
-               TEMP-PART (22)
-               TEMP-PART (23)
-               TEMP-PART (24)
-               TEMP-PART (25)
-               TEMP-PART (26)
-               TEMP-PART (27)
-               TEMP-PART (28)
-               TEMP-PART (29)
-               TEMP-PART (30)
+             INTO TEMP-PART(1)
+               TEMP-PART(2)
+               TEMP-PART(3)
+               TEMP-PART(4)
+               TEMP-PART(5)
+               TEMP-PART(6)
+               TEMP-PART(7)
+               TEMP-PART(8)
+               TEMP-PART(9)
+               TEMP-PART(10)
+               TEMP-PART(11)
+               TEMP-PART(12)
+               TEMP-PART(13)
+               TEMP-PART(14)
+               TEMP-PART(15)
+               TEMP-PART(16)
+               TEMP-PART(17)
+               TEMP-PART(18)
+               TEMP-PART(19)
+               TEMP-PART(20)
+               TEMP-PART(21)
+               TEMP-PART(22)
+               TEMP-PART(23)
+               TEMP-PART(24)
+               TEMP-PART(25)
+               TEMP-PART(26)
+               TEMP-PART(27)
+               TEMP-PART(28)
+               TEMP-PART(29)
+               TEMP-PART(30)
            .
 
            *> CNT計算 (數字判斷).
@@ -644,7 +645,7 @@
                  *> 荷蘭郵遞區號: 前半:4個數字，後半:大寫英文*2
                  IF TEMP-LEN = 4 AND
                     NEXT-LEN <= 3 AND
-                    FUNCTION TRIM(NEXT-COL(1:2)) IS ALPHABETIC-UPPER AND
+                    NEXT-COL(1:2) IS ALPHABETIC-UPPER AND
                     (DTLS-LF(2) = "NETHERLANDS" OR DTLS-LF(2) = "NLD")
                    MOVE "Y" TO NEXT-FLAG
                    MOVE 1   TO DTLS-FLAG
@@ -682,8 +683,7 @@
 
                 MOVE TEMP-A TO TEMP-COL
                 MOVE SPACES TO NEXT-COL
-                MOVE "Y" TO NEXT-FLAG
-                MOVE "Y" TO TEMP-FLAG
+                MOVE "Y" TO NEXT-FLAG TEMP-FLAG
                 MOVE 11  TO DTLS-FLAG
               END-IF
 
@@ -762,8 +762,7 @@
               END-IF
 
               IF ZIP-FLAG = "Y" AND TEMP-FLAG NOT = "Y"
-                MOVE "Y" TO TEMP-FLAG
-                MOVE "Y" TO NEXT-FLAG
+                MOVE "Y" TO TEMP-FLAG NEXT-FLAG
                 MOVE 1   TO DTLS-FLAG
                 MOVE "," TO PRE-FLAG
               END-IF
@@ -810,18 +809,14 @@
               IF TEMP-FLAG NOT = "Y"
               MOVE FUNCTION UPPER-CASE(TEMP-COL(1:TEMP-LEN)) 
                 TO TEMP-UPPER-COL
-              IF TEMP-UPPER-COL(LENGTH OF 
-                FUNCTION TRIM(TEMP-UPPER-COL):1) = ","
-                  MOVE TEMP-UPPER-COL(1:LENGTH OF 
-                FUNCTION TRIM(TEMP-UPPER-COL) - 1) TO TEMP-UPPER-COL
+              IF TEMP-UPPER-COL(TEMP-LEN:1) = ","
+                  MOVE TEMP-UPPER-COL(1:TEMP-LEN - 1) TO TEMP-UPPER-COL
               END-IF
 
               MOVE FUNCTION UPPER-CASE(NEXT-COL(1:NEXT-LEN)) 
                 TO NEXT-UPPER-COL
-              IF NEXT-UPPER-COL(LENGTH OF 
-                FUNCTION TRIM(NEXT-UPPER-COL):1) = ","
-                  MOVE NEXT-UPPER-COL(1:LENGTH OF 
-                FUNCTION TRIM(NEXT-UPPER-COL) - 1) TO NEXT-UPPER-COL
+              IF NEXT-UPPER-COL(NEXT-LEN:1) = ","
+                  MOVE NEXT-UPPER-COL(1:NEXT-LEN - 1) TO NEXT-UPPER-COL
               END-IF
 
                *> 全方向
@@ -836,18 +831,16 @@
                IF DIR-FLAG = "Y"
 
                   MOVE ";" TO NEXT-UPPER-COL
-                  MOVE "Y" TO TEMP-FLAG
-                  MOVE "Y" TO NEXT-FLAG
+                  MOVE "Y" TO TEMP-FLAG NEXT-FLAG
                   MOVE 5   TO DTLS-FLAG
-
 
                   *> **** DIRECTION ROAD
                   IF FUNCTION UPPER-CASE(TEMP-PART(IDX + 2)(1:4))
                      = "ROAD"
                     STRING
-                      FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
+                      TEMP-COL(1:TEMP-LEN) DELIMITED BY SIZE
                       " " DELIMITED BY SIZE
-                      FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
+                      NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
                       " " DELIMITED BY SIZE
                       TEMP-PART(IDX + 2)(1:4) DELIMITED BY SIZE
                       INTO TEMP-COL
@@ -869,8 +862,8 @@
 
                 *> ===== 羅馬字 判斷 ====
                 IF CHECK-COL(1:1) = "-" AND 
-                  TEMP-UPPER-COL(LENGTH OF FUNCTION TRIM(TEMP-UPPER-COL)
-                  - CHECK-LEN + 1:CHECK-LEN) = CHECK-COL
+                  TEMP-UPPER-COL(TEMP-LEN - CHECK-LEN + 1:
+                                 CHECK-LEN) = CHECK-COL
 
                     MOVE "," TO PRE-FLAG
                     MOVE ";" TO NEXT-UPPER-COL
@@ -889,10 +882,12 @@
                     MOVE SPACES TO TEMP-COL
                     STRING
                       "B" DELIMITED BY SIZE
-                      FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
+                      NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
                       INTO TEMP-COL
                     END-STRING
                     MOVE TEMP-COL TO NEXT-COL
+                    MOVE LENGTH OF FUNCTION TRIM(TEMP-COL)
+                         TO TEMP-LEN NEXT-LEN
                   END-IF
 
                   *> 後接字串判斷 特殊狀況(IF)需跳過
@@ -901,7 +896,9 @@
                     MOVE ";" TO NEXT-UPPER-COL
                     IF JDX >= 6 AND JDX <= 11
                           MOVE NEXT-COL TO TEMP-COL *> 省略文字僅留數字
+                          MOVE NEXT-LEN TO TEMP-LEN
                           MOVE SPACES TO NEXT-COL *> 省略文字僅留數字
+                          MOVE 0 TO NEXT-LEN
                     END-IF
                   END-IF
                 END-IF
@@ -924,6 +921,7 @@
                       INSPECT TEMP-COL REPLACING ALL "TH" BY SPACES
                       INSPECT TEMP-COL REPLACING ALL "th" BY SPACES
                       MOVE SPACES TO NEXT-COL
+                      MOVE 0 TO NEXT-LEN
                     END-IF
                     STRING
                       FUNCTION TRIM(PRE-COL) DELIMITED BY SIZE
@@ -934,8 +932,8 @@
                       INTO TEMP-A
                     END-STRING
                     MOVE TEMP-A TO TEMP-COL
-                    MOVE SPACES TO PRE-COL
-                    MOVE SPACES TO NEXT-COL
+                    MOVE SPACES TO PRE-COL NEXT-COL
+                    MOVE 0 TO PRE-LEN NEXT-LEN
                   ELSE *> FLOOR 字串判斷 結束
 
 
@@ -953,8 +951,7 @@
 
                   IF DIR-FLAG = "Y"
                        STRING
-                          FUNCTION TRIM(TEMP-PART(IDX + 1))
-                            DELIMITED BY SIZE
+                          NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
                           " " DELIMITED BY SIZE
                           FUNCTION TRIM(TEMP-PART(IDX + 2))
                             DELIMITED BY SIZE
@@ -1041,11 +1038,12 @@
            *> PRE-FLAG, 若 現欄位為郵遞區號，前欄位 -> PROVINCE
               IF PRE-FLAG = "," AND DTLS-FLAG = 1 AND 
                    DTLS-LF(16) = SPACES
-                MOVE FUNCTION TRIM(PRE-COL) TO DTLS-LF(16)
+                MOVE PRE-COL(1:PRE-LEN) TO DTLS-LF(16)
                 MOVE SPACES TO PRE-COL PRE-FLAG
+                MOVE 0 TO PRE-LEN
               END-IF
 
-              IF PRE-COL(LENGTH OF FUNCTION TRIM(PRE-COL):1) = "," OR
+              IF PRE-COL(PRE-LEN:1) = "," OR
                  IDX = 1 OR PRE-LEN = 0
                 MOVE SPACES TO PRE-FLAG
               END-IF
@@ -1059,6 +1057,7 @@
                MOVE PRE-COL TO DTLS-LF(5)
              END-IF
                MOVE SPACES TO PRE-COL PRE-FLAG
+               MOVE 0 TO PRE-LEN
              END-IF
            END-IF
 
@@ -1130,8 +1129,10 @@
        *>  ====================== 最終調整 ======================
            *> 結尾
            IF TEMP-FLAG = "N"
+             MOVE FUNCTION TRIM(AFTER-DATA) TO AFTER-DATA
+             MOVE LENGTH OF FUNCTION TRIM(AFTER-DATA) TO TEMP-LEN
 
-             IF AFTER-DATA(LENGTH OF FUNCTION TRIM(AFTER-DATA):1) = ","
+             IF AFTER-DATA(TEMP-LEN:1) = ","
                MOVE SPACES TO PRE-FLAG
              ELSE
                MOVE ", " TO PRE-FLAG
@@ -1139,16 +1140,11 @@
 
              STRING
                FUNCTION TRIM(PRE-FLAG) DELIMITED BY SIZE
-               FUNCTION TRIM(AFTER-DATA) DELIMITED BY SIZE
+               AFTER-DATA(1:TEMP-LEN) DELIMITED BY SIZE
                " " DELIMITED BY SIZE
-               FUNCTION TRIM(PRE-COL) DELIMITED BY SIZE
+               PRE-COL(1:PRE-LEN) DELIMITED BY SIZE
                INTO AFTER-DATA
              END-STRING
-           END-IF.
-
-           IF AFTER-DATA(LENGTH OF FUNCTION TRIM(AFTER-DATA):1) = ","
-             MOVE AFTER-DATA(1:LENGTH OF FUNCTION TRIM(AFTER-DATA) - 1)
-               TO AFTER-DATA
            END-IF.
 
            *> ,, 置換
@@ -1165,12 +1161,11 @@
            MOVE FUNCTION TRIM(AFTER-DATA) TO AFTER-DATA.
            MOVE LENGTH OF FUNCTION TRIM(AFTER-DATA) TO TEMP-LEN.
            IF AFTER-DATA(TEMP-LEN:1) = ","
-             MOVE FUNCTION TRIM(AFTER-DATA(1:TEMP-LEN - 1))
-               TO AFTER-DATA
+             SUBTRACT 1 FROM TEMP-LEN
            END-IF.
 
            *> OTHER 欄位
-           MOVE FUNCTION TRIM(AFTER-DATA) TO DTLS-LF(18). 
+           MOVE AFTER-DATA(1:TEMP-LEN) TO DTLS-LF(18). 
 
 
       *> ===================== REBUILD =====================
