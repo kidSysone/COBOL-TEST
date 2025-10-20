@@ -148,18 +148,18 @@ CUSTOMER_ID;中文地址;英文地址
 3744;1740 Highland Ave, Lakeside, NC 95349;1740 Highland Ave, Lakeside, NC 95349
 1057;6806 Oak St, Hillcrest, OH 30159;6806 Oak St, Hillcrest, OH 30159
 5808;6769 Highland Ave, Springfield, GA 92721;6769 Highland Ave, Springfield, GA 92721
-5215;5th Floor, 4678 Broadway, Austin, WA 83821, UK;5th Floor, 4678 Broadway, Austin, WA 83821, UK
-1420;Fl. 5, 4678 Broadway, Austin, WA 83821, UK;Fl. 5, 4678 Broadway, Austin, WA 83821, UK
-7223;Level 5, 4678 Broadway, Austin, WA 83821, UK;Level 5, 4678 Broadway, Austin, WA 83821, UK
-2683;Unit 501, 5th Floor, 4678 Broadway, Austin, WA 83821, UK;Unit 501, 5th Floor, 4678 Broadway, Austin, WA 83821, UK
-2094;Suite 501, Fl. 5, 4678 Broadway, Austin, WA 83821, UK;Suite 501, Fl. 5, 4678 Broadway, Austin, WA 83821, UK
-145;B1F, 4678 Broadway, Austin, WA 83821, UK;B1F, 4678 Broadway, Austin, WA 83821, UK
-6175;Basement 1, 4678 Broadway, Austin, WA 83821, UK;Basement 1, 4678 Broadway, Austin, WA 83821, UK
-3027;Lower Ground Floor, 4678 Broadway, Austin, WA 83821, UK;Lower Ground Floor, 4678 Broadway, Austin, WA 83821, UK
-8428;Unit B101, B1F, 4678 Broadway, Austin, WA 83821, UK;Unit B101, B1F, 4678 Broadway, Austin, WA 83821, UK
-963;M/F, 4678 Broadway, Austin, WA 83821, UK;M/F, 4678 Broadway, Austin, WA 83821, UK
-3555;Mezzanine Floor, 4678 Broadway, Austin, WA 83821, UK;Mezzanine Floor, 4678 Broadway, Austin, WA 83821, UK
-5326;Unit F1, M/F, 4678 Broadway, Austin, WA 83821, UK;Unit F1, M/F, 4678 Broadway, Austin, WA 83821, UK
+5215;***** For 'FLOOR' test data! *****;5th Floor, 4678 Broadway, Austin, WA 83821, UK
+1420;***** For 'FLOOR' test data! *****;Fl. 5, 4678 Broadway, Austin, WA 83821, UK
+7223;***** For 'FLOOR' test data! *****;Level 5, 4678 Broadway, Austin, WA 83821, UK
+2683;***** For 'FLOOR' test data! *****;Unit 501, 5th Floor, 4678 Broadway, Austin, WA 83821, UK
+2094;***** For 'FLOOR' test data! *****;Suite 501, Fl. 5, 4678 Broadway, Austin, WA 83821, UK
+145;***** For 'FLOOR' test data! *****;B1F, 4678 Broadway, Austin, WA 83821, UK
+6175;***** For 'FLOOR' test data! *****;Basement 1, 4678 Broadway, Austin, WA 83821, UK
+3027;***** For 'FLOOR' test data! *****;Lower Ground Floor, 4678 Broadway, Austin, WA 83821, UK
+8428;***** For 'FLOOR' test data! *****;Unit B101, B1F, 4678 Broadway, Austin, WA 83821, UK
+963;***** For 'FLOOR' test data! *****;M/F, 4678 Broadway, Austin, WA 83821, UK
+3555;***** For 'FLOOR' test data! *****;Mezzanine Floor, 4678 Broadway, Austin, WA 83821, UK
+5326;***** For 'FLOOR' test data! *****;Unit F1, M/F, 4678 Broadway, Austin, WA 83821, UK
 23;Suite 501, 5th Floor, Sunshine Tower, 3-1-1 Higashiikebukuro, Toshima-ku, Tokyo 170-6059, Japan;Suite 501, 5th Floor, Sunshine Tower, 3-1-1 Higashiikebukuro, Toshima-ku, Tokyo 170-6059, Japan
 1515955763;123 Main St, Los Angeles, CA 90001, United States;123 Main St, Los Angeles, CA 90001, United States
 7934382346;456 Queen St, Auckland, Auckland Region 1010, New Zealand;456 Queen St, Auckland, Auckland Region 1010, New Zealand
@@ -173,40 +173,40 @@ CUSTOMER_ID;中文地址;英文地址
 7473909536;55 Shijo-dori, Kyoto, Kyoto 600-8001, Japan;55 Shijo-dori, Kyoto, Kyoto 600-8001, Japan
 6767751544;77 Jalan Bukit Bintang, Kuala Lumpur, Federal Territory of Kuala Lumpur 55100, Malaysia;77 Jalan Bukit Bintang, Kuala Lumpur, Federal Territory of Kuala Lumpur 55100, Malaysia
 3106477369;88 Sukhumvit Rd, Bangkok, Bangkok 10110, Thailand;88 Sukhumvit Rd, Bangkok, Bangkok 10110, Thailand
-857051200;123 George Street, Sydney, New South Wales 2000, Australia;123 George Street, Sydney, New South Wales 2000, Australia
-857051200;123 George Street, Sydney, NSW 2000, Australia;123 George Street, Sydney, NSW 2000, Australia
-9824927098;456 Collins Street, Melbourne, Victoria 3000, Australia;456 Collins Street, Melbourne, Victoria 3000, Australia
-9824927098;456 Collins Street, Melbourne, VIC 3000, Australia;456 Collins Street, Melbourne, VIC 3000, Australia
-9073010488;789 Queen Street, Brisbane, Queensland 4000, Australia;789 Queen Street, Brisbane, Queensland 4000, Australia
-9073010488;789 Queen Street, Brisbane, QLD 4000, Australia;789 Queen Street, Brisbane, QLD 4000, Australia
-3396736021;12 King William Street, Adelaide, South Australia 5000, Australia;12 King William Street, Adelaide, South Australia 5000, Australia
-3396736021;12 King William Street, Adelaide, SA 5000, Australia;12 King William Street, Adelaide, SA 5000, Australia
-4114030485;34 Hay Street, Perth, Western Australia 6000, Australia;34 Hay Street, Perth, Western Australia 6000, Australia
-4114030485;34 Hay Street, Perth, WA 6000, Australia;34 Hay Street, Perth, WA 6000, Australia
-3746708620;56 Davey Street, Hobart, Tasmania 7000, Australia;56 Davey Street, Hobart, Tasmania 7000, Australia
-3746708620;56 Davey Street, Hobart, TAS 7000, Australia;56 Davey Street, Hobart, TAS 7000, Australia
-109702772;78 Smith Street, Darwin, Northern Territory 0800, Australia;78 Smith Street, Darwin, Northern Territory 0800, Australia
-109702772;78 Smith Street, Darwin, NT 0800, Australia;78 Smith Street, Darwin, NT 0800, Australia
-5124845014;90 Constitution Avenue, Canberra, Australian Capital Territory 2601, Australia;90 Constitution Avenue, Canberra, Australian Capital Territory 2601, Australia
-5124845014;90 Constitution Avenue, Canberra, ACT 2601, Australia;90 Constitution Avenue, Canberra, ACT 2601, Australia
-2858876485;1 Marine Drive, New Delhi, Delhi, DL 110001, India;1 Marine Drive, New Delhi, Delhi 110001, India
-2858876485;1 Marine Drive, New Delhi, Delhi, DL 110001, India;1 Marine Drive, New Delhi, DL 110001, India
-8779025400;23 Beach Road, Puducherry, Puducherry, PY 605001, India;23 Beach Road, Puducherry, Puducherry 605001, India
-8779025400;23 Beach Road, Puducherry, Puducherry, PY 605001, India;23 Beach Road, Puducherry, PY 605001, India
-6337970788;45 River Street, Chandigarh, Chandigarh, CH 160001, India;45 River Street, Chandigarh, Chandigarh 160001, India
-6337970788;45 River Street, Chandigarh, Chandigarh, CH 160001, India;45 River Street, Chandigarh, CH 160001, India
-7053173206;67 Palace Avenue, Lakshadweep, Lakshadweep, LD 682555, India;67 Palace Avenue, Lakshadweep, Lakshadweep 682555, India
-7053173206;67 Palace Avenue, Lakshadweep, Lakshadweep, LD 682555, India;67 Palace Avenue, Lakshadweep, LD 682555, India
-4894950860;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu, DNHDD 396230, India;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu 396230, India
-4894950860;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu, DNHDD 396230, India;89 Hilltop Lane, DNHDD 396230, India
-7338046995;12 Island Road, Andaman and Nicobar Islands, AN 744101, India;12 Island Road, Andaman and Nicobar Islands 744101, India
-7338046995;12 Island Road, Andaman and Nicobar Islands, AN 744101, India;12 Island Road, AN 744101, India
-8607782341;34 Desert Street, Ladakh, Ladakh, LA 194101, India;34 Desert Street, Ladakh, Ladakh 194101, India
-8607782341;34 Desert Street, Ladakh, LA 194101, India;34 Desert Street, Ladakh, LA 194101, India
-5495661039;56 Ghat Road, Jammu, Jammu and Kashmir, JK 180001, India;56 Ghat Road, Jammu, Jammu and Kashmir 180001, India
-5495661039;56 Ghat Road, Jammu, Jammu and Kashmir, JK 180001, India;56 Ghat Road, Jammu, J&K 180001, India
-8013883702;78 Fort Street, Kargil, Jammu and Kashmir, JK 194103, India;78 Fort Street, Kargil, Jammu and Kashmir 194103, India
-8013883702;78 Fort Street, Kargil, Jammu and Kashmir, JK 194103, India;78 Fort Street, Kargil, J&K 194103, India
+857051200;***** For 'STATE' test data! *****;123 George Street, Sydney, New South Wales 2000, Australia
+857051200;***** For 'STATE' test data! *****;123 George Street, Sydney, NSW 2000, Australia
+9824927098;***** For 'STATE' test data! *****;456 Collins Street, Melbourne, Victoria 3000, Australia
+9824927098;***** For 'STATE' test data! *****;456 Collins Street, Melbourne, VIC 3000, Australia
+9073010488;***** For 'STATE' test data! *****;789 Queen Street, Brisbane, Queensland 4000, Australia
+9073010488;***** For 'STATE' test data! *****;789 Queen Street, Brisbane, QLD 4000, Australia
+3396736021;***** For 'STATE' test data! *****;12 King William Street, Adelaide, South Australia 5000, Australia
+3396736021;***** For 'STATE' test data! *****;12 King William Street, Adelaide, SA 5000, Australia
+4114030485;***** For 'STATE' test data! *****;34 Hay Street, Perth, Western Australia 6000, Australia
+4114030485;***** For 'STATE' test data! *****;34 Hay Street, Perth, WA 6000, Australia
+3746708620;***** For 'STATE' test data! *****;56 Davey Street, Hobart, Tasmania 7000, Australia
+3746708620;***** For 'STATE' test data! *****;56 Davey Street, Hobart, TAS 7000, Australia
+109702772;***** For 'STATE' test data! *****;78 Smith Street, Darwin, Northern Territory 0800, Australia
+109702772;***** For 'STATE' test data! *****;78 Smith Street, Darwin, NT 0800, Australia
+5124845014;***** For 'STATE' test data! *****;90 Constitution Avenue, Canberra, Australian Capital Territory 2601, Australia
+5124845014;***** For 'STATE' test data! *****;90 Constitution Avenue, Canberra, ACT 2601, Australia
+2858876485;***** For 'STATE' test data! *****;1 Marine Drive, New Delhi, Delhi 110001, India
+2858876485;***** For 'STATE' test data! *****;1 Marine Drive, New Delhi, DL 110001, India
+8779025400;***** For 'STATE' test data! *****;23 Beach Road, Puducherry, Puducherry 605001, India
+8779025400;***** For 'STATE' test data! *****;23 Beach Road, Puducherry, PY 605001, India
+6337970788;***** For 'STATE' test data! *****;45 River Street, Chandigarh, Chandigarh 160001, India
+6337970788;***** For 'STATE' test data! *****;45 River Street, Chandigarh, CH 160001, India
+7053173206;***** For 'STATE' test data! *****;67 Palace Avenue, Lakshadweep, Lakshadweep 682555, India
+7053173206;***** For 'STATE' test data! *****;67 Palace Avenue, Lakshadweep, LD 682555, India
+4894950860;***** For 'STATE' test data! *****;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu 396230, India
+4894950860;***** For 'STATE' test data! *****;89 Hilltop Lane, DNHDD 396230, India
+7338046995;***** For 'STATE' test data! *****;12 Island Road, Andaman and Nicobar Islands 744101, India
+7338046995;***** For 'STATE' test data! *****;12 Island Road, AN 744101, India
+8607782341;***** For 'STATE' test data! *****;34 Desert Street, Ladakh, Ladakh 194101, India
+8607782341;***** For 'STATE' test data! *****;34 Desert Street, Ladakh, LA 194101, India
+5495661039;***** For 'STATE' test data! *****;56 Ghat Road, Jammu, Jammu and Kashmir 180001, India
+5495661039;***** For 'STATE' test data! *****;56 Ghat Road, Jammu, J&K 180001, India
+8013883702;***** For 'STATE' test data! *****;78 Fort Street, Kargil, Jammu and Kashmir 194103, India
+8013883702;***** For 'STATE' test data! *****;78 Fort Street, Kargil, J&K 194103, India
 ;;
 // 2-30列: 第二批測試資料;;
 // 31-150列: 第一批測試資料;;

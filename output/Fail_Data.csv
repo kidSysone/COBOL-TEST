@@ -13,8 +13,8 @@ CUSTOMER_ID;ADDRESS_LINE_ORIGIN;ADDRESS_LINE_EN;ERROR_MESSAGE
 3744;1740 Highland Ave, Lakeside, NC 95349;1740 Highland Ave, Lakeside, NC 95349;PLEASE ENTER COUNTRY.
 1057;6806 Oak St, Hillcrest, OH 30159;6806 Oak St, Hillcrest, OH 30159;PLEASE ENTER COUNTRY.
 5808;6769 Highland Ave, Springfield, GA 92721;6769 Highland Ave, Springfield, GA 92721;PLEASE ENTER COUNTRY.
-4894950860;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu, DNHDD 396230, India;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu 396230, India;PLEASE ENTER CITY OR PROVINCE.
-4894950860;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu, DNHDD 396230, India;89 Hilltop Lane, DNHDD 396230, India;PLEASE ENTER CITY OR PROVINCE.
-7338046995;12 Island Road, Andaman and Nicobar Islands, AN 744101, India;12 Island Road, Andaman and Nicobar Islands 744101, India;PLEASE ENTER CITY OR PROVINCE.
-7338046995;12 Island Road, Andaman and Nicobar Islands, AN 744101, India;12 Island Road, AN 744101, India;PLEASE ENTER CITY OR PROVINCE.
+4894950860;***** For 'STATE' test data! *****;89 Hilltop Lane, Dadra and Nagar Haveli and Daman and Diu 396230, India;PLEASE ENTER CITY OR PROVINCE.
+4894950860;***** For 'STATE' test data! *****;89 Hilltop Lane, DNHDD 396230, India;PLEASE ENTER CITY OR PROVINCE.
+7338046995;***** For 'STATE' test data! *****;12 Island Road, Andaman and Nicobar Islands 744101, India;PLEASE ENTER CITY OR PROVINCE.
+7338046995;***** For 'STATE' test data! *****;12 Island Road, AN 744101, India;PLEASE ENTER CITY OR PROVINCE.
 ;RESULT SUMMARY->;ERROR ITEMS:   18
