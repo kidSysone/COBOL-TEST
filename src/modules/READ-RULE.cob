@@ -13,6 +13,9 @@
            SELECT CITY-FILE ASSIGN
               TO "input\WorldCitiesList.csv"
            ORGANIZATION IS LINE SEQUENTIAL.
+           SELECT STATE-FILE ASSIGN
+              TO "input\StateFullnameList.csv"
+           ORGANIZATION IS LINE SEQUENTIAL.
 
 
        DATA DIVISION.
@@ -38,6 +41,12 @@
            RECORDING MODE IS F.
        01 CITY-REC PIC X(50).
 
+       FD  STATE-FILE
+           RECORD CONTAINS 50 CHARACTERS
+           BLOCK CONTAINS 0 RECORDS
+           RECORDING MODE IS F.
+       01 STATE-REC PIC X(60).
+
 
       *******************************************************
       *> 資料區、WORKING-STORAGE SECTION
@@ -45,6 +54,8 @@
        WORKING-STORAGE SECTION.
        01 IDX PIC 99999 VALUE 1.
        01 WS-END-FLAG            PIC X VALUE "N".
+       01 ST-DATA                PIC X(60) OCCURS 3 TIMES.
+       01 TEMP-COL               PIC X(40).
 
 
       *******************************************************
@@ -56,12 +67,38 @@
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
            05  LS-COUNTRY-COL       PIC X(50) OCCURS 500 TIMES.
            05  LS-CITY-COL          PIC X(50) OCCURS 50000 TIMES.
+           05  LS-STATE-NAME-COL    PIC X(45) OCCURS 200 TIMES.
+           05  LS-STATE-CODE-COL    PIC X(10) OCCURS 200 TIMES.
+           05  DIR-NAMES OCCURS 21 TIMES PIC X(8). *> 全方向
 
 
       *******************************************************
       *> 程式處理區
       *******************************************************
        PROCEDURE DIVISION USING LS-LIST-REC.
+
+           *> DIR-NAMES 初期化
+           MOVE "NORTH"   TO DIR-NAMES(1).
+           MOVE "SOUTH"   TO DIR-NAMES(2).
+           MOVE "EAST"    TO DIR-NAMES(3).
+           MOVE "WEST"    TO DIR-NAMES(4).
+           MOVE "NE"      TO DIR-NAMES(5).
+           MOVE "NW"      TO DIR-NAMES(6).
+           MOVE "SE"      TO DIR-NAMES(7).
+           MOVE "SW"      TO DIR-NAMES(8).
+           MOVE "N"       TO DIR-NAMES(9).
+           MOVE "S"       TO DIR-NAMES(10).
+           MOVE "E"       TO DIR-NAMES(11).
+           MOVE "W"       TO DIR-NAMES(12).
+           MOVE "N."      TO DIR-NAMES(13).
+           MOVE "S."      TO DIR-NAMES(14).
+           MOVE "E."      TO DIR-NAMES(15).
+           MOVE "W."      TO DIR-NAMES(16).
+           MOVE "KITA"    TO DIR-NAMES(17).
+           MOVE "MINAMI"  TO DIR-NAMES(18).
+           MOVE "HIGASHI" TO DIR-NAMES(19).
+           MOVE "NISHI"   TO DIR-NAMES(20).
+           MOVE "LOOP"    TO DIR-NAMES(21).
 
       *******************************************************
       *> LIST.csv 讀取
@@ -134,7 +171,15 @@
                AT END
                  MOVE "Y" TO WS-END-FLAG
                NOT AT END
-                 MOVE FUNCTION TRIM(COUNTRY-REC) TO LS-COUNTRY-COL(IDX)
+                 *> 移除 CSV 讀取字串時可能產生的多餘字串 '"'
+                 MOVE FUNCTION TRIM(COUNTRY-REC) TO TEMP-COL
+                 IF TEMP-COL(1:1) = '"'
+                   MOVE TEMP-COL(1: 
+                     LENGTH OF FUNCTION TRIM(TEMP-COL) - 2) TO
+                     LS-COUNTRY-COL(IDX)
+                 ELSE
+                   MOVE TEMP-COL TO LS-COUNTRY-COL(IDX)
+                 END-IF
                  ADD 1 TO IDX
              END-READ
            END-PERFORM.
@@ -159,6 +204,33 @@
            END-PERFORM.
 
            CLOSE CITY-FILE.
+
+      *******************************************************
+      *> StateFullnameList.csv 讀取
+      *******************************************************
+           MOVE "N" TO WS-END-FLAG.
+           MOVE 1   TO IDX.
+           OPEN INPUT STATE-FILE.
+
+           PERFORM UNTIL WS-END-FLAG = "Y"
+             READ STATE-FILE
+               AT END
+                 MOVE "Y" TO WS-END-FLAG
+               NOT AT END
+                 UNSTRING STATE-REC DELIMITED BY ";"
+                   INTO ST-DATA(1) ST-DATA(2) ST-DATA(3)
+
+                 MOVE FUNCTION TRIM(ST-DATA(1))
+                      TO LS-STATE-NAME-COL(IDX)
+                 MOVE FUNCTION TRIM(ST-DATA(2))
+                      TO LS-STATE-CODE-COL(IDX)
+                 ADD 1 TO IDX
+             END-READ
+           END-PERFORM.
+
+           CLOSE STATE-FILE.
+
+
            *> 處理結束
            EXIT PROGRAM.
        END PROGRAM READ-RULE.

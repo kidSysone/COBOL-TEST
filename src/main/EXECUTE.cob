@@ -126,6 +126,9 @@
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
            05  LS-COUNTRY-COL       PIC X(50) OCCURS 500 TIMES.
            05  LS-CITY-COL          PIC X(50) OCCURS 50000 TIMES.
+           05  LS-STATE-NAME-COL    PIC X(45) OCCURS 200 TIMES.
+           05  LS-STATE-CODE-COL    PIC X(10) OCCURS 200 TIMES.
+           05  DIR-NAMES OCCURS 21 TIMES PIC X(8). *> 全方向
 
        *> OUTPUT-ADDRESS 用
        01 LS-OUTPUT.

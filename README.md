@@ -1,9 +1,6 @@
 # 目前的課題：
-* STATE需要判斷全名?目前僅判斷簡寫
 * sa文件?
 * 國家名 → 是否要追加 ISO 2位數的國家CODE（例：JP, US, TW）
-* 新增多種測試地址
-* 原文 + 英文
 
 ***
 # Cobol-Test
@@ -38,7 +35,7 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
       * `CategoryRules.csv`: 分類標準
         * 預設上限: 40列(共210字) * 18行
         * 已做全大寫處理
-        * 實際資料: 最多35列(路) * 18行，單欄最多12字，單行最長196字
+        * 實際資料: 最多35列(路) * 18行，單欄最多12字，單行最長198字
       * `CountryList.csv`: 國家清單(含簡寫)
         * 預設上限: 1列(50字) * 500行
         * 已做全大寫處理、**依照文字數多->少順序排列**
@@ -46,11 +43,21 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
       * `WorldCitiesList.csv`: 城市清單
         * 預設上限: 1列(50字) * 50000行
         * 已做全大寫處理、**依照文字數多->少順序排列**
-        * 實際資料: 最多字欄位為49字，44017列
+        * 實際資料: 最多字欄位為49字，44024列
+      * `StateFullnameList.csv`: 州名稱清單
+        * 預設上限: 3列(各40字，總60字) * 200行
+        * 已做全大寫處理、**依照國家->文字數多->少順序排列**
+        * 實際資料: 最多字欄位為52字，140列
 
-  * 讀取`IN-FILE.csv`
-    * 取得需解讀之地址清單
+  * 讀取`INPUT-ADDRESS.csv`
+    * 取得需解讀之地址清單(CUSTOMER_ID/中文地址/英文地址)
       * 預設上限: 1列(共500字)(IN-FILE-REC) * 行數無限制(讀完/讀取內容為空白)
+        * 2-30列: 第二批測試資料
+        * 31-150列: 第一批測試資料
+        * 151-162列: 樓層測試資料
+        * 163-175列: 第二批測試資料
+        * 176-196列: STATE測試資料
+      
 
   * 呼叫`FORMATTER-ADDRESS.cob`
     * `INITIALIZATION SECTION.`: 進行地址名稱的基本格式化
@@ -63,6 +70,7 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
     * `MAIN SECTION.`: 主要程序
       * 特殊字串抽出
         * 利用`CountryList.csv`尋找國家  **※ 以國家欄位一定會在字串字尾為前提**
+        * 利用`StateFullnameList.csv`尋找州  **※ 以州名為首字除外為小寫為前提**
         * 利用`WorldCitiesList.csv`尋找特殊字串
           * 若找到的字串後接`CategoryRule.csv`關鍵字，轉為依照`CategoryRule.csv`分類
       * 依照[分類規則](#分類規則)為準則分類
@@ -94,8 +102,8 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
       3. OTHER 有值: **PARSING FAILED. PLEASE CHECK INPUT.**
       4. ZIP 為空值: **PLEASE ENTER POSTAL CODE.**
       5. COUNTRY 為空值: **PLEASE ENTER COUNTRY.**
-      6. CITY 為空值: **PLEASE ENTER CITY.**  
-      * ※ 若ZIP/COUNTRY/CITY有複數個欄位空值，錯誤訊息將直接串聯顯示
+      6. CITY 或 PROVINCE 為空值: **PLEASE ENTER CITY OR PROVINCE.**  
+      * ※ 若ZIP/COUNTRY/(CITY/PROVINCE)有複數個欄位空值，錯誤訊息將直接串聯顯示
 
   * 呼叫`OUTPUT-ADDRESS.cob`
     * 整理輸出結果內容
@@ -122,12 +130,13 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
   2. 移除多餘空格
   3. 簡寫地名補上.
   4. 使用`CountryList.csv`搜尋國家名稱
-  5. 使用`WorldCitiesList.csv`、`CategoryRule.csv`搜尋城市等名稱
-  6. 使用空格分割字串並進行主要分段判斷(參考下表)並插入","
-  7. 微調分析結果
+  5. 使用`StateFullnameList.csv`搜尋州名(全名/簡寫)，並轉換成簡寫
+  6. 使用`WorldCitiesList.csv`、`CategoryRule.csv`搜尋城市等名稱
+  7. 使用空格分割字串並進行主要分段判斷(參考下表)並插入","
+  8. 微調分析結果
     * ",," -> ","
     * 分析結果若導致地址字首/字尾為","時將該字移除
-  8. 致力分析`ADTER-DATA`內容，不應有值
+  9. 致力分析`ADTER-DATA`內容，不應有值
 
 
 | DTLS-LF<br>之位置 | 英文名| 中文名 |FORMATTER-ADDRESS|備註|
@@ -143,12 +152,12 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
 |9<br>~~10~~|M-NO<br>~~S-NO~~|號|依照`CategoryRules.csv`分類<br>1. 為純數字或"-"所組成的字串(此條件優先度NUMBER > ZIP)<br>2.{數字字串} * 1以上 + {大寫英文字} * 1|原為考量x號之y分成2段，目前改不考慮的緣故10號不使用<br>`欄位中省略關鍵字`|
 |11<br>~~12~~|M-FLOOR<br>~~S-FLOOR~~|樓|1. 依照`CategoryRules.csv`分類<br>2. `{數字} F.`/ `{數字} FL.`/ `{數字}F`/ `B{數字}` 之字串<br>3. 數字字串 + 序數詞(st/nd/rd/th)|原為考量x樓之y分成2段，目前改不考慮的緣故12號不使用<br>`欄位中省略關鍵字`|
 |13|ROOM|室|依照`CategoryRules.csv`分類||
-|14|BUILDING|建築大樓|1. 依照`CategoryRules.csv`分類<br>2. 若前一欄位塞值入FLOOR||
-|15|VILLAGE|社區|依照`CategoryRules.csv`分類<br>2. 若前一欄位塞值入STREET||
+|14|BUILDING|建築大樓|1. 依照`CategoryRules.csv`分類<br>2.若前一欄位塞值入FLOOR||
+|15|VILLAGE|社區|依照`CategoryRules.csv`分類<br>1.若前一欄位塞值入STREET||
 |16|PROVINCE|省份|依照`CategoryRules.csv`分類||
-|17|STATE|州|1.字數2~3<br>2.皆為大寫||
+|17|STATE|州|1.字數2~3<br>2.皆為大寫<br>3.依照`StateFullnameList.csv`分類<br>||
 |18|OTHER-COL|其他|-|若字串未成功塞入任何欄位，則強制塞入OTHER||
-|19|ERROR-COMMENT|錯誤|<優先顯示排列順序><br>1. 包含特殊字體: <br>`CONTAINS INVALID CHARACTERS.`<br>2. 輸入文字過長: <br>`ADDRESS DATA IS TOO LONG.`<br>3. OTHER 有值: <br>`PARSING FAILED. PLEASE CHECK INPUT.`<br>4. ZIP 為空值: <br>`PLEASE ENTER POSTAL CODE.`<br>5. COUNTRY 為空值: <br>`PLEASE ENTER COUNTRY.`<br>6. CITY 為空值: <br>`PLEASE ENTER CITY.`|※ 因SWIFT電文設計上，國家/郵遞區號/城市為必填欄位、不可包含特殊字體|
+|19|ERROR-COMMENT|錯誤|<優先顯示排列順序><br>1. 包含特殊字體: <br>`CONTAINS INVALID CHARACTERS.`<br>2. 輸入文字過長: <br>`ADDRESS DATA IS TOO LONG.`<br>3. OTHER 有值: <br>`PARSING FAILED. PLEASE CHECK INPUT.`<br>4. ZIP 為空值: <br>`PLEASE ENTER POSTAL CODE.`<br>5. COUNTRY 為空值: <br>`PLEASE ENTER COUNTRY.`<br>6. CITY 或 PROVINCE 為空值: <br>`PLEASE ENTER CITY OR PROVINCE.`|※ 因SWIFT電文設計上，國家/郵遞區號/城市為必填欄位、不可包含特殊字體|
 |20|CUSTOMER_ID|客戶 ID|-|**因未設定輸入方式，暫設為隨機序號**|
 |23|ADDR_LINE_REBUILD|重組地址|<反結構><br>11[FLOOR] → 13[ROOM] → 14[BUILDING] → 9[NUMBER] → 8[ALLEY] → 7[LANE] → 6[SEC] → 5[SREET] → 18[OTHER] → 15[VILLAGE] →4[DISTRICT] → 3[CITY] → 16[PROVINCE] → 17[STATE] → 1[ZIP] → 2[COUNTRY]||
 |其他分類標準|-|-|-||
@@ -226,13 +235,14 @@ IF ( CNT-U(IDX) = "Y" AND (
 ***
 ## 假資料/暫定資料
 * 目前預設輸入地址資料為一整個完整地址
-  * 是否需要調整成SWIFT電文形式?(1個地址分3?4?段輸入)
 * 客戶統編資料
   * 目前於 `INPUT-ADDRESS.csv` 設定，`=ROUNDDOWN(RAND() * 10000000000; 0)`
 
 ***
 ## 爭議點?
+* 是否需要調整成SWIFT電文形式?(1個地址分3?4?段輸入)
 * 輸入的地址格式
   * 國家必定會位於字尾
+  * STATE名與CITY名撞到時，會被優先填入STATE中
 * FLOOR
   * `Lower Ground Floor`、`Mezzanine Floor`、`M/F`，是否需要變更簡短?
