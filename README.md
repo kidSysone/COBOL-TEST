@@ -1,6 +1,7 @@
 # 目前的課題：
+* 依據(結構化地址)準備工作分析欄位
+* 分類規則待整理
 * sa文件?
-* 國家名 → 是否要追加 ISO 2位數的國家CODE（例：JP, US, TW）
 
 ***
 # Cobol-Test
@@ -36,14 +37,6 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
         * 預設上限: 40列(共210字) * 18行
         * 已做全大寫處理
         * 實際資料: 最多35列(路) * 18行，單欄最多12字，單行最長198字
-      * `CountryList.csv`: 國家清單(含簡寫)
-        * 預設上限: 1列(50字) * 500行
-        * 已做全大寫處理、**依照文字數多->少順序排列**
-        * 實際資料: 共320列，單欄最多32字
-      * `WorldCitiesList.csv`: 城市清單
-        * 預設上限: 1列(50字) * 50000行
-        * 已做全大寫處理、**依照文字數多->少順序排列**
-        * 實際資料: 最多字欄位為49字，44024列
       * `StateFullnameList.csv`: 州名稱清單
         * 預設上限: 3列(各40字，總60字) * 200行
         * 已做全大寫處理、**依照國家->文字數多->少順序排列**
@@ -69,10 +62,7 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
         * 4字: "Blvd"
     * `MAIN SECTION.`: 主要程序
       * 特殊字串抽出
-        * 利用`CountryList.csv`尋找國家  **※ 以國家欄位一定會在字串字尾為前提**
         * 利用`StateFullnameList.csv`尋找州  **※ 以州名為首字除外為小寫為前提**
-        * 利用`WorldCitiesList.csv`尋找特殊字串
-          * 若找到的字串後接`CategoryRule.csv`關鍵字，轉為依照`CategoryRule.csv`分類
       * 依照[分類規則](#分類規則)為準則分類
         * SREET 分析時，需尋找是否包含方向關鍵字
           * 全名: "NORTH"、"SOUTH"、"EAST"、"WEST"
@@ -129,21 +119,20 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
     * 分析結果若導致地址字首/字尾為","時將該字移除
   2. 移除多餘空格
   3. 簡寫地名補上.
-  4. 使用`CountryList.csv`搜尋國家名稱
-  5. 使用`StateFullnameList.csv`搜尋州名(全名/簡寫)，並轉換成簡寫
-  6. 使用`WorldCitiesList.csv`、`CategoryRule.csv`搜尋城市等名稱
-  7. 使用空格分割字串並進行主要分段判斷(參考下表)並插入","
-  8. 微調分析結果
+  4. 使用`StateFullnameList.csv`搜尋州名(全名/簡寫)，並轉換成簡寫
+  5. 使用空格分割字串並進行主要分段判斷(參考下表)並插入","
+  6. 微調分析結果
     * ",," -> ","
     * 分析結果若導致地址字首/字尾為","時將該字移除
-  9. 致力分析`ADTER-DATA`內容，不應有值
+  7. 致力分析`ADTER-DATA`內容，不應有值
 
 
 | DTLS-LF<br>之位置 | 英文名| 中文名 |FORMATTER-ADDRESS|備註|
 |---|---|---|---|---|
 |1|ZIP|郵遞區號|1. 荷蘭篩選<br> 2. 英式篩選<br> 3. 標準書寫/手寫常見<br>4. 為純數字或"-"所組成的字串(此條件優先度NUMBER > ZIP)|[詳細劃分規則](#詳細劃分規則)|
-|2|COUNTRY|國家|依照`CountryList.csv`內容尋找國家名稱||   
-|3|CITY|縣市|依照`WorldCitiesList.csv`內容尋找城市名稱<br>※ 若城市名後面連接"CITY"，視為同段字串<br>※ 若城市名後面連接方向(N/S/E/W等)，視為同段字串||
+|2|COUNTRY|國家|地址倒數第1/2欄位為ISO(2位數)
+||
+|3|CITY|縣市|~~依照`WorldCitiesList.csv`內容尋找城市名稱<br>※ 若城市名後面連接"CITY"，視為同段字串<br>※ 若城市名後面連接方向(N/S/E/W等)，視為同段字串~~||
 |4|DISTRICT|市區|依照`CategoryRules.csv`分類<br>≪OTHER CHECK≫<br>1. 若DISRICT為空值，則優先移動OTHER內容至CITY，並將舊CITY資料移動至DISTRICT||
 |5|STREET|路|1. 依照`CategoryRules.csv`分類<br>2. "{非關鍵字字串} {方向關鍵字} {無/ROAD}"<br>3. 若STREET為空值，則優先移動OTHER內容至STREET||
 |6|SEC|段|依照`CategoryRules.csv`分類|`欄位中省略關鍵字`|

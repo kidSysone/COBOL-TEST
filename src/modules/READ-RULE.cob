@@ -7,12 +7,6 @@
            SELECT LIST-FILE ASSIGN
               TO "input\CategoryRules.csv"
            ORGANIZATION IS LINE SEQUENTIAL.
-           SELECT COUNTRY-FILE ASSIGN
-              TO "input\CountryList.csv"
-           ORGANIZATION IS LINE SEQUENTIAL.
-           SELECT CITY-FILE ASSIGN
-              TO "input\WorldCitiesList.csv"
-           ORGANIZATION IS LINE SEQUENTIAL.
            SELECT STATE-FILE ASSIGN
               TO "input\StateFullnameList.csv"
            ORGANIZATION IS LINE SEQUENTIAL.
@@ -28,18 +22,6 @@
            BLOCK CONTAINS 0 RECORDS
            RECORDING MODE IS F.
        01 LIST-REC PIC X(210).
-
-       FD  COUNTRY-FILE
-           RECORD CONTAINS 50 CHARACTERS
-           BLOCK CONTAINS 0 RECORDS
-           RECORDING MODE IS F.
-       01 COUNTRY-REC PIC X(50).
-
-       FD  CITY-FILE
-           RECORD CONTAINS 50 CHARACTERS
-           BLOCK CONTAINS 0 RECORDS
-           RECORDING MODE IS F.
-       01 CITY-REC PIC X(50).
 
        FD  STATE-FILE
            RECORD CONTAINS 50 CHARACTERS
@@ -65,8 +47,6 @@
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
-           05  LS-COUNTRY-COL       PIC X(50) OCCURS 500 TIMES.
-           05  LS-CITY-COL          PIC X(50) OCCURS 50000 TIMES.
            05  LS-STATE-NAME-COL    PIC X(45) OCCURS 200 TIMES.
            05  LS-STATE-CODE-COL    PIC X(10) OCCURS 200 TIMES.
            05  DIR-NAMES OCCURS 21 TIMES PIC X(8). *> 全方向
@@ -158,52 +138,6 @@
            END-PERFORM.
 
            CLOSE LIST-FILE.
-
-      *******************************************************
-      *> CountryList.csv 讀取
-      *******************************************************
-           MOVE "N" TO WS-END-FLAG.
-           MOVE 1   TO IDX.
-           OPEN INPUT COUNTRY-FILE.
-
-           PERFORM UNTIL WS-END-FLAG = "Y"
-             READ COUNTRY-FILE
-               AT END
-                 MOVE "Y" TO WS-END-FLAG
-               NOT AT END
-                 *> 移除 CSV 讀取字串時可能產生的多餘字串 '"'
-                 MOVE FUNCTION TRIM(COUNTRY-REC) TO TEMP-COL
-                 IF TEMP-COL(1:1) = '"'
-                   MOVE TEMP-COL(1: 
-                     LENGTH OF FUNCTION TRIM(TEMP-COL) - 2) TO
-                     LS-COUNTRY-COL(IDX)
-                 ELSE
-                   MOVE TEMP-COL TO LS-COUNTRY-COL(IDX)
-                 END-IF
-                 ADD 1 TO IDX
-             END-READ
-           END-PERFORM.
-
-           CLOSE COUNTRY-FILE.
-
-      *******************************************************
-      *> WorldCitiesList.csv 讀取
-      *******************************************************
-           MOVE "N" TO WS-END-FLAG.
-           MOVE 1   TO IDX.
-           OPEN INPUT CITY-FILE.
-
-           PERFORM UNTIL WS-END-FLAG = "Y"
-             READ CITY-FILE
-               AT END
-                 MOVE "Y" TO WS-END-FLAG
-               NOT AT END
-                 MOVE FUNCTION TRIM(CITY-REC) TO LS-CITY-COL(IDX)
-                 ADD 1 TO IDX
-             END-READ
-           END-PERFORM.
-
-           CLOSE CITY-FILE.
 
       *******************************************************
       *> StateFullnameList.csv 讀取
