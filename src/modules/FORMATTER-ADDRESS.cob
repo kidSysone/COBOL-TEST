@@ -7,70 +7,130 @@
       *> 資料部、LOCAL-STORAGE SECTION
       *******************************************************
        LOCAL-STORAGE SECTION.
-       01 TEMP-ARRAY.
-           05 TEMP-PART        PIC X(500) OCCURS 30 TIMES.
-           05 TEMP-PART-CHECK  PIC 99     OCCURS 30 TIMES. *> 該IDX歸類位置
-           05 MATCH-NEW        PIC 999.
-           05 CNT-NUM          PIC 9(3)   OCCURS 30 TIMES. *> 數字字數
-           05 CNT-U            PIC X      OCCURS 30 TIMES. *> 大寫字字數
 
-           05 TEMP-A           PIC X(500).
-           05 TEMP-B           PIC X(500).
-           05 TEMP-COL         PIC X(500).
-           05 TEMP-COL-2       PIC X(500).
-           05 TEMP-UPPER-COL   PIC X(500).
-           05 TEMP-LEN         PIC 999.
-           05 TEMP-FLAG        PIC XX VALUE "Y".
-           05 DTLS-FLAG        PIC 99.
-           05 ZIP-FLAG         PIC X. *> 英國等地區之郵遞區號
+       01  WK-AREA.
+           03  IDX                       PIC   9(03).
+           03  JDX                       PIC   9(03).
+           03  KDX                       PIC   9(02).
+           03  LDX                       PIC   9(02).
+           03  WK-LEN                    PIC   9(03).
+           03  WK-DURING-PROCESS.
+             05  WK-PART                 PIC   X(500) OCCURS 30 TIMES.
+             05  WK-END                  PIC   9(2).
+             05  WK-TEMP-COL             PIC   X(500).
+             05  WK-TEMP-LEN             PIC   9(03).
+             05  WK-CNT0                 PIC   9(03).
+             05  WK-CNT1                 PIC   9(03).
+             05  WK-CNT2                 PIC   9(03).
+             05  WK-TEMP-FLAG            PIC   XX VALUE "Y".
+               88  TEMP-FLAG-Y                    VALUE "Y".
+               88  TEMP-FLAG-N                    VALUE "N".
 
-           05 CNT-F            PIC 9.
-           05 CNT-FL           PIC 9.
+           03  WK-RULE-RTN.
+             05  RR-TEMP.
+               07  RR-TEMP-COL           PIC   X(500).
+               07  RR-TEMP-LEN           PIC   9(03).
+               07  RR-TEMP-FLAG          PIC   XX VALUE "Y".
+                 *> Y: 需要分類
+                 88  RR-TEMP-Y                    VALUE "Y".
+                 88  RR-TEMP-N                    VALUE "N".
 
-           05 PRE-COL          PIC X(100).
-           05 PRE-LEN          PIC 999.
-           05 PRE-FLAG         PIC XX.
+             05  RR-NEXT.
+               07  RR-NEXT-COL           PIC   X(500).
+               07  RR-NEXT-LEN           PIC   9(03).
+               07  RR-NEXT-FLAG          PIC   XX VALUE "Y".
+                 *> Y: 下一欄需要和TEMP一起分類
+                 88  RR-NEXT-Y                    VALUE "Y".
+                 88  RR-NEXT-N                    VALUE "N".
+               07  RR-NEXT-COL-2         PIC   X(500).
+               07  RR-NEXT-LEN-2         PIC   9(03).
 
-           05 NEXT-COL         PIC X(100).
-           05 NEXT-UPPER-COL   PIC X(100).
-           05 NEXT-LEN         PIC 999.
-           05 NEXT-FLAG        PIC XX.
+             05  RR-PRE.
+               07  RR-PRE-COL            PIC   X(500).
+               07  RR-PRE-LEN            PIC   9(03).
+               07  RR-PRE-FLAG           PIC   XX VALUE "Y".
+                 *> Y: PRE內容不可和TEMP混合(需切開)
+                 88  RR-PRE-Y                     VALUE "Y".
+                 88  RR-PRE-N                     VALUE "N".
 
-           05 CHECK-COL        PIC X(100). *> LS-LIST-COL
-           05 CHECK-LEN        PIC 999.
+             05  RR-IDX-PLUS             PIC   9(02).
+             05  RR-DTLS-FLAG            PIC   9(02).
 
-           05 DIR-LEN PIC 99 VALUE 21.
-           05 DIR-COL  PIC X(8).
-           05 DIR-FLAG PIC X(1).
+             05  RR-FLOOR.
+               07  RR-CNT-F              PIC   9(02).
+               07  RR-CNT-FL             PIC   9.
 
-           05 STATE-FLAG       PIC X.
+             05  RR-ZIP-FLAG             PIC   X. *> 英國等地區之郵遞區號
 
-           05 OTHER-FLAG         PIC X.           
-           05 OTHER-STREET       PIC 99. *> 5
-           05 OTHER-DISTRICT     PIC 99. *> 4
-           05 OTHER-CITY         PIC 99. *> 3
-           05 OTHER-PROVINCE     PIC 99. *> 16
-           05 OTHER-PRE          PIC 99. *> 前次記錄位置
+             05  RR-DIR-FLAG             PIC   X.
 
-       01 ERROR-ARRAY.
-           05 ERROR-TEMP PIC X(40).
-           05 COMMA-FLAG PIC XX.
-           05 CHARACTERS-FLAG PIC X(40).
+             05  RR-TEMP-AB.
+               07  RR-TEMP-A             PIC   X(500).
+               07  RR-TEMP-A-LEN         PIC   9(03).
+               07  RR-TEMP-B             PIC   X(500).
+               07  RR-TEMP-B-LEN         PIC   9(03).
+             
+             05  RR-CHECK.
+               07  RR-CHECK-COL          PIC   X(100).
+               07  RR-CHECK-LEN          PIC   9(03).
+               07  RR-CHECK-TEMP-CNT     PIC   9.
+               07  RR-CHECK-NEXT-CNT     PIC   9.
+             05 RR-FOUND-JDX             PIC   9(3).
 
-       01 IDX PIC 99999.
-       01 JDX PIC 999.
-       01 KDX PIC 99.
-       01 IDX-PLUS PIC 99.
-       01 FOUND-JDX PIC 999.
-       01 END-JDX PIC 999.
-       01 PROCESSING-DATA PIC X(500). *> 處理中資料
+           *> 記錄處理中狀態
+           03 WK-PROCESS-CHECK.
+             *> WK-PART 該IDX歸類位置
+             05 PC-PART-CHECK            PIC   99    OCCURS 30 TIMES.
+             05 PC-MATCH-NEW             PIC   999.
+             *> 數字字數 (包含  "-")
+             05 PC-CNT-NUM               PIC   9(3)  OCCURS 30 TIMES.
+             *> 文字字數 (不包含 ","/數字)
+             05 PC-CNT-CHAR              PIC   9(3)  OCCURS 30 TIMES.
+             *> 是否為 "," 結尾
+             05 PC-CNT-COMMA             PIC   X     OCCURS 30 TIMES.
+             *> 是否為 關鍵字 (99: 表示方向)
+             05 PC-CNT-KEY-I             PIC   9(2)  OCCURS 30 TIMES. *> INDEX
+             05 PC-CNT-KEY-W             PIC   X(35) OCCURS 30 TIMES. *> WORD
+
+             *> OTHER 累積 (DEBUG 用)
+             05 PC-OTHER-ALL             PIC  X(500).
+
+             *> REBUILD
+             05 RB-DTLS-LF               PIC  9(3) OCCURS 30 TIMES.
+
+             05 PC-OTHER-FLAG            PIC   X.
+             05 PC-OTHER-CITY            PIC   99. *> 3
+             05 PC-OTHER-DISTRICT        PIC   99. *> 4
+             05 PC-OTHER-STREET          PIC   99. *> 5
+             05 PC-OTHER-PROVINCE        PIC   99. *> 16
+             05 PC-OTHER-STATE           PIC   99. *> 17
+             05 PC-OTHER-PRE             PIC   99. *> 前次記錄位置
+             05 PC-OTHER-NEXT            PIC   99. *> 下次記錄位置
+
+           *> FA-TRIM
+           03 TRIM-DATA.
+             05  TD-TEMP                 PIC   X(500). *> IN
+             05  TD-FINISH               PIC   X(500). *> OUT
+             05  TD-IDX                  PIC   9(03).
+             05  TD-LEN                  PIC   9(03).
+             05  TD-S                    PIC   9(03).  *> START
+             05  TD-L                    PIC   9(03).  *> LEN
+
+           *> XCR5K-CTRY-RTN
+           03 CTRY-DATA.
+             05  CD-CHECK-LIST           PIC   X(35) OCCURS 5 TIMES.
+
+           03 ERROR-ARRAY.
+             05 ERROR-TEMP               PIC   X(40).
+             05 COMMA-FLAG               PIC   XX.
+             05 CHARACTERS-FLAG          PIC   X(40).
 
        *> 特殊字判斷(ERROR)
-       01 WS-SPECIAL-CHAR.
-           05 WS-CH                  PIC X.
-           05 WS-CODE                PIC 9(5).
-           05 ALLOWED-CH             PIC X(20) VALUE "/-?:().,+'".
-           05 ERROR-FLAG             PIC X.
+           03 WS-SPECIAL-CHAR.
+             05 WS-CH                    PIC   X.
+             05 WS-CODE                  PIC   9(5).
+             05 ALLOWED-CH               PIC   X(20) VALUE "/-?:().,+'".
+             05 ERROR-FLAG               PIC   X.
 
 
       *******************************************************
@@ -87,9 +147,13 @@
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
-           05  LS-STATE-NAME-COL    PIC X(45) OCCURS 200 TIMES.
-           05  LS-STATE-CODE-COL    PIC X(10) OCCURS 200 TIMES.
-           05  DIR-NAMES OCCURS 21 TIMES PIC X(8). *> 全方向
+           05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
+           05  LS-COUNTRY-CODE      PIC X(2) OCCURS 500 TIMES.
+           05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
+           05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2) OCCURS 200 TIMES.
+           05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
+           05  DIR-LEN              PIC 99   VALUE 23.
 
       *******************************************************
       *> 程序部
@@ -100,541 +164,872 @@
       *> INITIALIZATION SECTION 初始化
       *******************************************************
        INITIALIZATION SECTION.
-           *> TEMP-PART
-           *> TEMP-PART-CHECK CNT-NUM 初期化
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
-              MOVE SPACES TO TEMP-PART(IDX)
-              MOVE 0      TO TEMP-PART-CHECK(IDX) CNT-NUM(IDX)
-                             OTHER-STREET OTHER-CITY OTHER-DISTRICT
-                             OTHER-PROVINCE
+           INITIALIZE WK-AREA.
+
+      *******************************************************
+      *> MAIN SECTION 執行/檢查
+      *******************************************************
+       MAIN SECTION.
+           PERFORM FA-DATA-FORMATTING. *> 1. 整頓原始資料
+           INITIALIZE  WK-DURING-PROCESS WK-PROCESS-CHECK.
+           DISPLAY "FORMAT        :"FUNCTION TRIM(BEFORE-DATA).
+           PERFORM FA-EXTRACT-COUNTRY. *> 2. 抽出 國家
+           DISPLAY "CLEAR COUNTRY :"FUNCTION TRIM(BEFORE-DATA)
+                   "/ " FUNCTION TRIM(DTLS-LF(2)).
+           PERFORM FA-EXTRACT-STATE.   *> 3. 抽出 STATE
+           DISPLAY "CLEAR STATE   :"FUNCTION TRIM(BEFORE-DATA)
+                   "/ " FUNCTION TRIM(DTLS-LF(17)).
+           PERFORM FA-COUNT-CNT.       *> 4. 計算各欄位字數 數字判斷
+           PERFORM FA-SPLIT-BY-LOGIC.  *> 5. 依照 分割規則 拆解地址
+           PERFORM FA-REBUILD.         *> 6. 反結構
+           PERFORM FA-ERROR-SECTION.   *> 7. 處理錯誤資料
+
+           DISPLAY "=========== KEKKA."
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
+           EVALUATE IDX
+             WHEN 1
+               MOVE "ZIP      :" TO RR-TEMP-COL
+             WHEN 2
+               MOVE "COUNTRY  :" TO RR-TEMP-COL
+             WHEN 3
+               MOVE "CITY     :" TO RR-TEMP-COL
+             WHEN 4
+               MOVE "DIST.    :" TO RR-TEMP-COL
+             WHEN 5
+               MOVE "STREET   :" TO RR-TEMP-COL
+             WHEN 6
+               MOVE "SEC.     :" TO RR-TEMP-COL
+             WHEN 7
+               MOVE "LANE     :" TO RR-TEMP-COL
+             WHEN 8
+               MOVE "ALLEY    :" TO RR-TEMP-COL
+             WHEN 9
+               MOVE "NO.      :" TO RR-TEMP-COL
+             WHEN 10
+               MOVE "DEPT.    :" TO RR-TEMP-COL
+             WHEN 11
+               MOVE "FLOOR    :" TO RR-TEMP-COL
+             WHEN 12
+               MOVE "P.O.-BOX :" TO RR-TEMP-COL
+             WHEN 13
+               MOVE "ROOM     :" TO RR-TEMP-COL
+             WHEN 14
+               MOVE "BUILDING :" TO RR-TEMP-COL
+             WHEN 15
+               MOVE "VILLAGE  :" TO RR-TEMP-COL
+             WHEN 16
+               MOVE "PROVINCE :" TO RR-TEMP-COL
+             WHEN 17
+               MOVE "STATE    :" TO RR-TEMP-COL
+             WHEN 18
+               MOVE "SUB DEPT.:" TO RR-TEMP-COL
+           END-EVALUATE
+
+           DISPLAY FUNCTION TRIM(RR-TEMP-COL)" "
+                   FUNCTION TRIM(DTLS-LF(IDX))
            END-PERFORM.
 
-           *> MATCH-NEW 初期化
-           MOVE 0 TO MATCH-NEW.
+           GOBACK.
 
-           *> AFTER-DATA 初期化
-           MOVE SPACES TO AFTER-DATA.
+      *******************************************************
+      *> FA-DATA-FORMATTING SECTION 整頓原始資料
+      *******************************************************
+       FA-DATA-FORMATTING.
+           *> 特殊狀況處理
+           *> 字首 "ADD." -> SPACES
+           IF BEFORE-DATA(1:4) = "ADD."
+             MOVE BEFORE-DATA(5:TD-L - 4) TO BEFORE-DATA
+           END-IF.
 
-           *> BEFORE-DATA 初期化
-           MOVE FUNCTION TRIM(BEFORE-DATA) TO BEFORE-DATA
+           MOVE      BEFORE-DATA       TO    TD-TEMP.
+           PERFORM   FA-TRIM.
+           MOVE      TD-FINISH           TO    BEFORE-DATA.
 
-           *> DTLS-LF 初期化
-            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
-                MOVE SPACES TO DTLS-LF(IDX) 
-            END-PERFORM.
+           *> 字首 "ON " -> SPACES
+           IF BEFORE-DATA(1:3) = "ON "
+             MOVE BEFORE-DATA(4:TD-L - 3) TO BEFORE-DATA
+           END-IF.
 
+           MOVE      BEFORE-DATA       TO    TD-TEMP.
+           PERFORM   FA-TRIM.
+           MOVE      TD-FINISH           TO    BEFORE-DATA.
+
+           IF BEFORE-DATA(TD-L:1) = "."
+             MOVE BEFORE-DATA(1: TD-L - 1) TO BEFORE-DATA
+           END-IF.
+
+           *> C.A.P. -> SPACES (ZIP)
+           INSPECT BEFORE-DATA REPLACING FIRST "C.A.P." BY "      ".
+
+           *> "CITYXXX" -> "CITY"
+      *    PERFORM VARYING IDX FROM TD-L BY -1 UNTIL IDX = 4
+      *      IF BEFORE-DATA(IDX - 4:4) = "CITY" AND
+      *         BEFORE-DATA(IDX:1) NOT = " "
+      *        MOVE BEFORE-DATA(IDX:TD-L - IDX + 1)
+      *             TO RR-TEMP-A(IDX + 1:TD-L - IDX + 1)
+      *        MOVE RR-TEMP-A(IDX:TD-L - IDX + 2)
+      *             TO BEFORE-DATA(IDX:TD-L - IDX + 2)
+      *      END-IF
+      *    END-PERFORM.
+
+
+           *> 整頓標點符號/特殊自前後" "&","配置
            *> "," -> ", "
-           MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN.
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > TEMP-LEN
+           MOVE      TD-L                TO    WK-LEN.
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > WK-LEN
+               *> 移除字首 ","
                IF BEFORE-DATA(IDX:1) = "," AND IDX = 1
-                 SUBTRACT 1 FROM TEMP-LEN IDX
-                 MOVE FUNCTION TRIM(BEFORE-DATA(2:TEMP-LEN))
-                   TO BEFORE-DATA
-                 MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+                 SUBTRACT 1 FROM WK-LEN IDX
+                 MOVE      BEFORE-DATA(2:WK-LEN)       TO    TD-TEMP
+                 PERFORM   FA-TRIM
+                 MOVE      TD-FINISH           TO    BEFORE-DATA
+                 MOVE      TD-L                TO    WK-LEN
                END-IF
 
-               IF BEFORE-DATA(IDX:1) = "," AND IDX = TEMP-LEN
+               *> 移除字尾 ","
+               IF BEFORE-DATA(IDX:1) = "," AND IDX = WK-LEN
                  SUBTRACT 2 FROM IDX
-                 MOVE FUNCTION TRIM(BEFORE-DATA(1:TEMP-LEN - 1))
-                   TO BEFORE-DATA
-                 MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+
+                 MOVE      BEFORE-DATA(1:WK-LEN - 1)    TO    TD-TEMP
+                 PERFORM   FA-TRIM
+                 MOVE      TD-FINISH           TO    BEFORE-DATA
+                 MOVE      TD-L                TO    WK-LEN
                END-IF
 
+               *> 移除重複 ","
                IF BEFORE-DATA(IDX:2) = ",,"
-                 MOVE SPACES TO TEMP-COL
+                 MOVE SPACES TO WK-TEMP-COL
 
-                 STRING
-                   BEFORE-DATA(1:IDX) DELIMITED BY SIZE
-                   BEFORE-DATA(IDX + 2:TEMP-LEN - IDX - 1)
-                     DELIMITED BY SIZE
-                   INTO TEMP-COL
-                 END-STRING
+                 MOVE BEFORE-DATA(1:IDX) TO WK-TEMP-COL
+                 MOVE BEFORE-DATA(IDX + 2:WK-LEN - IDX - 1)
+                      TO WK-TEMP-COL(IDX + 1:WK-LEN - IDX - 1)
                  SUBTRACT 1 FROM IDX
-                 MOVE TEMP-COL TO BEFORE-DATA
-                 MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+                 MOVE WK-TEMP-COL TO BEFORE-DATA
 
+                 MOVE      BEFORE-DATA       TO    TD-TEMP
+                 PERFORM   FA-TRIM
+                 MOVE      TD-L                TO    WK-LEN
                END-IF
 
+               *> ",X" -> ", X" OR ".,X" -> "., X" OR "X.9" -> "X. 9"
+               IF (BEFORE-DATA(IDX:1) = ","
+                  AND BEFORE-DATA(IDX + 1:1) NOT = " ") 
+                  OR
+                  (IDX > 1 AND
+                    BEFORE-DATA(IDX - 1:1) IS ALPHABETIC AND
+                  BEFORE-DATA(IDX:1) = "." AND
+                  BEFORE-DATA(IDX + 1:1) IS NUMERIC)
+                     MOVE BEFORE-DATA(1:IDX) TO WK-TEMP-COL
+                     MOVE " " TO WK-TEMP-COL(IDX + 1:1)
+                     MOVE BEFORE-DATA(IDX + 1:WK-LEN - IDX)
+                          TO WK-TEMP-COL(IDX + 2:WK-LEN - IDX)
 
-               IF BEFORE-DATA(IDX:1) = ","
-                  AND BEFORE-DATA(IDX + 1:1 - NEXT-LEN) NOT = " "
-                     STRING
-                       BEFORE-DATA(1:IDX) DELIMITED BY SIZE
-                       " "  DELIMITED BY SIZE
-                       BEFORE-DATA(IDX + 1 - NEXT-LEN :TEMP-LEN - IDX)
-                            DELIMITED BY SIZE
-                       INTO TEMP-COL
-                     END-STRING
-                    MOVE TEMP-COL TO BEFORE-DATA
-                  MOVE LENGTH OF FUNCTION TRIM(BEFORE-DATA) TO TEMP-LEN
+                    MOVE WK-TEMP-COL TO BEFORE-DATA
+                    MOVE      BEFORE-DATA    TO    TD-TEMP
+                    PERFORM   FA-TRIM
+                    MOVE      TD-L             TO    WK-LEN
                END-IF
            END-PERFORM.
 
-
-           *> 迴避複數空格的狀況、縮寫地址插入".""
-           UNSTRING 
+           MOVE      FUNCTION UPPER-CASE(BEFORE-DATA)
+                                         TO    BEFORE-DATA.
+           *> 迴避複數空格的狀況、縮寫地址插入"."
+           UNSTRING
              BEFORE-DATA DELIMITED BY ALL " "
-             INTO TEMP-PART (1)
-               TEMP-PART (2)
-               TEMP-PART (3)
-               TEMP-PART (4)
-               TEMP-PART (5)
-               TEMP-PART (6)
-               TEMP-PART (7)
-               TEMP-PART (8)
-               TEMP-PART (9)
-               TEMP-PART (10)
-               TEMP-PART (11)
-               TEMP-PART (12)
-               TEMP-PART (13)
-               TEMP-PART (14)
-               TEMP-PART (15)
-               TEMP-PART (16)
-               TEMP-PART (17)
-               TEMP-PART (18)
-               TEMP-PART (19)
-               TEMP-PART (20)
-               TEMP-PART (21)
-               TEMP-PART (22)
-               TEMP-PART (23)
-               TEMP-PART (24)
-               TEMP-PART (25)
-               TEMP-PART (26)
-               TEMP-PART (27)
-               TEMP-PART (28)
-               TEMP-PART (29)
-               TEMP-PART (30)
+             INTO WK-PART (1)
+               WK-PART (2)
+               WK-PART (3)
+               WK-PART (4)
+               WK-PART (5)
+               WK-PART (6)
+               WK-PART (7)
+               WK-PART (8)
+               WK-PART (9)
+               WK-PART (10)
+               WK-PART (11)
+               WK-PART (12)
+               WK-PART (13)
+               WK-PART (14)
+               WK-PART (15)
+               WK-PART (16)
+               WK-PART (17)
+               WK-PART (18)
+               WK-PART (19)
+               WK-PART (20)
+               WK-PART (21)
+               WK-PART (22)
+               WK-PART (23)
+               WK-PART (24)
+               WK-PART (25)
+               WK-PART (26)
+               WK-PART (27)
+               WK-PART (28)
+               WK-PART (29)
+               WK-PART (30)
+           .
 
-           MOVE SPACES TO PROCESSING-DATA.
+           MOVE SPACES TO BEFORE-DATA.
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
-             IF TEMP-PART(IDX) NOT = SPACES
-                MOVE FUNCTION TRIM(TEMP-PART(IDX)) TO TEMP-COL
-                MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN
-                IF TEMP-COL(TEMP-LEN:1) = ","
-                   MOVE TEMP-COL(1:TEMP-LEN - 1) TO TEMP-COL
-                END-IF
+             IF WK-PART(IDX) NOT = SPACES
+               MOVE      WK-PART(IDX)        TO    TD-TEMP
+               PERFORM   FA-TRIM
+               MOVE      TD-FINISH           TO    WK-TEMP-COL
+               MOVE      TD-L                TO    WK-LEN
+               IF WK-TEMP-COL(WK-LEN:1) = ","
+                 MOVE WK-TEMP-COL(1:WK-LEN - 1) TO WK-TEMP-COL
+               END-IF
 
-              MOVE "N" TO TEMP-FLAG
-              MOVE LENGTH OF FUNCTION TRIM(TEMP-PART(IDX)) TO TEMP-LEN
-              IF TEMP-PART(IDX)(TEMP-LEN:1) = ","
-                MOVE 1 TO NEXT-LEN
+               MOVE "N" TO WK-TEMP-FLAG
+               MOVE      WK-PART(IDX)        TO    TD-TEMP
+               PERFORM   FA-TRIM
+               MOVE      TD-L                TO    WK-LEN
+              IF WK-PART(IDX)(WK-LEN:1) = ","
+                MOVE 1 TO WK-CNT2
               ELSE
-                MOVE 0 TO NEXT-LEN
+                MOVE 0 TO WK-CNT2
               END-IF
 
               *> 2文字
-              MOVE TEMP-PART(IDX)(TEMP-LEN - 1 - NEXT-LEN:2)TO TEMP-COL
-              IF TEMP-COL = "St"
-                 OR TEMP-COL = "Rd"
-                 OR TEMP-COL = "Dr"
-                 OR TEMP-COL = "Rm"
-                 MOVE "Y" TO TEMP-FLAG
+              MOVE WK-PART(IDX)(1:2) TO WK-TEMP-COL
+              IF (WK-TEMP-COL = "ST" OR
+                  WK-TEMP-COL = "RD" OR
+                  WK-TEMP-COL = "DR" OR
+      *           WK-TEMP-COL = "RM" OR
+                  WK-TEMP-COL = "NO" OR
+                  WK-TEMP-COL = "LN") AND
+                  WK-PART(IDX)(3:1) NOT = "." AND WK-LEN < 4
+                 MOVE "Y" TO WK-TEMP-FLAG
               END-IF
 
               *> 3文字
-              MOVE TEMP-PART(IDX)(TEMP-LEN - 2 - NEXT-LEN:3)TO TEMP-COL
-              IF TEMP-COL = "Ave"
-                 OR TEMP-COL = "Riv"
-                 MOVE "Y" TO TEMP-FLAG
+              MOVE WK-PART(IDX)(1:3) TO WK-TEMP-COL
+              IF (WK-TEMP-COL = "AVE" OR
+                  WK-TEMP-COL = "RIV" OR
+                  WK-TEMP-COL = "ALY" OR
+                  WK-TEMP-COL = "LTD") AND
+                  WK-PART(IDX)(4:1) NOT = "." AND WK-LEN < 5
+                 MOVE "Y" TO WK-TEMP-FLAG
               END-IF
 
               *> 4文字
-              MOVE TEMP-PART(IDX)(TEMP-LEN - 3 - NEXT-LEN:4)TO TEMP-COL
-              IF TEMP-COL = "Blvd"
-                 MOVE "Y" TO TEMP-FLAG
+              MOVE WK-PART(IDX)(1:4) TO WK-TEMP-COL
+              IF (WK-TEMP-COL = "BLDG" OR
+                  WK-TEMP-COL = "BLVD" OR
+                  WK-TEMP-COL = "DIST" OR
+                  WK-TEMP-COL = "DEPT") AND
+                  WK-PART(IDX)(5:1) NOT = "." AND WK-LEN < 6
+                 MOVE "Y" TO WK-TEMP-FLAG
               END-IF
 
               *> 補上.
-              IF TEMP-FLAG = "Y"
-                 STRING 
-                     TEMP-PART(IDX)(1:TEMP-LEN - NEXT-LEN)
-                     "." DELIMITED BY SIZE
-                     INTO TEMP-PART(IDX)
-                 END-STRING
+              IF WK-TEMP-FLAG = "Y"
+                 MOVE WK-PART(IDX)(1:WK-LEN - WK-CNT2) TO WK-TEMP-COL
+                 MOVE "."  TO    WK-TEMP-COL(WK-LEN - WK-CNT2 + 1:1)
+                 MOVE WK-PART(IDX)(WK-LEN - WK-CNT2 + 1:WK-CNT2) 
+                      TO    WK-TEMP-COL(WK-LEN - WK-CNT2 + 2:WK-CNT2)
+
+                 MOVE WK-TEMP-COL TO WK-PART(IDX)
               END-IF
-               STRING
-                 FUNCTION TRIM(PROCESSING-DATA) DELIMITED BY SIZE
-                 " " DELIMITED BY SIZE
-                 FUNCTION TRIM(TEMP-PART(IDX)) DELIMITED BY SIZE
-                 INTO PROCESSING-DATA
-               END-STRING
+
+              IF WK-PART(IDX)(3:1) = "." AND
+                 WK-PART(IDX)(4:1) IS NUMERIC
+                   MOVE WK-PART(IDX) TO WK-TEMP-COL
+                   MOVE      WK-TEMP-COL       TO    TD-TEMP
+                   PERFORM   FA-TRIM
+                   MOVE      TD-L              TO    WK-LEN
+
+                   MOVE      WK-PART(IDX)(1:3) TO    WK-TEMP-COL
+                   MOVE      " "               TO    WK-TEMP-COL(4:1)
+                   MOVE      WK-PART(IDX)(4:WK-LEN - 3)   
+                                         TO    WK-TEMP-COL(5:WK-LEN - 3)
+
+                   MOVE WK-TEMP-COL TO WK-PART(IDX) 
+              END-IF
+
+               MOVE      BEFORE-DATA       TO    TD-TEMP
+               PERFORM   FA-TRIM
+               MOVE      TD-L                TO    WK-CNT0
+               MOVE      TD-FINISH           TO    BEFORE-DATA
+
+               MOVE      WK-PART(IDX)        TO    TD-TEMP
+               PERFORM   FA-TRIM
+               MOVE      TD-FINISH           TO    WK-TEMP-COL
+               MOVE      " "       TO    BEFORE-DATA(WK-CNT0 + 1:1)
+               MOVE      TD-FINISH(1:TD-L)   
+                                   TO    BEFORE-DATA(WK-CNT0 + 2:TD-L)
              END-IF
            END-PERFORM.
-           MOVE FUNCTION TRIM(PROCESSING-DATA) TO PROCESSING-DATA.
+           MOVE      BEFORE-DATA         TO    TD-TEMP.
+           PERFORM   FA-TRIM.
+           MOVE      TD-FINISH           TO    BEFORE-DATA.
 
 
-           *> TEMP-PART 初期化
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
-              MOVE SPACES TO TEMP-PART(IDX) 
-           END-PERFORM.
+           *> P.O. Box -> P.O.-BOX
+           INSPECT   BEFORE-DATA        REPLACING ALL "P.O. BOX"
+                                                    BY "P.O.-BOX".
 
       *******************************************************
-      *> MAIN SECTION 主要程序
+      *> FA-EXTRACT-COUNTRY SECTION 抽出 國家
       *******************************************************
-       MAIN SECTION.
-           UNSTRING 
-             BEFORE-DATA DELIMITED BY ALL " "
-             INTO TEMP-PART (1)
-               TEMP-PART (2)
-               TEMP-PART (3)
-               TEMP-PART (4)
-               TEMP-PART (5)
-               TEMP-PART (6)
-               TEMP-PART (7)
-               TEMP-PART (8)
-               TEMP-PART (9)
-               TEMP-PART (10)
-               TEMP-PART (11)
-               TEMP-PART (12)
-               TEMP-PART (13)
-               TEMP-PART (14)
-               TEMP-PART (15)
-               TEMP-PART (16)
-               TEMP-PART (17)
-               TEMP-PART (18)
-               TEMP-PART (19)
-               TEMP-PART (20)
-               TEMP-PART (21)
-               TEMP-PART (22)
-               TEMP-PART (23)
-               TEMP-PART (24)
-               TEMP-PART (25)
-               TEMP-PART (26)
-               TEMP-PART (27)
-               TEMP-PART (28)
-               TEMP-PART (29)
-               TEMP-PART (30)
-
-           *> ======================= 特殊字 抽出 =======================
-           *> 抽出 COUNTRY
-           MOVE 0 TO PRE-LEN.
-           MOVE LENGTH OF FUNCTION TRIM(PROCESSING-DATA) TO NEXT-LEN.
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
-             MOVE FUNCTION TRIM(TEMP-PART(IDX)) TO TEMP-COL
-             MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN
-             ADD 1 TO PRE-LEN
-             IF (TEMP-PART(IDX + 1) = SPACES OR *> 為最後一串字/國家 + 郵遞區號
-                (TEMP-PART(IDX + 1) IS NUMERIC AND 
-                 TEMP-PART(IDX + 2) = SPACES)) AND
-
-                (TEMP-LEN = 2 AND
-                 TEMP-COL(1:2) IS ALPHABETIC-UPPER)
-
-                   MOVE TEMP-COL TO DTLS-LF(2)
-                   IF TEMP-PART(IDX + 1) = SPACES
-                     MOVE PROCESSING-DATA(1:PRE-LEN - 3) TO TEMP-COL
-                   ELSE
-                     STRING
-                       PROCESSING-DATA(1:PRE-LEN - 3) DELIMITED BY SIZE
-                       PROCESSING-DATA(PRE-LEN + TEMP-LEN + 1:
-                         NEXT-LEN - PRE-LEN - TEMP-LEN) 
-                         DELIMITED BY SIZE
-                       INTO TEMP-COL
-                     END-STRING
-                   END-IF
-
-                   MOVE TEMP-COL TO PROCESSING-DATA
-                   EXIT PERFORM
-             END-IF
-             ADD TEMP-LEN TO PRE-LEN
-           END-PERFORM.
-
-           *> 抽出 STATE
-           *> 簡寫STATE抽出作業
-           MOVE FUNCTION TRIM(PROCESSING-DATA) TO TEMP-COL.
-           INSPECT TEMP-COL REPLACING ALL "&" BY "A".
-           MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN.
-           MOVE "N" TO STATE-FLAG.
-           PERFORM VARYING IDX FROM TEMP-LEN BY -1 UNTIL IDX = 0
-
-              IF ((TEMP-COL(IDX:1) = SPACE OR 
-                   TEMP-COL(IDX:1) = ",") AND
-                  (TEMP-COL(IDX + 4:1) = SPACE OR 
-                   TEMP-COL(IDX + 4:1) = ","   OR
-                   IDX + 3 = TEMP-LEN) AND
-                 IDX + 3 <= TEMP-LEN AND
-                 TEMP-COL(IDX + 1:3) IS ALPHABETIC-UPPER)
-                 MOVE PROCESSING-DATA(IDX + 1:3) TO DTLS-LF(17)
-                 MOVE SPACES TO PROCESSING-DATA
-                 STRING
-                   TEMP-COL(1:IDX) DELIMITED BY SIZE
-                   TEMP-COL(IDX + 5:TEMP-LEN - 4 - IDX)
-                     DELIMITED BY SIZE
-                   INTO PROCESSING-DATA
-                 END-STRING
-                 MOVE "Y" TO STATE-FLAG
-                 EXIT PERFORM
-              END-IF
-
-              IF ((TEMP-COL(IDX:1) = SPACE OR
-                   TEMP-COL(IDX:1) = ",") AND
-                  (TEMP-COL(IDX + 3:1) = SPACE OR
-                   TEMP-COL(IDX + 3:1) = ","   OR
-                   IDX + 2 = TEMP-LEN) AND
-                 IDX + 2 <= TEMP-LEN AND
-                 TEMP-COL(IDX + 1: 2) IS ALPHABETIC-UPPER)
-                 MOVE PROCESSING-DATA(IDX + 1:2) TO DTLS-LF(17)
-                 MOVE SPACES TO PROCESSING-DATA
-                 STRING
-                   TEMP-COL(1:IDX) DELIMITED BY SIZE
-                   TEMP-COL(IDX + 4:TEMP-LEN - 3 - IDX)
-                     DELIMITED BY SIZE
-                   INTO PROCESSING-DATA
-                 END-STRING
-                 MOVE "Y" TO STATE-FLAG
-                 EXIT PERFORM
-              END-IF
-           END-PERFORM.
-
-           *> 全名STATE抽出作業
+       FA-EXTRACT-COUNTRY.
+          *> COUNTRY抽出作業
+           MOVE BEFORE-DATA TO TD-TEMP.
+           PERFORM FA-TRIM.
+           MOVE TD-L TO RR-TEMP-LEN.
+           MOVE 0 TO RR-FOUND-JDX.
+           *> RR-TEMP-COL -> 原字串
+           *> RR-TEMP-A   -> 資料字串(國家全名)
+           *> RR-CNT-F    -> , 出現次數
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 500
-              IF LS-STATE-NAME-COL(IDX) = SPACES OR STATE-FLAG = "Y"
-                EXIT PERFORM
-              END-IF
+             IF LS-COUNTRY-NAME(IDX) = SPACES
+               EXIT PERFORM
+             END-IF
 
-              MOVE LS-STATE-NAME-COL(IDX) TO NEXT-COL
-              MOVE LENGTH OF FUNCTION TRIM(NEXT-COL) TO NEXT-LEN
-              MOVE 0 TO FOUND-JDX
-              PERFORM VARYING JDX FROM 1 BY 1
-                UNTIL JDX > TEMP-LEN - NEXT-LEN + 1
-       
-                  IF TEMP-COL(JDX:NEXT-LEN) = NEXT-COL(1:NEXT-LEN)
-                   *> 確認該單字前後皆為空白後才能進入
-                   IF (
-             JDX > 1 AND JDX < TEMP-LEN AND 
-             FUNCTION TRIM(TEMP-COL(JDX - 1:NEXT-LEN + 2)) = NEXT-COL OR
-             FUNCTION TRIM(TEMP-COL(JDX - 1:NEXT-LEN + 2)) = TEMP-COL-2
-             )
-                      MOVE JDX TO FOUND-JDX
+             MOVE LS-COUNTRY-NAME(IDX) TO RR-TEMP-A TD-TEMP
+             PERFORM FA-TRIM
+             MOVE TD-L TO RR-TEMP-A-LEN
+
+             MOVE 0 TO RR-CNT-F *> 紀錄逗號
+             PERFORM VARYING JDX FROM RR-TEMP-LEN BY -1
+                     UNTIL JDX = RR-FOUND-JDX
+
+               IF BEFORE-DATA(JDX:1) = " " AND
+                  RR-TEMP-LEN - JDX > RR-TEMP-A-LEN
+                    ADD 1 TO RR-CNT-F
+                    IF RR-CNT-F > 2
                       EXIT PERFORM
-                     END-IF
-                  END-IF
-              END-PERFORM
-       
-              *> 若找到相符內容
-              IF FOUND-JDX > 0
-                 MOVE SPACES TO PROCESSING-DATA
-                 STRING
-                   TEMP-COL(1:FOUND-JDX - 1) DELIMITED BY SIZE
-                   TEMP-COL(FOUND-JDX + NEXT-LEN + 1:
-                            TEMP-LEN - FOUND-JDX)
-                            DELIMITED BY SIZE
-                   INTO PROCESSING-DATA
-                 END-STRING
-                 MOVE LS-STATE-CODE-COL(IDX) TO DTLS-LF(17)
-                 EXIT PERFORM
+                    END-IF
+               END-IF
 
-              END-IF
+               *> 若文字串中包含 國家全名
+               IF BEFORE-DATA(JDX:RR-TEMP-A-LEN) = RR-TEMP-A AND
+                  JDX >= RR-FOUND-JDX AND
+                  LS-COUNTRY-CODE(IDX) NOT = DTLS-LF(2) AND
+      *           (JDX = 1 OR
+      *            BEFORE-DATA(JDX - 1:1) = SPACES OR
+      *            BEFORE-DATA(JDX - 1:1) = ",") AND
+                  (BEFORE-DATA(JDX + RR-TEMP-A-LEN:1) = SPACE OR
+                   BEFORE-DATA(JDX + RR-TEMP-A-LEN:1) = "," OR
+                   BEFORE-DATA(JDX + RR-TEMP-A-LEN:1) = ".")
+                  MOVE LS-COUNTRY-CODE(IDX) TO DTLS-LF(2)
+                  MOVE JDX TO RR-FOUND-JDX
+
+                  *> 後半字串起始點 -> RR-TEMP-B-LEN
+                  COMPUTE RR-TEMP-B-LEN = JDX + RR-TEMP-A-LEN
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "," OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "."
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "," OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "."
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "," OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "."
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  *> 後半字串長度 -> RR-TEMP-A-LEN
+                  IF RR-TEMP-LEN - RR-TEMP-B-LEN + 1 <= 0
+                    MOVE 0 TO RR-TEMP-A-LEN
+                  ELSE
+                    COMPUTE RR-TEMP-A-LEN 
+                            = RR-TEMP-LEN - RR-TEMP-B-LEN + 1
+                  END-IF
+
+                  MOVE SPACES TO RR-TEMP-COL
+                  MOVE BEFORE-DATA(1:JDX - 1) TO RR-TEMP-COL(1:JDX - 1)
+                  MOVE BEFORE-DATA(RR-TEMP-B-LEN:RR-TEMP-A-LEN)
+                       TO RR-TEMP-COL(JDX:RR-TEMP-A-LEN)
+                  EXIT PERFORM
+               END-IF
+
+               *> 若文字串中包含 國家ISO代號
+               IF BEFORE-DATA(JDX:2) = LS-COUNTRY-CODE(IDX) AND
+                  JDX >= RR-FOUND-JDX AND
+                  LS-COUNTRY-CODE(IDX) NOT = DTLS-LF(2) AND
+                  (BEFORE-DATA(JDX - 1:1) = SPACES OR
+                   BEFORE-DATA(JDX - 1:1) = ",") AND
+                  (BEFORE-DATA(JDX + 2:1) = SPACE OR
+                   BEFORE-DATA(JDX + 2:1) = ",")
+                  MOVE LS-COUNTRY-CODE(IDX) TO DTLS-LF(2)
+                  MOVE JDX TO RR-FOUND-JDX
+
+                  *> 後半字串起始點 -> RR-TEMP-B-LEN
+                  COMPUTE RR-TEMP-B-LEN = JDX + 2
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = ","
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = ","
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  *> 後半字串長度 -> RR-TEMP-A-LEN
+                  IF RR-TEMP-LEN - RR-TEMP-B-LEN + 1 <= 0
+                    MOVE 0 TO RR-TEMP-A-LEN
+                  ELSE
+                    COMPUTE RR-TEMP-A-LEN 
+                            = RR-TEMP-LEN - RR-TEMP-B-LEN + 1
+                  END-IF
+
+                  MOVE SPACES TO RR-TEMP-COL
+                  MOVE BEFORE-DATA(1:JDX - 1) TO RR-TEMP-COL(1:JDX - 1)
+                  MOVE BEFORE-DATA(RR-TEMP-B-LEN:RR-TEMP-A-LEN)
+                       TO RR-TEMP-COL(JDX:RR-TEMP-A-LEN)
+                  EXIT PERFORM
+               END-IF
+
+             END-PERFORM
            END-PERFORM.
 
-           *> ===================== 特殊字 抽出完成 =====================
-      *    DISPLAY "BEFORE: "FUNCTION TRIM(BEFORE-DATA).
-      *    DISPLAY "PROCES: "FUNCTION TRIM(PROCESSING-DATA).
+           IF DTLS-LF(2) NOT = SPACES
+             MOVE RR-TEMP-COL TO TD-TEMP
+             PERFORM FA-TRIM
+             IF TD-TEMP(TD-L:1) = ","
+               MOVE TD-TEMP(1:TD-L - 1) TO TD-TEMP
+               PERFORM FA-TRIM
+             END-IF
 
+             MOVE TD-TEMP TO BEFORE-DATA
+           END-IF.
 
-           *> 資料分類
-           UNSTRING PROCESSING-DATA
-             DELIMITED BY SPACE
-             INTO TEMP-PART(1)
-               TEMP-PART(2)
-               TEMP-PART(3)
-               TEMP-PART(4)
-               TEMP-PART(5)
-               TEMP-PART(6)
-               TEMP-PART(7)
-               TEMP-PART(8)
-               TEMP-PART(9)
-               TEMP-PART(10)
-               TEMP-PART(11)
-               TEMP-PART(12)
-               TEMP-PART(13)
-               TEMP-PART(14)
-               TEMP-PART(15)
-               TEMP-PART(16)
-               TEMP-PART(17)
-               TEMP-PART(18)
-               TEMP-PART(19)
-               TEMP-PART(20)
-               TEMP-PART(21)
-               TEMP-PART(22)
-               TEMP-PART(23)
-               TEMP-PART(24)
-               TEMP-PART(25)
-               TEMP-PART(26)
-               TEMP-PART(27)
-               TEMP-PART(28)
-               TEMP-PART(29)
-               TEMP-PART(30)
+      *******************************************************
+      *> FA-EXTRACT-STATE SECTION 抽出 STATE
+      *******************************************************
+       FA-EXTRACT-STATE.
+
+           *> 若判斷對象非以下國家 跳過STATE抽出作業
+           IF NOT 
+             (DTLS-LF(2) = "US" OR
+              DTLS-LF(2) = "AU" OR
+              DTLS-LF(2) = "IN" OR
+              DTLS-LF(2) = "MX" OR
+              DTLS-LF(2) = "CA" OR
+              DTLS-LF(2) = "IT")
+             EXIT PARAGRAPH
+           END-IF.
+
+           *> STATE抽出作業
+           MOVE BEFORE-DATA TO TD-TEMP.
+           *> J&K -> JAK(視為簡寫)
+           INSPECT WK-TEMP-COL REPLACING ALL "&" BY "A".
+           PERFORM FA-TRIM.
+           MOVE TD-L TO RR-TEMP-LEN.
+           MOVE 0 TO RR-FOUND-JDX.
+           *> RR-TEMP-COL -> 原字串
+           *> RR-TEMP-A   -> 資料字串(STATE全名)
+           *> RR-CNT-F    -> , 出現次數
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 500
+             IF LS-STATE-NAME(IDX) = SPACES
+               EXIT PERFORM
+             END-IF
+
+             MOVE LS-STATE-NAME(IDX) TO RR-TEMP-A TD-TEMP
+             PERFORM FA-TRIM
+             MOVE TD-L TO RR-TEMP-A-LEN
+
+             MOVE 0 TO RR-CNT-F *> 紀錄逗號
+             PERFORM VARYING JDX FROM RR-TEMP-LEN BY -1
+                     UNTIL JDX = RR-FOUND-JDX
+               IF LS-STATE-COUNTRY(IDX) NOT = DTLS-LF(2)
+                 EXIT PERFORM
+               END-IF
+
+               IF BEFORE-DATA(JDX:1) = " " AND
+                  RR-TEMP-LEN - JDX > RR-TEMP-A-LEN
+                    ADD 1 TO RR-CNT-F
+                    IF RR-CNT-F > 2
+                      EXIT PERFORM
+                    END-IF
+               END-IF
+
+               *> 若文字串中包含 STATE全名
+               IF BEFORE-DATA(JDX:RR-TEMP-A-LEN) = RR-TEMP-A AND
+                  (JDX = 1 OR
+                   BEFORE-DATA(JDX - 1:1) = SPACES OR
+                   BEFORE-DATA(JDX - 1:1) = ",") AND
+                  (BEFORE-DATA(JDX + RR-TEMP-A-LEN:1) = SPACE OR
+                   BEFORE-DATA(JDX + RR-TEMP-A-LEN:1) = "," OR
+                   BEFORE-DATA(JDX + RR-TEMP-A-LEN:1) = ".")
+                  MOVE LS-STATE-CODE(IDX) TO DTLS-LF(17)
+                  MOVE JDX TO RR-FOUND-JDX
+
+                  *> 後半字串起始點 -> RR-TEMP-B-LEN
+                  COMPUTE RR-TEMP-B-LEN = JDX + RR-TEMP-A-LEN
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "," OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "."
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "," OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "."
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "," OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = "."
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  *> 後半字串長度 -> RR-TEMP-A-LEN
+                  IF RR-TEMP-LEN - RR-TEMP-B-LEN + 1 <= 0
+                    MOVE 0 TO RR-TEMP-A-LEN
+                  ELSE
+                    COMPUTE RR-TEMP-A-LEN 
+                            = RR-TEMP-LEN - RR-TEMP-B-LEN + 1
+                  END-IF
+
+                  MOVE SPACES TO RR-TEMP-COL
+                  MOVE BEFORE-DATA(1:JDX - 1) TO RR-TEMP-COL(1:JDX - 1)
+                  MOVE BEFORE-DATA(RR-TEMP-B-LEN:RR-TEMP-A-LEN)
+                       TO RR-TEMP-COL(JDX:RR-TEMP-A-LEN)
+                  EXIT PERFORM
+               END-IF
+
+               IF LS-STATE-CODE(IDX)(3:1) NOT = SPACES
+                 MOVE 3 TO KDX
+               ELSE
+                 MOVE 2 TO KDX
+               END-IF
+               *> 若文字串中包含 STATE代號(KDX碼)
+               IF BEFORE-DATA(JDX:KDX) = LS-STATE-CODE(IDX) AND
+                  (BEFORE-DATA(JDX - 1:1) = SPACES OR
+                   BEFORE-DATA(JDX - 1:1) = ",") AND
+                  (BEFORE-DATA(JDX + KDX:1) = SPACE OR
+                   BEFORE-DATA(JDX + KDX:1) = ",")
+                  MOVE LS-STATE-CODE(IDX) TO DTLS-LF(17)
+                  MOVE JDX TO RR-FOUND-JDX
+
+                  *> 後半字串起始點 -> RR-TEMP-B-LEN
+                  COMPUTE RR-TEMP-B-LEN = JDX + KDX
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = ","
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  IF BEFORE-DATA(RR-TEMP-B-LEN:1) = SPACES OR
+                     BEFORE-DATA(RR-TEMP-B-LEN:1) = ","
+                     ADD 1 TO RR-TEMP-B-LEN
+                  END-IF
+
+                  *> 後半字串長度 -> RR-TEMP-A-LEN
+                  IF RR-TEMP-LEN - RR-TEMP-B-LEN + 1 <= 0
+                    MOVE 0 TO RR-TEMP-A-LEN
+                  ELSE
+                    COMPUTE RR-TEMP-A-LEN 
+                            = RR-TEMP-LEN - RR-TEMP-B-LEN + 1
+                  END-IF
+
+                  MOVE SPACES TO RR-TEMP-COL
+                  MOVE BEFORE-DATA(1:JDX - 1) TO RR-TEMP-COL(1:JDX - 1)
+                  MOVE BEFORE-DATA(RR-TEMP-B-LEN:RR-TEMP-A-LEN)
+                       TO RR-TEMP-COL(JDX:RR-TEMP-A-LEN)
+                  EXIT PERFORM
+               END-IF
+
+             END-PERFORM
+             IF DTLS-LF(17) NOT = SPACES
+               EXIT PERFORM
+             END-IF
+           END-PERFORM.
+
+           IF DTLS-LF(17) NOT = SPACES
+             MOVE RR-TEMP-COL TO TD-TEMP
+             PERFORM FA-TRIM
+             IF TD-TEMP(TD-L:1) = ","
+               MOVE TD-TEMP(1:TD-L - 1) TO TD-TEMP
+               PERFORM FA-TRIM
+             END-IF
+
+             MOVE TD-TEMP TO BEFORE-DATA
+           END-IF.
+
+      *******************************************************
+      *> FA-COUNT-CNT SECTION 計算各欄位字數 數字判斷
+      *******************************************************
+       FA-COUNT-CNT.
+           MOVE      BEFORE-DATA       TO    TD-TEMP
+           PERFORM   FA-TRIM
+           MOVE      TD-L                TO    WK-LEN
+
+           UNSTRING
+             BEFORE-DATA DELIMITED BY ALL " "
+             INTO WK-PART (1)
+                  WK-PART (2)
+                  WK-PART (3)
+                  WK-PART (4)
+                  WK-PART (5)
+                  WK-PART (6)
+                  WK-PART (7)
+                  WK-PART (8)
+                  WK-PART (9)
+                  WK-PART (10)
+                  WK-PART (11)
+                  WK-PART (12)
+                  WK-PART (13)
+                  WK-PART (14)
+                  WK-PART (15)
+                  WK-PART (16)
+                  WK-PART (17)
+                  WK-PART (18)
+                  WK-PART (19)
+                  WK-PART (20)
+                  WK-PART (21)
+                  WK-PART (22)
+                  WK-PART (23)
+                  WK-PART (24)
+                  WK-PART (25)
+                  WK-PART (26)
+                  WK-PART (27)
+                  WK-PART (28)
+                  WK-PART (29)
+                  WK-PART (30)
            .
 
            *> CNT計算 (數字判斷)
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
-              IF TEMP-PART(IDX) = SPACES
-                 MOVE 2 TO TEMP-PART-CHECK(IDX)
-                 EXIT PERFORM
-              END-IF
-              IF TEMP-PART(IDX) = ","
-                CONTINUE
-              END-IF
+             IF WK-PART(IDX) = SPACES
+               MOVE    2                 TO    PC-PART-CHECK(IDX)
+               IF DTLS-LF(17) NOT = 17
+                 MOVE 99 TO PC-OTHER-STATE
+               END-IF
 
-              *> CNT
-              MOVE 0 TO CNT-NUM(IDX)
-              MOVE "Y" TO CNT-U(IDX)
-              MOVE TEMP-PART(IDX) TO TEMP-COL
-              MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN
-              PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > TEMP-LEN
-                IF TEMP-COL(JDX:1) = ","
-                  EXIT PERFORM
+               EXIT PERFORM
+             END-IF
+
+             *> CNT
+             MOVE      WK-PART(IDX)      TO    TD-TEMP
+             PERFORM   FA-TRIM
+             MOVE      TD-FINISH         TO    WK-TEMP-COL
+             MOVE      TD-L              TO    WK-TEMP-LEN
+             PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > WK-TEMP-LEN
+               IF WK-TEMP-COL(JDX:2) = ", "
+                 MOVE  ","               TO    PC-CNT-COMMA(IDX)
+                 MOVE  WK-TEMP-COL(1:JDX - 1) TO   WK-TEMP-COL
+                 SUBTRACT 1 FROM WK-TEMP-LEN
+                 EXIT PERFORM
+               END-IF
+
+               *> 數字判斷
+               IF WK-TEMP-COL(JDX:1) IS NUMERIC OR
+                  WK-TEMP-COL(JDX:1) = "-"
+                 ADD   1                 TO    PC-CNT-NUM(IDX)
+               ELSE
+                 IF WK-TEMP-COL(JDX:1) NOT = ","
+                   ADD   1                 TO    PC-CNT-CHAR(IDX)
+                 END-IF
+               END-IF
+             END-PERFORM
+
+              *> 以 LS-LIST-COL 為準則切割
+             PERFORM VARYING JDX FROM 3 BY 1 UNTIL JDX > 18
+             PERFORM VARYING KDX FROM 2 BY 1 UNTIL KDX > 40
+               MOVE LS-LIST-COL(JDX KDX) TO RR-CHECK-COL
+               MOVE LENGTH OF FUNCTION TRIM(RR-CHECK-COL)
+                                         TO RR-CHECK-LEN
+               IF RR-CHECK-COL = SPACES
+                 EXIT PERFORM
+               END-IF
+
+                *> ===== 羅馬字 判斷 ====
+                IF RR-CHECK-COL(1:1) = "-" AND 
+                   WK-TEMP-COL(WK-TEMP-LEN - RR-CHECK-LEN + 1:
+                               RR-CHECK-LEN) = RR-CHECK-COL
+                    COMPUTE PC-CNT-KEY-I(IDX) = JDX + 30
+                    MOVE RR-CHECK-COL TO PC-CNT-KEY-W(IDX)
                 END-IF
-              *> 數字判斷
-                   IF TEMP-COL(JDX:1) IS NUMERIC OR
-                      TEMP-COL(JDX:1) = "-"
-                      ADD 1 TO CNT-NUM(IDX)
-                   END-IF
-              *> 大寫判斷
-                   IF NOT(TEMP-COL(JDX:1) IS ALPHABETIC-UPPER OR
-                      TEMP-COL(JDX:1) IS NUMERIC OR
-                      TEMP-COL(JDX:1) = "-")
-                        MOVE "N" TO CNT-U(IDX)
-                   END-IF
-               END-PERFORM
+
+                *> ===== 後接字 判斷 ====
+                IF RR-CHECK-COL(RR-CHECK-LEN:1) = "-" AND 
+                   WK-TEMP-COL = RR-CHECK-COL(1:RR-CHECK-LEN - 1)
+                    COMPUTE PC-CNT-KEY-I(IDX) = JDX + 60
+                    MOVE RR-CHECK-COL TO PC-CNT-KEY-W(IDX)
+                END-IF
+
+                IF PC-CNT-KEY-I(IDX) = 0 AND
+                   WK-TEMP-COL = RR-CHECK-COL
+                  MOVE JDX TO PC-CNT-KEY-I(IDX)
+                  MOVE RR-CHECK-COL TO PC-CNT-KEY-W(IDX)
+                END-IF
+             END-PERFORM
+             END-PERFORM
+
+             *> 全方向
+             IF PC-CNT-KEY-I(IDX) = 0
+             PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > DIR-LEN
+               IF WK-TEMP-COL = DIR-NAMES(JDX)
+                 MOVE 99 TO PC-CNT-KEY-I(IDX)
+      *          MOVE DIR-NAMES(JDX) TO PC-CNT-KEY-W(IDX)
+                 EXIT PERFORM
+               END-IF
+             END-PERFORM
+             END-IF
+      *      DISPLAY IDX " PC-CNT-KEY: "PC-CNT-KEY-I(IDX)
+      *              "/ "FUNCTION TRIM(PC-CNT-KEY-W(IDX))
+      *              "/ "FUNCTION TRIM(WK-TEMP-COL)
            END-PERFORM.
 
-      *    PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
-      *      DISPLAY IDX"IDX:? "FUNCTION TRIM(TEMP-PART(IDX))
-      *    END-PERFORM.
-
-
       *******************************************************
+      *> FA-SPLIT-BY-LOGIC SECTION 依照 分割規則 拆解地址
+      *******************************************************
+       FA-SPLIT-BY-LOGIC.
+           INITIALIZE WK-RULE-RTN.
+
+      ********************************************************
            *> 剩餘欄位分類
-           *> TEMP-COL: 本次迴圈處理
-           *> NEXT-COL: 下欄預約
-           *> PRE-COL : 累積
-
-           *> TEMP-FLAG: 需重置PER/ 本次納入AFTER
-           *> (PER-COL)~(PRE-FLAG)~(TEMP-COL)~(TEMP-FLAG)~
-           *> (NEXT-COL)~(NEXT-FLAG)
+           *> RR-TEMP-COL: 本次迴圈處理
+           *> RR-NEXT-COL: 下欄預約
+           *>    RR-PRE-COL : 累積
+       
+           *> RR-TEMP-FLAG: 需重置PER/ 本次納入AFTER
+           *> (PER-COL)~(RR-PRE-FLAG)~(RR-TEMP-COL)~(RR-TEMP-FLAG)~
+           *> (RR-NEXT-COL)~(RR-NEXT-FLAG)
       *******************************************************
-           MOVE SPACES TO TEMP-COL.
-           MOVE "N" TO TEMP-FLAG.
+      *    MOVE      BEFORE-DATA       TO    TD-TEMP.
+           MOVE      "N"                 TO    RR-TEMP-FLAG.
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
-              IF TEMP-PART(IDX) = SPACES
-                 EXIT PERFORM
-              END-IF
+             IF WK-PART(IDX) = SPACES
+               EXIT PERFORM
+             END-IF
 
-              MOVE TEMP-PART(IDX) TO TEMP-COL
-              MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN
-              IF TEMP-COL(TEMP-LEN:1) = ","
-                SUBTRACT 1 FROM TEMP-LEN
-              END-IF
-              MOVE TEMP-COL(1:TEMP-LEN) TO TEMP-PART(IDX)
+             *> TEMP
+             COMPUTE   RR-TEMP-LEN =
+                         PC-CNT-NUM(IDX) + PC-CNT-CHAR(IDX)
+             MOVE      WK-PART(IDX)(1:RR-TEMP-LEN)   TO    RR-TEMP-COL
+             MOVE      RR-TEMP-COL                   TO    WK-PART(IDX)
 
-              IF TEMP-FLAG = "Y" OR DTLS-FLAG NOT = 0
-                MOVE SPACES TO PRE-COL PRE-FLAG
-                MOVE 0 TO PRE-LEN
-                MOVE "N" TO TEMP-FLAG
-      *       ELSE
-      *         IF IDX NOT = 1
-      *           MOVE 99 TO TEMP-PART-CHECK(IDX - 1)
-      *           MOVE SPACES TO TEMP-PART(IDX - 1)
-      *         END-IF
-              END-IF
-              MOVE 0 TO DTLS-FLAG IDX-PLUS
+             *> RR-TEMP-Y(分類完成) -> 重製 RR-PRE
+             IF RR-TEMP-Y OR RR-DTLS-FLAG NOT = 0 OR IDX = 1
+               INITIALIZE  RR-PRE
+               MOVE    "N"                           TO    RR-TEMP-FLAG
+             ELSE
+               IF IDX NOT = 1 AND RR-TEMP-N
+                 MOVE 99                   TO    PC-PART-CHECK(IDX - 1)
+                 MOVE SPACES               TO    WK-PART(IDX - 1)
+                 MOVE RR-PRE-COL           TO    TD-TEMP
+                 PERFORM  FA-TRIM
+                 MOVE TD-FINISH            TO    RR-PRE-COL
+                 MOVE TD-L                 TO    RR-PRE-LEN
+               END-IF
+             END-IF
+             MOVE     0                    TO RR-DTLS-FLAG RR-IDX-PLUS
 
-              *> NEXT
-              MOVE TEMP-PART(IDX + 1) TO NEXT-COL
-              MOVE LENGTH OF FUNCTION TRIM(NEXT-COL) TO NEXT-LEN
-              MOVE "N" TO NEXT-FLAG
-              IF NEXT-COL(NEXT-LEN:1) = ","
-                SUBTRACT 1 FROM NEXT-LEN
-              END-IF
-
+             *> NEXT
+             IF IDX NOT = 30
+               COMPUTE   RR-NEXT-LEN =
+                         PC-CNT-NUM(IDX + 1) + PC-CNT-CHAR(IDX + 1)
+               MOVE    WK-PART(IDX + 1)(1:RR-NEXT-LEN) TO   RR-NEXT-COL
+               MOVE    "N"                             TO   RR-NEXT-FLAG
+             END-IF
 
        *>  ====================== 判斷開始 ======================
-              *> =================== NUMBER 判斷 ===================
-              *> 是否為 單純數字
-              IF CNT-NUM(IDX) = TEMP-LEN
-                MOVE "Y" TO TEMP-FLAG
-                MOVE "," TO PRE-FLAG
-                *> 若此欄位下1/2格為國家 塞入郵遞區號
-                IF TEMP-PART-CHECK(IDX + 1) = 2 OR
-                   TEMP-PART-CHECK(IDX + 2) = 2
-                  MOVE 1 TO DTLS-FLAG
-                ELSE
-                  MOVE 9 TO DTLS-FLAG
-                END-IF
+             *> =================== NUMBER 判斷 ===================
+             *> 是否為 單純數字
+             IF PC-CNT-NUM(IDX) = RR-TEMP-LEN
+               MOVE "Y" TO RR-TEMP-FLAG
+               MOVE "," TO RR-PRE-FLAG
+               *> 若此欄位+1/2格為國家 塞入郵遞區號
+               IF (IDX NOT EQUAL TO 30 AND PC-PART-CHECK(IDX + 1) = 2)
+                  OR
+                  (IDX NOT EQUAL TO 29 AND PC-PART-CHECK(IDX + 2) = 2)
+                 MOVE 1 TO RR-DTLS-FLAG
+               ELSE
+                 MOVE 9 TO RR-DTLS-FLAG
+               END-IF
 
-                 *> 荷蘭郵遞區號: 前半:4個數字，後半:大寫英文*2
-                 IF TEMP-LEN = 4 AND
-                    NEXT-LEN <= 3 AND
-                    NEXT-COL(1:2) IS ALPHABETIC-UPPER AND
-                    (DTLS-LF(2) = "NETHERLANDS" OR DTLS-LF(2) = "NLD")
-                   MOVE "Y" TO NEXT-FLAG
-                   MOVE 1   TO DTLS-FLAG
-                 END-IF
-              END-IF
+               *> 荷蘭郵遞區號: 前半:4個數字，後半:大寫英文*2
+               IF IDX NOT EQUAL TO 30 AND
+                  PC-CNT-NUM(IDX)      = 4 AND
+                  PC-CNT-CHAR(IDX + 1) = 2 AND
+                  DTLS-LF(2) = "NL"
+                 MOVE "Y" TO RR-NEXT-FLAG
+                 MOVE 1   TO RR-DTLS-FLAG
+               END-IF
 
-              *> =================== NUMBER 判斷結束 ===================
-              *> =================== FLOOR 判斷 ===================
-              MOVE 0 TO CNT-F CNT-FL
-              INSPECT NEXT-COL TALLYING CNT-F FOR ALL "F."
-              INSPECT NEXT-COL TALLYING CNT-FL FOR ALL "FL."
-             IF CNT-NUM(IDX) > 0 AND
-                (CNT-F > 0 OR CNT-FL > 0)
+               *> 若國家並非 摩納哥"MC" 或 丹麥"DK" 且 數字字數 <= 2
+               *> ZIP -> FLOOR
+               IF (DTLS-LF(2) NOT = "MC"  AND
+                   DTLS-LF(2) NOT = "DK") AND
+                  PC-CNT-NUM(IDX)   <= 2  AND
+                  RR-DTLS-FLAG       = 1
+                  MOVE 11 TO RR-DTLS-FLAG
+                  IF DTLS-LF(9) = SPACES
+                    MOVE 9 TO RR-DTLS-FLAG
+                  END-IF
+               END-IF
+             END-IF
+             *> =================== NUMBER 判斷結束 ===================
+             *> =================== FLOOR 判斷 ===================
+             INITIALIZE RR-FLOOR
+             INSPECT RR-NEXT-COL TALLYING RR-CNT-F FOR ALL "F."
+             INSPECT RR-NEXT-COL TALLYING RR-CNT-FL FOR ALL "FL."
+             IF PC-CNT-NUM(IDX) > 0 AND
+               RR-CNT-F > 0 OR RR-CNT-FL > 0
 
-                INSPECT TEMP-COL
-                  REPLACING ALL "ST" BY SPACES
-                INSPECT TEMP-COL
-                  REPLACING ALL "ND" BY SPACES
-                INSPECT TEMP-COL
-                  REPLACING ALL "RD" BY SPACES
-                INSPECT TEMP-COL
-                  REPLACING ALL "TH" BY SPACES
+               MOVE RR-TEMP-COL TO TD-TEMP
+               PERFORM FA-TRIM
+               MOVE TD-FINISH TO RR-TEMP-A
+               MOVE TD-L TO RR-TEMP-A-LEN
 
-                INSPECT NEXT-COL
-                  REPLACING ALL "F." BY SPACES
-                INSPECT NEXT-COL
-                  REPLACING ALL "FL." BY SPACES
-                
-                MOVE SPACES TO TEMP-A
-                STRING
-                  FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
-                  FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
-                  INTO TEMP-A
-                END-STRING
+               MOVE RR-NEXT-COL TO TD-TEMP
+               PERFORM FA-TRIM
+               MOVE TD-FINISH TO RR-TEMP-B
+               MOVE TD-L TO RR-TEMP-B-LEN
 
-                MOVE TEMP-A TO TEMP-COL
-                MOVE SPACES TO NEXT-COL
-                MOVE "Y" TO NEXT-FLAG TEMP-FLAG
-                MOVE 11  TO DTLS-FLAG
-              END-IF
+               MOVE SPACES TO RR-TEMP-COL RR-NEXT-COL
+               MOVE RR-TEMP-A(1:RR-TEMP-A-LEN) TO RR-TEMP-COL
+               MOVE RR-TEMP-B(1:RR-TEMP-B-LEN) TO 
+                            RR-TEMP-COL(RR-TEMP-A-LEN + 1:RR-TEMP-B-LEN)
 
-              IF TEMP-COL(TEMP-LEN:1) = "F" AND 
-                  TEMP-COL(TEMP-LEN - 1:1) IS NUMERIC
-                MOVE TEMP-COL(1 : TEMP-LEN - 1) TO TEMP-COL
-                MOVE "Y" TO TEMP-FLAG
-                MOVE 11  TO DTLS-FLAG
-              END-IF
+               MOVE "Y" TO RR-NEXT-FLAG RR-TEMP-FLAG
+               MOVE 11  TO RR-DTLS-FLAG
+             END-IF
+       
+             IF RR-TEMP-COL(RR-TEMP-LEN:1) = "F" AND 
+                RR-TEMP-COL(RR-TEMP-LEN - 1:1) IS NUMERIC
+      *        MOVE RR-TEMP-COL(1 : RR-TEMP-LEN - 1) TO RR-TEMP-COL *> 省略
+               MOVE "Y" TO RR-TEMP-FLAG
+               MOVE 11  TO RR-DTLS-FLAG
+             END-IF
 
-              IF TEMP-COL(TEMP-LEN:2) = "F," AND 
-                  TEMP-COL(TEMP-LEN - 2:1) IS NUMERIC
-                MOVE TEMP-COL(1 : TEMP-LEN - 2) TO TEMP-COL
-                MOVE "Y" TO TEMP-FLAG
-                MOVE 11  TO DTLS-FLAG
-              END-IF
+      *       IF RR-TEMP-COL(RR-TEMP-LEN:2) = "F," AND 
+      *           RR-TEMP-COL(RR-TEMP-LEN - 2:1) IS NUMERIC
+      *         MOVE RR-TEMP-COL(1 : RR-TEMP-LEN - 2) TO RR-TEMP-COL
+      *         MOVE "Y" TO RR-TEMP-FLAG
+      *         MOVE 11  TO RR-DTLS-FLAG
+      *       END-IF
+             IF RR-TEMP-COL(RR-TEMP-LEN - 1:2) = "F." AND
+                (PC-CNT-NUM(IDX + 1) = 0 OR
+                PC-CNT-COMMA(IDX) = ",")
+                MOVE "Y" TO RR-TEMP-FLAG
+                MOVE "N" TO RR-NEXT-FLAG
+                MOVE 11  TO RR-DTLS-FLAG
+             END-IF
 
-              IF TEMP-COL(1:1) = "B" AND
-                (TEMP-COL(2:TEMP-LEN - 1) IS NUMERIC OR
-                (TEMP-COL(TEMP-LEN:1) = "," AND
-                 TEMP-COL(2:TEMP-LEN - 2) IS NUMERIC))
-                MOVE "Y" TO TEMP-FLAG
-                MOVE 11  TO DTLS-FLAG
-              END-IF
 
-              *> =================== FLOOR 判斷結束 ===================
-              *> =================== 特殊ZIP 判斷 ===================
+             IF  RR-TEMP-COL(1:1) = "B" AND
+               ((RR-TEMP-COL(2:RR-TEMP-LEN - 1) IS NUMERIC) OR
+                (RR-TEMP-COL(RR-TEMP-LEN:1) = "," AND
+                 RR-TEMP-COL(2:RR-TEMP-LEN - 2) IS NUMERIC))
+               MOVE "Y" TO RR-TEMP-FLAG
+               MOVE 11  TO RR-DTLS-FLAG
+             END-IF
 
-              *> 是否為 郵遞區號 (英國等地區用)
+             *> =================== FLOOR 判斷結束 ===================
+             *> =================== 特殊ZIP 判斷 ===================
+       
+             *> 是否為 郵遞區號 (英國等地區用)
       *       標準寫法: "XXX XXX" (有空白，分2段)
       *       手寫常見: "XXXXXX"  (無空白，僅1段)
       *      1. 非英國
@@ -645,651 +1040,1018 @@
       *      前半：總字數1~2
       *      前半：總字數3~4，包含數字*1
       *      後半：包含數字*1、總字數3
-            IF (DTLS-FLAG NOT = 1 
-                AND (TEMP-PART-CHECK(IDX + 1) = 2 OR
-                     TEMP-PART-CHECK(IDX + 2) = 2 OR
-                     TEMP-PART-CHECK(IDX + 3) = 2)
+             IF (RR-DTLS-FLAG NOT = 1 
+                AND (PC-PART-CHECK(IDX + 1) = 2 OR
+                     PC-PART-CHECK(IDX + 2) = 2 OR
+                     PC-PART-CHECK(IDX + 3) = 2)
                 AND(
                *> 1. 非英國 標準寫法
                (
-               (TEMP-LEN = 3                  AND CNT-NUM(IDX) = 1)) AND
-               (NEXT-LEN >= 3 AND NEXT-LEN <= 4 
-                                              AND CNT-NUM(IDX + 1) >= 1)
+               (RR-TEMP-LEN = 3           AND PC-CNT-NUM(IDX) = 1)) AND
+               (RR-NEXT-LEN >= 3 AND RR-NEXT-LEN <= 4 
+                                          AND PC-CNT-NUM(IDX + 1) >= 1)
 
                OR
 
                *> 2. 英國 標準寫法
-               ((DTLS-LF(2) = "GB" OR DTLS-LF(2) = "UK") AND
-               ((TEMP-LEN >= 1 AND TEMP-LEN <= 2
-                                              AND CNT-NUM(IDX) < 2) OR
-                (TEMP-LEN >= 3 AND TEMP-LEN <= 4 
-                                              AND CNT-NUM(IDX) = 1)) AND
-               (NEXT-LEN >= 3 AND NEXT-LEN <= 4 
-                                              AND CNT-NUM(IDX + 1) = 1))
+               (DTLS-LF(2) = "GB" AND
+               ((RR-TEMP-LEN >= 1 AND RR-TEMP-LEN <= 2
+                                          AND PC-CNT-NUM(IDX) < 2) OR
+                (RR-TEMP-LEN >= 3 AND RR-TEMP-LEN <= 4 
+                                          AND PC-CNT-NUM(IDX) = 1)) AND
+               (RR-NEXT-LEN >= 3 AND RR-NEXT-LEN <= 4 
+                                          AND PC-CNT-NUM(IDX + 1) = 1))
                ))
-                MOVE "Y" TO ZIP-FLAG
+                MOVE "Y" TO RR-ZIP-FLAG
                 *> 前半
-                PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > TEMP-LEN
-                  IF NOT (TEMP-COL(JDX:1) IS ALPHABETIC-UPPER OR
-                     TEMP-COL(JDX:1) IS NUMERIC)
-                     MOVE "N" TO ZIP-FLAG
+                PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > RR-TEMP-LEN
+                  IF NOT (RR-TEMP-COL(JDX:1) IS ALPHABETIC-UPPER OR
+                     RR-TEMP-COL(JDX:1) IS NUMERIC)
+                     MOVE "N" TO RR-ZIP-FLAG
                      EXIT PERFORM
                   END-IF
                 END-PERFORM
 
                 *> 後半
-                PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > NEXT-LEN
-                  IF NOT (NEXT-COL(JDX:1) IS ALPHABETIC-UPPER OR
-                     NEXT-COL(JDX:1) IS NUMERIC)
-                     MOVE "N" TO ZIP-FLAG
+                PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > RR-NEXT-LEN
+                  IF NOT (RR-NEXT-COL(JDX:1) IS ALPHABETIC-UPPER OR
+                     RR-NEXT-COL(JDX:1) IS NUMERIC)
+                     MOVE "N" TO RR-ZIP-FLAG
                      EXIT PERFORM
                   END-IF
                 END-PERFORM
 
               ELSE
-                  MOVE "N" TO ZIP-FLAG
+                  MOVE "N" TO RR-ZIP-FLAG
               END-IF
 
-              IF ZIP-FLAG = "Y"
-                MOVE "Y" TO TEMP-FLAG NEXT-FLAG
-                MOVE 1   TO DTLS-FLAG
-                MOVE "," TO PRE-FLAG
+              IF RR-ZIP-FLAG = "Y" AND PC-CNT-NUM(IDX) > 0
+                MOVE "Y" TO RR-TEMP-FLAG RR-NEXT-FLAG
+                MOVE 1   TO RR-DTLS-FLAG
+                MOVE "," TO RR-PRE-FLAG
               END-IF
 
-            IF (DTLS-FLAG NOT = 1 
-                AND (TEMP-PART-CHECK(IDX + 1) = 2 OR
-                     TEMP-PART-CHECK(IDX + 2) = 2 OR
-                     TEMP-PART-CHECK(IDX + 3) = 2)
-                AND CNT-U(IDX) = "Y" AND (
+             IF PC-CNT-NUM(IDX) > 0 AND
+               (RR-DTLS-FLAG NOT = 1 
+                AND (PC-PART-CHECK(IDX + 1) = 2 OR
+                     PC-PART-CHECK(IDX + 2) = 2 OR
+                     PC-PART-CHECK(IDX + 3) = 2)
+                AND (
                *> 1. 非英國 手寫常見
-               (TEMP-LEN >= 6 AND TEMP-LEN <= 7 AND CNT-NUM(IDX) >= 2)
+               (RR-TEMP-LEN >= 6 AND RR-TEMP-LEN <= 7 
+                                             AND PC-CNT-NUM(IDX) >= 2)
+               OR
+               (RR-TEMP-LEN >= 8
+                                             AND PC-CNT-NUM(IDX) >= 5)
 
                OR
 
                *> 2. 英國 手寫常見
-               ((DTLS-LF(2) = "GB" OR DTLS-LF(2) = "UK") AND
-               ((TEMP-LEN >= 4 AND TEMP-LEN <= 6 AND CNT-NUM(IDX) < 3)OR
-               (TEMP-LEN >= 6 AND TEMP-LEN <= 8 AND CNT-NUM(IDX) = 2)))
+               (DTLS-LF(2) = "GB" AND
+               ((RR-TEMP-LEN >= 4 AND RR-TEMP-LEN <= 6 
+                                             AND PC-CNT-NUM(IDX) < 3)OR
+               (RR-TEMP-LEN >= 6 AND RR-TEMP-LEN <= 8 
+                                             AND PC-CNT-NUM(IDX) = 2)))
 
                ))
-                MOVE "Y" TO TEMP-FLAG
-                MOVE 1 TO DTLS-FLAG
-                MOVE "," TO PRE-FLAG
+                MOVE "Y" TO RR-TEMP-FLAG
+                MOVE 1 TO RR-DTLS-FLAG
+                MOVE "," TO RR-PRE-FLAG
               END-IF
+              
               *> =================== 特殊ZIP 判斷結束 ===================
               *> 是否為 號
-              IF TEMP-LEN - CNT-NUM(IDX) = 1 AND
-                 TEMP-LEN > 1 AND CNT-NUM(IDX) > 1 AND
-                 TEMP-COL(TEMP-LEN:1) IS ALPHABETIC-UPPER AND
-                 DTLS-FLAG < 11
-                MOVE "," TO PRE-FLAG
-                MOVE "Y" TO TEMP-FLAG
-                MOVE 9 TO DTLS-FLAG
+              IF RR-TEMP-LEN - PC-CNT-NUM(IDX) = 1 AND
+                 RR-TEMP-LEN > 1 AND PC-CNT-NUM(IDX) > 1 AND
+                 RR-TEMP-COL(RR-TEMP-LEN:1) IS ALPHABETIC-UPPER AND
+                 RR-DTLS-FLAG < 11
+                MOVE "," TO RR-PRE-FLAG
+                MOVE "Y" TO RR-TEMP-FLAG
+                MOVE 9 TO RR-DTLS-FLAG
               END-IF
 
-              *> =================== CategoryRule 判斷 ===================
-              IF TEMP-FLAG NOT = "Y"
-              MOVE FUNCTION UPPER-CASE(TEMP-COL(1:TEMP-LEN)) 
-                TO TEMP-UPPER-COL
-              IF TEMP-UPPER-COL(TEMP-LEN:1) = ","
-                  MOVE TEMP-UPPER-COL(1:TEMP-LEN - 1) TO TEMP-UPPER-COL
-              END-IF
+              *> =================== LS-LIST-COL 判斷 ===================
+              IF RR-TEMP-FLAG NOT = "Y" OR
+                 (DTLS-LF(RR-DTLS-FLAG) NOT = SPACES AND 
+                 RR-DTLS-FLAG NOT = 11)
 
-              MOVE FUNCTION UPPER-CASE(NEXT-COL(1:NEXT-LEN)) 
-                TO NEXT-UPPER-COL
-              IF NEXT-UPPER-COL(NEXT-LEN:1) = ","
-                  MOVE NEXT-UPPER-COL(1:NEXT-LEN - 1) TO NEXT-UPPER-COL
-              END-IF
-
-               *> 全方向
-               MOVE "N" TO DIR-FLAG
-               PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > DIR-LEN
-                 IF NEXT-UPPER-COL = DIR-NAMES(JDX)
-                   MOVE "Y" TO DIR-FLAG
-                   EXIT PERFORM
-                 END-IF
-               END-PERFORM
-
-               IF DIR-FLAG = "Y"
-
-                  MOVE ";" TO NEXT-UPPER-COL
-                  MOVE "Y" TO TEMP-FLAG NEXT-FLAG
-                  MOVE 5   TO DTLS-FLAG
-
-                  *> (**** DIRECTION ROAD) OR
-                  *> (**** DE ****)
-                  IF FUNCTION UPPER-CASE(TEMP-PART(IDX + 2)(1:4))
-                     = "ROAD" OR NEXT-UPPER-COL = "DE"
-                    STRING
-                      TEMP-COL(1:TEMP-LEN) DELIMITED BY SIZE
-                      " " DELIMITED BY SIZE
-                      NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
-                      " " DELIMITED BY SIZE
-                      TEMP-PART(IDX + 2)(1:4) DELIMITED BY SIZE
-                      INTO TEMP-COL
-                    END-STRING
-                    MOVE SPACES TO TEMP-PART(IDX + 2) NEXT-COL
-                    ADD 1 TO IDX-PLUS
-                  END-IF
-                END-IF
-
-              *> 以CategoryRule.csv 為準則切割
-              PERFORM VARYING JDX FROM 3 BY 1 UNTIL JDX > 16
-              PERFORM VARYING KDX FROM 2 BY 1 UNTIL KDX > 40
-                MOVE LS-LIST-COL(JDX KDX) TO CHECK-COL
-                MOVE LENGTH OF FUNCTION TRIM(CHECK-COL) TO CHECK-LEN
-                IF CHECK-COL = SPACES OR CHECK-COL = ALL LOW-VALUES
-                  EXIT PERFORM
-                END-IF
-
-
+                 MOVE PC-CNT-KEY-I(IDX) TO JDX
+                MOVE PC-CNT-KEY-W(IDX) TO RR-CHECK-COL
+                MOVE LENGTH OF FUNCTION TRIM(RR-CHECK-COL)
+                                          TO RR-CHECK-LEN
                 *> ===== 羅馬字 判斷 ====
-                IF CHECK-COL(1:1) = "-" AND 
-                  TEMP-UPPER-COL(TEMP-LEN - CHECK-LEN + 1:
-                                 CHECK-LEN) = CHECK-COL
-
-                    MOVE "," TO PRE-FLAG
-                    MOVE ";" TO NEXT-UPPER-COL
-                    MOVE "Y" TO TEMP-FLAG
-                    MOVE JDX TO DTLS-FLAG
+                IF JDX > 30 AND JDX < 60
+                    MOVE "," TO RR-PRE-FLAG
+                    MOVE "Y" TO RR-TEMP-FLAG
+                    SUBTRACT 30 FROM JDX GIVING JDX RR-DTLS-FLAG
                 END-IF
 
                 *> ===== 後接字 判斷 ====
-                IF CHECK-COL(CHECK-LEN:1) = "-" AND 
-                  TEMP-UPPER-COL = CHECK-COL(1:CHECK-LEN - 1)
+                IF JDX > 60 AND JDX < 99
 
-                    MOVE "," TO PRE-FLAG
-                    MOVE ";" TO NEXT-UPPER-COL
-                    MOVE "Y" TO TEMP-FLAG
-                    STRING
-                      TEMP-COL(1:CHECK-LEN - 1) DELIMITED BY SIZE
-                      " " DELIMITED BY SIZE
-                      NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
-                      INTO TEMP-COL
-                    MOVE SPACES TO NEXT-COL TEMP-PART(IDX + 1)
-                    MOVE JDX TO DTLS-FLAG TEMP-PART-CHECK(IDX + 1)
-                    MOVE 1 TO IDX-PLUS
+                    MOVE "," TO RR-PRE-FLAG
+                    MOVE "Y" TO RR-TEMP-FLAG
+                    SUBTRACT 60 FROM JDX GIVING JDX RR-DTLS-FLAG
+                                                PC-PART-CHECK(IDX + 1)
+
+                    MOVE RR-TEMP-COL(1:RR-CHECK-LEN - 1) TO RR-TEMP-COL
+                    MOVE " " TO RR-TEMP-COL(RR-CHECK-LEN:1)
+                    MOVE RR-NEXT-COL(1:RR-NEXT-LEN) 
+                        TO RR-TEMP-COL(RR-CHECK-LEN + 1:RR-NEXT-LEN)
+
+                    MOVE SPACES TO RR-NEXT-COL WK-PART(IDX + 1)
+                    MOVE 1 TO RR-IDX-PLUS
+
+                    *> 義大利街名判斷
+                    PERFORM VARYING RR-CNT-F FROM 2 BY 1
+                            UNTIL DTLS-LF(2) = "IT" AND JDX = 5 AND
+                                 (PC-CNT-COMMA(IDX + RR-CNT-F - 1) = ","
+                               OR PC-CNT-NUM(IDX + RR-CNT-F) > 0
+                               OR PC-PART-CHECK(IDX) NOT = 0)
+
+                      MOVE RR-TEMP-COL TO TD-TEMP
+                      PERFORM FA-TRIM
+                      MOVE TD-FINISH TO RR-TEMP-COL
+                      MOVE TD-L TO RR-TEMP-LEN
+
+                      MOVE WK-PART(IDX + RR-CNT-F) TO TD-TEMP
+                      PERFORM FA-TRIM
+                      MOVE TD-FINISH TO RR-NEXT-COL
+                      MOVE TD-L TO RR-NEXT-LEN
+
+                      MOVE " " TO RR-TEMP-COL(RR-TEMP-LEN + 1:1)
+                      MOVE RR-NEXT-COL(1:RR-NEXT-LEN) 
+                          TO RR-TEMP-COL(RR-TEMP-LEN + 2:RR-NEXT-LEN)
+
+                      MOVE SPACES TO RR-NEXT-COL WK-PART(IDX + RR-CNT-F)
+                      MOVE JDX TO RR-DTLS-FLAG
+                                  PC-PART-CHECK(IDX + RR-CNT-F)
+                      ADD 1 TO RR-IDX-PLUS
+                    END-PERFORM
+
                 END-IF
 
                 *> ===== 段巷弄號樓室 判斷 =====
-                IF JDX >= 6 AND JDX <= 16 AND TEMP-UPPER-COL = CHECK-COL
-                  MOVE "Y" TO TEMP-FLAG
-                  MOVE JDX TO DTLS-FLAG
+                IF JDX >= 6 AND JDX <= 16 AND
+                   RR-TEMP-COL = RR-CHECK-COL
+      *          OR RR-TEMP-COL(RR-TEMP-LEN - RR-CHECK-LEN + 1
+      *                         :RR-CHECK-LEN) = RR-CHECK-COL)
+                  MOVE "Y" TO RR-TEMP-FLAG
+                  MOVE JDX TO RR-DTLS-FLAG
 
-                  *> BASEMENT 1 -> B1
-                  IF TEMP-UPPER-COL = "BASEMENT"
-                    MOVE SPACES TO TEMP-COL
-                    STRING
-                      "B" DELIMITED BY SIZE
-                      NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
-                      INTO TEMP-COL
-                    END-STRING
-                    MOVE TEMP-COL TO NEXT-COL
-                    MOVE LENGTH OF FUNCTION TRIM(TEMP-COL)
-                         TO TEMP-LEN NEXT-LEN
-                  END-IF
+                  *> 若 TEMP 為關鍵字但無其他資訊(需追加 NEXT 資訊)
+                  IF RR-PRE-COL = SPACES AND RR-TEMP-COL = RR-CHECK-COL
+                    AND NOT((JDX >= 3 AND JDX <= 5) OR JDX = 10 OR
+                             JDX >= 15)
+                    AND RR-TEMP-COL NOT = "M/F"
+                    MOVE "Y" TO RR-NEXT-FLAG
 
-                  *> 後接字串判斷 特殊狀況(IF)需跳過
-                  IF CHECK-COL NOT = "M/F"
-                    MOVE "Y" TO NEXT-FLAG
-                    MOVE ";" TO NEXT-UPPER-COL
-                    IF JDX >= 6 AND JDX <= 11
-                          MOVE NEXT-COL TO TEMP-COL *> 省略文字僅留數字
-                          MOVE NEXT-LEN TO TEMP-LEN
-                          MOVE SPACES TO NEXT-COL *> 省略文字僅留數字
-                          MOVE 0 TO NEXT-LEN
+                    *> BASEMENT 1 -> B1F
+                    IF RR-TEMP-COL = "BASEMENT"
+                      MOVE "B" TO RR-TEMP-COL
+                      MOVE RR-NEXT-COL(1:RR-NEXT-LEN)
+                                      TO RR-TEMP-COL(2:RR-NEXT-LEN)
+                      MOVE "F" TO RR-TEMP-COL(RR-NEXT-LEN + 2:1)
+
+                      MOVE RR-TEMP-COL TO TD-TEMP
+                      PERFORM FA-TRIM
+                      MOVE TD-L TO RR-TEMP-LEN
+                      MOVE SPACES TO RR-NEXT-COL
+                      MOVE 0 TO RR-NEXT-LEN
                     END-IF
+      *           ELSE
+      *            *> 若 TEMP 為關鍵字但無其他資訊(該關鍵字不能在字串首位)
+      *             MOVE "N" TO RR-TEMP-FLAG RR-NEXT-FLAG
+      *             MOVE 0 TO RR-DTLS-FLAG
                   END-IF
+
+                  IF RR-TEMP-COL = "M/F"
+                    MOVE "Y" TO RR-TEMP-FLAG
+                    MOVE JDX TO RR-DTLS-FLAG
+                  END-IF
+
+                IF RR-TEMP-COL = RR-CHECK-COL AND RR-DTLS-FLAG = 0
+                  MOVE "Y" TO RR-TEMP-FLAG
+                  MOVE JDX TO RR-DTLS-FLAG                  
                 END-IF
-
-           *> ===== (NEXT-COL)特定字判斷 =====
+                END-IF
+           *> ===== (RR-NEXT-COL)特定字判斷 =====
                 *> 若找到相符內容
-                IF NEXT-UPPER-COL = CHECK-COL
-                  MOVE "Y" TO TEMP-FLAG
-                  MOVE "Y" TO NEXT-FLAG
-                  MOVE JDX TO DTLS-FLAG
+      *      DISPLAY "RR-NEXT-FLAG? "RR-NEXT-FLAG"\"
+      *      FUNCTION TRIM(RR-NEXT-COL)"\"
+      *      FUNCTION TRIM(RR-CHECK-COL)"\"JDX
 
-                  *> 段巷弄號樓室 判斷
-                  IF JDX >= 7 AND JDX <= 8 AND
-                     FUNCTION TRIM(TEMP-COL) IS NOT NUMERIC
-                    MOVE 5 TO DTLS-FLAG
+                IF PC-CNT-KEY-I(IDX + 1) NOT = 0 AND
+                   PC-CNT-KEY-I(IDX + 1) < 30 AND
+                   PC-CNT-COMMA(IDX) NOT = ","
+                  MOVE "Y" TO RR-TEMP-FLAG
+                  MOVE "Y" TO RR-NEXT-FLAG
+                  MOVE PC-CNT-KEY-I(IDX + 1) TO JDX RR-DTLS-FLAG
+
+                  *> ===== 是否需要跳過處理 判斷 =====
+                  *> EX 原邏輯: (XXX PARK) -> 4[DISTRICT] (RD.) -> 5[STREET]
+                  *>    修正後: (XXX PARK RD.) -> 5[STREET]
+                  IF PC-CNT-KEY-I(IDX + 2) = 5 AND
+                     PC-CNT-COMMA(IDX + 1) NOT = ","
+                    MOVE 5 TO RR-DTLS-FLAG
+                    MOVE RR-TEMP-COL(1:RR-TEMP-LEN) TO RR-TEMP-COL
+                    MOVE " " TO RR-TEMP-COL(RR-TEMP-LEN + 1:1)
+                    MOVE RR-NEXT-COL(1:RR-NEXT-LEN) 
+                         TO RR-TEMP-COL(RR-TEMP-LEN + 2:RR-NEXT-LEN)
+                    MOVE " " 
+                         TO RR-TEMP-COL(RR-TEMP-LEN + RR-NEXT-LEN + 2:1)
+                    MOVE WK-PART(IDX + 2)(1:PC-CNT-CHAR(IDX + 2))
+                         TO RR-TEMP-COL(RR-TEMP-LEN + RR-NEXT-LEN + 3:
+                                        PC-CNT-CHAR(IDX + 2))
+                    MOVE SPACES TO WK-PART(IDX + 2) RR-NEXT-COL
+                    MOVE 1 TO RR-IDX-PLUS
                   END-IF
 
                   *> FLOOR 字串判斷
                   IF JDX = 11
-                    IF CNT-NUM(IDX) > 0 AND NEXT-UPPER-COL = "FLOOR"
-                      INSPECT TEMP-COL REPLACING ALL "ST" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "st" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "ND" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "nd" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "RD" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "rd" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "TH" BY SPACES
-                      INSPECT TEMP-COL REPLACING ALL "th" BY SPACES
-                      MOVE SPACES TO NEXT-COL
-                      MOVE 0 TO NEXT-LEN
-                    END-IF
-                    STRING
-                      FUNCTION TRIM(PRE-COL) DELIMITED BY SIZE
-                      " " DELIMITED BY SIZE
-                      FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
-                      " " DELIMITED BY SIZE
-                      FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
-                      INTO TEMP-A
-                    END-STRING
-                    MOVE TEMP-A TO TEMP-COL
-                    MOVE SPACES TO PRE-COL NEXT-COL
-                    MOVE 0 TO PRE-LEN NEXT-LEN
+      *             *> "1ST FLOOR" -> "1" 省略贅字
+      *             IF PC-CNT-NUM(IDX) > 0 AND RR-NEXT-COL = "FLOOR"
+      *               INSPECT RR-TEMP-COL REPLACING ALL "ST" BY SPACES
+      *               INSPECT RR-TEMP-COL REPLACING ALL "ND" BY SPACES
+      *               INSPECT RR-TEMP-COL REPLACING ALL "RD" BY SPACES
+      *               INSPECT RR-TEMP-COL REPLACING ALL "TH" BY SPACES
+      *               MOVE SPACES TO RR-NEXT-COL
+      *               MOVE 0 TO RR-NEXT-LEN
+      *             END-IF
+                    MOVE RR-TEMP-COL TO TD-TEMP
+                    PERFORM FA-TRIM
+                    MOVE TD-L TO RR-TEMP-LEN
+
+                    MOVE RR-PRE-COL(1:RR-PRE-LEN) TO RR-TEMP-A
+                    MOVE " " TO RR-TEMP-A(RR-PRE-LEN + 1:1)
+                    MOVE RR-TEMP-COL(1:RR-TEMP-LEN)
+                         TO RR-TEMP-A(RR-PRE-LEN + 2:RR-TEMP-LEN)
+                    MOVE " " 
+                         TO RR-TEMP-A(RR-PRE-LEN + RR-TEMP-LEN + 2:1)
+                    MOVE RR-NEXT-COL(1:RR-NEXT-LEN)
+                         TO RR-TEMP-A(RR-PRE-LEN + RR-TEMP-LEN + 3
+                                                        :RR-NEXT-LEN)
+
+                    MOVE RR-TEMP-A TO RR-TEMP-COL
+                    MOVE SPACES TO RR-PRE-COL RR-NEXT-COL
+                    MOVE 0 TO RR-PRE-LEN RR-NEXT-LEN
                   ELSE *> FLOOR 字串判斷 結束
 
                   *> STREET 後接字串判斷
-                  MOVE FUNCTION UPPER-CASE(TEMP-PART(IDX + 2))
-                    TO NEXT-UPPER-COL
+                  COMPUTE RR-NEXT-LEN-2 = PC-CNT-NUM(IDX + 2) +
+                                          PC-CNT-CHAR(IDX + 2)
+                  MOVE WK-PART(IDX + 2)(1:RR-NEXT-LEN-2) 
+                       TO RR-NEXT-COL-2
                     *> 全方向
-                  MOVE "N" TO DIR-FLAG
-                  PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > DIR-LEN
-                    IF NEXT-UPPER-COL = DIR-NAMES(JDX)
-                    MOVE "Y" TO DIR-FLAG
-                    EXIT PERFORM
-                    END-IF
-                  END-PERFORM
+                  IF (PC-CNT-KEY-I(IDX + 2) = 99 OR
+                      PC-CNT-KEY-W(IDX + 2) = "LOOP") AND
+                     PC-CNT-COMMA(IDX + 1)  NOT = ","
+                       MOVE RR-NEXT-COL(1:RR-NEXT-LEN) TO RR-NEXT-COL
+                       MOVE " " TO RR-NEXT-COL(RR-NEXT-LEN + 1:1)
+                       MOVE RR-NEXT-COL-2(1:RR-NEXT-LEN-2) 
+                           TO RR-NEXT-COL(RR-NEXT-LEN + 2:RR-NEXT-LEN-2)
 
-                  IF DIR-FLAG = "Y"
-                       STRING
-                          NEXT-COL(1:NEXT-LEN) DELIMITED BY SIZE
-                          " " DELIMITED BY SIZE
-                          FUNCTION TRIM(TEMP-PART(IDX + 2))
-                            DELIMITED BY SIZE
-                          INTO NEXT-COL
-                       END-STRING
-
-                       MOVE 1 TO IDX-PLUS
-
+                       MOVE 1 TO RR-IDX-PLUS
                     END-IF
                   END-IF
 
-                  EXIT PERFORM
+                  *> SECTION -> SUB-DEPARTMENT(若段為文字)
+                  IF RR-DTLS-FLAG = 6 AND PC-CNT-NUM(IDX) = 0
+                    MOVE 18 TO RR-DTLS-FLAG
+                  END-IF
+
+                  *> 若
+                  IF RR-DTLS-FLAG = 13 AND PC-CNT-NUM(IDX) = 0
+                    MOVE 18 TO RR-DTLS-FLAG
+                  END-IF
+
                 END-IF
-           *> ===== (NEXT-COL)特定字判斷 完成 =====
-              END-PERFORM
-              END-PERFORM
+           *> ===== (RR-NEXT-COL)特定字判斷 完成 =====
+               IF (RR-DTLS-FLAG = 0 AND
+                  (PC-CNT-KEY-I(IDX+ 1) = 99 OR
+                   PC-CNT-KEY-W(IDX+ 1) = "LOOP")
+                  AND
+                  PC-CNT-COMMA(IDX) NOT = ",") OR
+                  RR-NEXT-COL = "DE"   OR
+                  RR-NEXT-COL = "DEL"
+
+                  MOVE "Y" TO RR-TEMP-FLAG RR-NEXT-FLAG
+                  MOVE 5   TO RR-DTLS-FLAG
+
+                  *> (**** DIRECTION ROAD) OR
+                  *> (VIA DIRECTION ****) OR
+                  *> (**** DE ****) OR
+                  *> (**** DEL ****)
+                  IF WK-PART(IDX + 2)(1:4) = "ROAD" OR
+                     WK-PART(IDX + 2)(1:3) = "RD."  OR
+                     RR-TEMP-COL = "VIA"  OR
+                     RR-NEXT-COL = "DE"   OR
+                     RR-NEXT-COL = "DEL"
+                    MOVE RR-TEMP-COL(1:RR-TEMP-LEN) TO RR-TEMP-COL
+                    MOVE " " TO RR-TEMP-COL(RR-TEMP-LEN + 1:1)
+                    MOVE RR-NEXT-COL(1:RR-NEXT-LEN) 
+                         TO RR-TEMP-COL(RR-TEMP-LEN + 2:RR-NEXT-LEN)
+                    MOVE " " 
+                         TO RR-TEMP-COL(RR-TEMP-LEN + RR-NEXT-LEN + 2:1)
+                    MOVE WK-PART(IDX + 2)(1:PC-CNT-CHAR(IDX + 2))
+                         TO RR-TEMP-COL(RR-TEMP-LEN + RR-NEXT-LEN + 3:
+                                        PC-CNT-CHAR(IDX + 2))
+                    MOVE SPACES TO WK-PART(IDX + 2) RR-NEXT-COL
+                    MOVE 1 TO RR-IDX-PLUS
+                  END-IF
+               ELSE
+
+               *> 若此欄為 VIA~ 且 NEXT無逗號 IDX + 2 欄位也需要加入
+               IF RR-DTLS-FLAG = 5 AND RR-IDX-PLUS = 1 AND
+                  RR-TEMP-COL(1:4) = "VIA " AND
+                  PC-CNT-COMMA(IDX + 1) NOT = ","
+
+                  MOVE RR-TEMP-COL TO TD-TEMP
+                  PERFORM FA-TRIM
+                  MOVE TD-FINISH TO RR-TEMP-COL
+                  MOVE TD-L TO RR-TEMP-LEN
+
+                    MOVE RR-TEMP-COL(1:RR-TEMP-LEN) TO RR-TEMP-COL
+                    MOVE " " TO RR-TEMP-COL(RR-TEMP-LEN + 1:1)
+                    MOVE WK-PART(IDX + 2)
+                         (1:PC-CNT-NUM(IDX + 2) + PC-CNT-CHAR(IDX + 2))
+                         TO RR-TEMP-COL(RR-TEMP-LEN + 2:
+                            PC-CNT-NUM(IDX + 2) + PC-CNT-CHAR(IDX + 2))
+                    MOVE SPACES TO WK-PART(IDX + 2) RR-NEXT-COL
+
+                  ADD 1 TO RR-IDX-PLUS
+
+               END-IF
+               END-IF
+
               END-IF
-              *> =================== CategoryRule 判斷結束 ===================
+              *> =================== LS-LIST-COL 判斷結束 ===================
 
               *> 尚未分類完成 但本身便帶有","
-              *> 特殊處理欄位/ AFTER-DATA納入主判斷
-              IF TEMP-COL(TEMP-LEN + 1:1) = "," AND DTLS-FLAG = 0
+              *> 特殊處理欄位/ PC-OTHER-ALL納入主判斷
+              IF PC-CNT-COMMA(IDX) = "," AND RR-DTLS-FLAG = 0
       *         DISPLAY "OTHER!!!!" 
-      *           FUNCTION TRIM(PRE-COL)"/ "
-      *           FUNCTION TRIM(TEMP-COL)"/ "
-      *           FUNCTION TRIM(NEXT-COL)"/ "
-      *           MATCH-NEW"/ "IDX"/ "TEMP-PART-CHECK(MATCH-NEW)
+      *           FUNCTION TRIM(RR-PRE-COL)"/ "
+      *           FUNCTION TRIM(RR-TEMP-COL)"/ "
+      *           FUNCTION TRIM(RR-NEXT-COL)"/ "
+      *           PC-MATCH-NEW"/ "IDX"/ "PC-PART-CHECK(PC-MATCH-NEW)
 
-                MOVE "Y" TO TEMP-FLAG
+                MOVE "Y" TO RR-TEMP-FLAG
 
                 *> 樓層 + 大樓
-                IF IDX NOT = 1 AND TEMP-PART-CHECK(MATCH-NEW) = 11
-                  MOVE 14 TO DTLS-FLAG
+                IF IDX NOT = 1 AND PC-MATCH-NEW NOT = 0
+                   AND PC-PART-CHECK(PC-MATCH-NEW) = 11
+                  MOVE 14 TO RR-DTLS-FLAG
                 END-IF
 
                 *> 若尚未填入 路以上之欄位
-                IF DTLS-FLAG = 0 AND DTLS-LF(5) = SPACES AND 
-                TEMP-PART-CHECK(MATCH-NEW) > 5 OR
-                TEMP-PART-CHECK(MATCH-NEW) <= 2 OR
-                   MATCH-NEW = 0
+                IF RR-DTLS-FLAG = 0 AND DTLS-LF(5) = SPACES AND 
+                  (PC-MATCH-NEW = 0 OR
+                   PC-PART-CHECK(PC-MATCH-NEW) > 5 OR
+                   PC-PART-CHECK(PC-MATCH-NEW) <= 2)
+                   
                   *> STREET 後接字串判斷
-                  MOVE FUNCTION UPPER-CASE(NEXT-COL) TO NEXT-UPPER-COL
-                  IF NEXT-UPPER-COL(NEXT-LEN:1) = ","
-                      MOVE NEXT-UPPER-COL(1:NEXT-LEN - 1) 
-                        TO NEXT-UPPER-COL
+                  IF PC-CNT-COMMA(IDX + 1) = ","
+                      MOVE RR-NEXT-COL(1:RR-NEXT-LEN - 1) 
+                        TO RR-NEXT-COL
                   END-IF
 
                   *> 全方向
-                  PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > DIR-LEN
-                    IF NEXT-UPPER-COL = DIR-NAMES(JDX)
-                    MOVE "Y" TO NEXT-FLAG
-                    EXIT PERFORM
-                    END-IF
-                  END-PERFORM
+                  IF PC-CNT-KEY-I(IDX + 1) = 99 OR
+                     PC-CNT-KEY-W(IDX+ 1) = "LOOP"
+                    MOVE "Y" TO RR-NEXT-FLAG
+                  END-IF
 
-                  MOVE 5 TO DTLS-FLAG
+                  MOVE 5 TO RR-DTLS-FLAG
                 END-IF
 
                   PERFORM VARYING JDX FROM IDX BY -1 UNTIL JDX = 1
-                    IF TEMP-PART-CHECK(JDX - 1) = 0
-                      MOVE SPACES TO TEMP-PART(JDX - 1)
-                      MOVE 99 TO TEMP-PART-CHECK(JDX - 1)
+                    IF PC-PART-CHECK(JDX - 1) = 0
+                      MOVE SPACES TO WK-PART(JDX)
+                      MOVE 98 TO PC-PART-CHECK(JDX)
                     END-IF
                   END-PERFORM
-                
               END-IF
 
        *>  ====================== 判斷結束 ======================
-           *> NEXT-FLAG
-              IF NEXT-FLAG = "Y"
-                   STRING
-                     FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
-                     " " DELIMITED BY SIZE
-                     FUNCTION TRIM(NEXT-COL) DELIMITED BY SIZE
-                     INTO TEMP-COL
-                   END-STRING
+           *> RR-NEXT-FLAG
+              IF RR-NEXT-Y
+                   MOVE RR-TEMP-COL TO TD-TEMP
+                   PERFORM FA-TRIM
+                   MOVE TD-FINISH TO RR-TEMP-A
+                   MOVE TD-L TO RR-TEMP-A-LEN
 
-                   COMPUTE TEMP-LEN = TEMP-LEN + NEXT-LEN + 1
-                   MOVE SPACES TO TEMP-PART(IDX) TEMP-PART(IDX + 1)
-                   MOVE DTLS-FLAG TO TEMP-PART-CHECK(IDX)
-                                     TEMP-PART-CHECK(IDX + 1)
+                   MOVE RR-NEXT-COL TO TD-TEMP
+                   PERFORM FA-TRIM
+                   MOVE TD-FINISH TO RR-TEMP-B
+                   MOVE TD-L TO RR-TEMP-B-LEN
+
+                   MOVE RR-TEMP-A(1:RR-TEMP-A-LEN) TO RR-TEMP-COL
+                   MOVE " " TO RR-TEMP-COL(RR-TEMP-A-LEN + 1:1)
+                   MOVE RR-TEMP-B(1:RR-TEMP-B-LEN)
+                        TO RR-TEMP-COL(RR-TEMP-A-LEN + 2:RR-TEMP-B-LEN)
+
+                   COMPUTE RR-TEMP-LEN = RR-TEMP-LEN + RR-NEXT-LEN + 1
+                   MOVE SPACES TO WK-PART(IDX) WK-PART(IDX + 1)
+                   MOVE RR-DTLS-FLAG TO PC-PART-CHECK(IDX)
+                                     PC-PART-CHECK(IDX + 1)
                    ADD 1 TO IDX
               END-IF
 
-              IF PRE-COL(PRE-LEN:1) = "," OR
-                 IDX = 1 OR PRE-LEN = 0
-                MOVE SPACES TO PRE-FLAG
+              IF IDX = 1 OR RR-PRE-LEN = 0 OR
+                 PC-CNT-COMMA(IDX - 1) = ","
+                MOVE SPACES TO RR-PRE-FLAG
               END-IF
 
-           *> CHECK PRE-FLAG
-           IF (PRE-COL(PRE-LEN:1) = "," OR PRE-FLAG = ",") AND 
-               DTLS-FLAG NOT = 0 AND PRE-LEN > 0
-             IF DTLS-LF(14) = SPACES AND TEMP-PART-CHECK(MATCH-NEW) = 11
-               MOVE PRE-COL TO DTLS-LF(14)
+           *> CHECK RR-PRE-FLAG
+           IF RR-PRE-LEN > 0
+             IF (RR-PRE-COL(RR-PRE-LEN:1) = "," OR RR-PRE-FLAG = ",")
+               AND RR-DTLS-FLAG NOT = 0 
+             IF DTLS-LF(14) = SPACES AND
+                (PC-MATCH-NEW >= 1 AND PC-MATCH-NEW <= 30) AND
+                PC-PART-CHECK(PC-MATCH-NEW) = 11
+               MOVE RR-PRE-COL TO DTLS-LF(14)
              ELSE
-             IF DTLS-LF(5) = SPACES
-               MOVE PRE-COL TO DTLS-LF(5)
+             *> 若 STREET欄位為空值 且 非倒數第1~3位
+             IF DTLS-LF(5) = SPACES AND
+                (PC-PART-CHECK(IDX + 1) NOT = 2 AND
+                 PC-PART-CHECK(IDX + 2) NOT = 2 AND
+                 PC-PART-CHECK(IDX + 3) NOT = 2 )
+               MOVE RR-PRE-COL TO DTLS-LF(5)
              ELSE
-               MOVE PRE-COL TO TEMP-PART(IDX - 1)
+               MOVE RR-PRE-COL TO WK-PART(IDX - 1)
 
-               *> 清理TEMP-PART
-               IF IDX > 2
-                 PERFORM VARYING JDX FROM IDX BY -1 UNTIL JDX = 2
-                   IF TEMP-PART-CHECK(JDX - 2) = 0
-                     MOVE SPACES TO TEMP-PART(JDX - 2)
-                     MOVE 99 TO TEMP-PART-CHECK(JDX - 2)
-                   END-IF
-                 END-PERFORM
-               END-IF
+      *        *> 清理WK-PART
+      *        IF IDX > 2
+      *          PERFORM VARYING JDX FROM IDX BY -1 UNTIL JDX = 2
+      *            IF PC-PART-CHECK(JDX - 2) = 0
+      *              MOVE SPACES TO WK-PART(JDX - 2)
+      *              MOVE 97 TO PC-PART-CHECK(JDX - 2)
+      *            END-IF
+      *          END-PERFORM
+      *        END-IF
              END-IF
-               MOVE SPACES TO PRE-COL PRE-FLAG
-               MOVE 0 TO PRE-LEN
+               MOVE SPACES TO RR-PRE-COL RR-PRE-FLAG
+               MOVE 0 TO RR-PRE-LEN
              END-IF
+           END-IF
            END-IF
 
            *> 串聯
-              STRING
-                FUNCTION TRIM(PRE-COL)  DELIMITED BY SIZE
-                FUNCTION TRIM(PRE-FLAG) DELIMITED BY SIZE
-                " " DELIMITED BY SIZE
-                FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
-                INTO PRE-COL
-              END-STRING
-              COMPUTE PRE-LEN = PRE-LEN + TEMP-LEN + 1
+              MOVE RR-PRE-COL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-FINISH TO RR-TEMP-A
+              MOVE TD-L TO RR-TEMP-A-LEN
 
-           *> PRE-FLAG
-              IF AFTER-DATA(LENGTH OF FUNCTION TRIM(AFTER-DATA):1) = ","
-                 OR IDX = 1
-                MOVE SPACES TO PRE-FLAG
+              MOVE RR-TEMP-COL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-FINISH TO RR-TEMP-B
+              MOVE TD-L TO RR-TEMP-B-LEN
+
+              IF RR-PRE-FLAG = ","
+                MOVE RR-TEMP-A(1:RR-TEMP-A-LEN) TO RR-PRE-COL
+                MOVE ", " TO RR-PRE-COL(RR-TEMP-A-LEN + 1:2)
+                MOVE RR-TEMP-B(1:RR-TEMP-B-LEN)
+                     TO RR-PRE-COL(RR-TEMP-A-LEN + 3:RR-TEMP-B-LEN)
+
+                COMPUTE RR-PRE-LEN = RR-TEMP-A-LEN + RR-TEMP-B-LEN + 2
+              ELSE
+                MOVE RR-TEMP-A(1:RR-TEMP-A-LEN) TO RR-PRE-COL
+                MOVE " " TO RR-PRE-COL(RR-TEMP-A-LEN + 1:1)
+                MOVE RR-TEMP-B(1:RR-TEMP-B-LEN)
+                     TO RR-PRE-COL(RR-TEMP-A-LEN + 2:RR-TEMP-B-LEN)
+                COMPUTE RR-PRE-LEN = RR-TEMP-A-LEN + RR-TEMP-B-LEN + 1
               END-IF
 
-           *> DTLS-FLAG判斷
-           IF DTLS-FLAG NOT = 0
-             MOVE FUNCTION TRIM(PRE-COL) TO PRE-COL
-             MOVE LENGTH OF FUNCTION TRIM(PRE-COL) TO PRE-LEN
-             IF PRE-COL(PRE-LEN:1) = ","
-               MOVE PRE-COL(1:PRE-LEN - 1) TO PRE-COL
+           *> RR-PRE-FLAG
+              MOVE PC-OTHER-ALL TO TD-TEMP
+              PERFORM FA-TRIM
+              IF TD-FINISH(TD-L:1) = ","
+                 OR IDX = 1
+                MOVE SPACES TO RR-PRE-FLAG
+              END-IF
+
+           *> RR-DTLS-FLAG判斷
+           IF RR-DTLS-FLAG NOT = 0
+              MOVE RR-PRE-COL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-FINISH TO RR-PRE-COL
+              MOVE TD-L TO RR-PRE-LEN
+             IF RR-PRE-COL(RR-PRE-LEN:1) = ","
+               MOVE RR-PRE-COL(1:RR-PRE-LEN - 1) TO RR-PRE-COL
              END-IF
 
-             IF DTLS-LF(DTLS-FLAG) = SPACES
-               MOVE FUNCTION TRIM(PRE-COL) TO DTLS-LF(DTLS-FLAG)
-               MOVE DTLS-FLAG TO TEMP-PART-CHECK(IDX)
-               MOVE IDX TO MATCH-NEW
-               MOVE SPACES TO TEMP-PART(IDX)
+             *> 若欲移動之位子已經有值 原本要移動至 DEPARTMENT(10)
+             *> 英文撰寫順序: 公司名 -> 部門
+             IF DTLS-LF(RR-DTLS-FLAG) NOT = SPACES AND
+                RR-DTLS-FLAG = 10 AND RR-TEMP-FLAG = "Y"
+                    MOVE 18 TO RR-DTLS-FLAG
              END-IF
 
-             *> 清理TEMP-PART
+             *> 若欲移動之位子已經有值 原本要移動至 BUILDING(14)
+             *> 英文撰寫順序: 建築大樓(單棟) -> 建築大樓(區域)
+             IF DTLS-LF(RR-DTLS-FLAG) NOT = SPACES AND
+                RR-DTLS-FLAG = 14 AND
+                RR-TEMP-FLAG = "Y"
+                IF RR-PRE-COL = RR-TEMP-COL
+                    MOVE DTLS-LF(RR-DTLS-FLAG) TO TD-TEMP
+                    PERFORM FA-TRIM
+                    MOVE " " TO DTLS-LF(RR-DTLS-FLAG)(TD-L + 1:1)
+                    MOVE RR-PRE-COL TO DTLS-LF(RR-DTLS-FLAG)
+                                           (TD-L + 2:RR-PRE-LEN)
+                    MOVE DTLS-LF(RR-DTLS-FLAG) TO RR-PRE-COL
+                    MOVE SPACES TO DTLS-LF(RR-DTLS-FLAG)
+                ELSE
+                    MOVE DTLS-LF(RR-DTLS-FLAG) TO TD-TEMP
+                    PERFORM FA-TRIM
+                    MOVE ", " TO DTLS-LF(RR-DTLS-FLAG)(TD-L + 1:2)
+                    MOVE RR-PRE-COL TO DTLS-LF(RR-DTLS-FLAG)
+                                           (TD-L + 3:RR-PRE-LEN)
+                    MOVE DTLS-LF(RR-DTLS-FLAG) TO RR-PRE-COL
+                    MOVE SPACES TO DTLS-LF(RR-DTLS-FLAG)
+                END-IF
+             END-IF
+
+             *> 若欲移動之位子已經有值
+             IF DTLS-LF(RR-DTLS-FLAG) NOT = SPACES AND
+                DTLS-LF(5) = SPACES AND RR-TEMP-FLAG = "Y"
+                  *> 若原本要移動至 NUMBER(9)
+                  IF RR-DTLS-FLAG = 9
+                    *> 若該值為數字 移至樓層 否則 移至建築物名稱
+                    IF (PC-MATCH-NEW >= 1 AND PC-MATCH-NEW <= 30) AND
+                       PC-CNT-NUM(PC-MATCH-NEW) > 2 AND
+                       PC-CNT-CHAR(PC-MATCH-NEW) < 2
+                       AND DTLS-LF(11) = SPACES
+                      MOVE DTLS-LF(9) TO DTLS-LF(11)
+                      MOVE SPACES TO DTLS-LF(9)
+                    ELSE
+                      MOVE DTLS-LF(9) TO DTLS-LF(14)
+                      MOVE SPACES TO DTLS-LF(9)
+                    END-IF
+                  *> STREET
+                  ELSE
+                    MOVE 5 TO RR-DTLS-FLAG
+                  END-IF
+             ELSE
+
+             *> 若本欄位移動至 
+             *> (18[SUB-DEPARTMENT] 但 10[DEPARTMENT] 為空欄) 或
+             *> 本欄位移動至 10[DEPARTMENT]
+             *> 但前一位未分類完成/被分類至5[STREET] 塞回 10[DEPARTMENT]
+             IF (RR-DTLS-FLAG = 18 AND DTLS-LF(10) = SPACES) OR
+                 RR-DTLS-FLAG = 10
+                IF IDX > 1 AND RR-NEXT-N AND PC-PART-CHECK(IDX - 1) = 5
+                  MOVE WK-PART(IDX - 1) TO DTLS-LF(10)
+                  IF DTLS-LF(10) = SPACES
+                    MOVE DTLS-LF(5) TO DTLS-LF(10)
+                  END-IF
+                  MOVE SPACES TO WK-PART(IDX - 1) DTLS-LF(5)
+                  MOVE 10 TO PC-PART-CHECK(IDX - 1)
+                  MOVE 18 TO RR-DTLS-FLAG
+                END-IF
+                IF IDX > 2 AND RR-NEXT-Y AND PC-PART-CHECK(IDX - 2) = 5
+                  MOVE WK-PART(IDX - 2) TO DTLS-LF(10)
+                  IF DTLS-LF(10) = SPACES
+                    MOVE DTLS-LF(5) TO DTLS-LF(10)
+                  END-IF
+                  MOVE SPACES TO WK-PART(IDX - 2) DTLS-LF(5)
+                  MOVE 10 TO PC-PART-CHECK(IDX - 2)
+                  MOVE 18 TO RR-DTLS-FLAG
+                END-IF
+             END-IF
+
+             *> 若5[STREET]已有值 且
+             *> CNT判斷時 已經確認要放入5 DTLS-LF(5)-> DTLS-LF(10/ 18)
+             IF RR-DTLS-FLAG = 5 AND DTLS-LF(RR-DTLS-FLAG) NOT = SPACES
+                IF PC-CNT-KEY-I(IDX) = 5
+                    IF DTLS-LF(10) NOT = SPACES
+                      MOVE DTLS-LF(5) TO DTLS-LF(18)
+                    ELSE
+                      MOVE DTLS-LF(5) TO DTLS-LF(10)
+                    END-IF
+                    MOVE SPACES TO DTLS-LF(5)
+                ELSE
+                *> 4[DISTRICT]無值
+                IF DTLS-LF(4) = SPACES
+                    MOVE 4 TO RR-DTLS-FLAG
+                END-IF
+                END-IF
+             END-IF
+             END-IF
+
+             IF DTLS-LF(RR-DTLS-FLAG) = SPACES
+              MOVE RR-PRE-COL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-FINISH TO DTLS-LF(RR-DTLS-FLAG)
+
+               MOVE RR-DTLS-FLAG TO PC-PART-CHECK(IDX)
+               MOVE IDX TO PC-MATCH-NEW
+               MOVE SPACES TO WK-PART(IDX)
+             END-IF
+
+             *> 清理WK-PART
              IF IDX > 2
-               PERFORM VARYING JDX FROM IDX BY -1 UNTIL JDX = 2
-                 IF TEMP-PART-CHECK(JDX - 2) = 0
-                   MOVE SPACES TO TEMP-PART(JDX - 2)
-                   MOVE 99 TO TEMP-PART-CHECK(JDX - 2)
+      *       AND RR-PRE-COL(1 : LENGTH OF FUNCTION TRIM(
+      *          WK-PART(IDX))) NOT = WK-PART(IDX)
+              MOVE 1 TO KDX
+              MOVE RR-PRE-COL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-L TO RR-PRE-LEN
+
+              PERFORM VARYING JDX FROM 1 BY 1 UNTIL JDX > RR-PRE-LEN
+                IF RR-PRE-COL(JDX:1) = " "
+                  ADD 1 TO KDX
+                END-IF
+              END-PERFORM
+
+               PERFORM VARYING JDX FROM 0 BY 1 UNTIL JDX = KDX
+                 COMPUTE RR-CNT-F = IDX - JDX
+                 IF PC-PART-CHECK(RR-CNT-F) = 0
+                   MOVE SPACES TO WK-PART(RR-CNT-F)
+                   MOVE 96 TO PC-PART-CHECK(RR-CNT-F)
+                 ELSE
+                   MOVE PC-PART-CHECK(IDX) TO
+                        PC-PART-CHECK(RR-CNT-F)
                  END-IF
                END-PERFORM
              END-IF
            END-IF
 
-           *> 納入 TEMP-PART(IDX)
-              IF TEMP-FLAG = "Y" AND DTLS-FLAG  = 0
-                IF TEMP-COL(TEMP-LEN + 1:1) = ","
-                  STRING
-                    FUNCTION TRIM(AFTER-DATA) DELIMITED BY SIZE
-                    " " DELIMITED BY SIZE
-                    FUNCTION TRIM(PRE-COL) DELIMITED BY SIZE
-                    INTO TEMP-PART(IDX)
-                  END-STRING
-                ELSE
-                  STRING
-                    FUNCTION TRIM(AFTER-DATA) DELIMITED BY SIZE
-                    " " DELIMITED BY SIZE
-                    FUNCTION TRIM(PRE-COL) DELIMITED BY SIZE
-                    "," DELIMITED BY SIZE
-                    INTO TEMP-PART(IDX)
-                  END-STRING
-                END-IF
-                MOVE 98 TO TEMP-PART-CHECK(IDX)
+           *> 納入 WK-PART(IDX)
+           IF RR-TEMP-FLAG = "Y" AND RR-DTLS-FLAG  = 0
+              MOVE PC-OTHER-ALL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-FINISH TO RR-TEMP-A
+              MOVE TD-L TO RR-TEMP-A-LEN
+
+              MOVE RR-PRE-COL TO TD-TEMP
+              PERFORM FA-TRIM
+              MOVE TD-FINISH TO RR-TEMP-B
+              MOVE TD-L TO RR-TEMP-B-LEN
+
+              MOVE RR-TEMP-A(1:RR-TEMP-A-LEN) TO WK-PART(IDX)
+              MOVE " " TO WK-PART(IDX)(RR-TEMP-A-LEN + 1:1)
+              MOVE RR-TEMP-B(1:RR-TEMP-B-LEN)
+                   TO WK-PART(IDX)(RR-TEMP-A-LEN + 2:RR-TEMP-B-LEN)
+           ELSE
+
+           *> 若前一欄為 99，將 RR-PRE-COL 放回 WK-PART
+           IF IDX > 1 AND PC-PART-CHECK(IDX - 1) = 99
+              AND NOT RR-TEMP-Y
+             MOVE RR-PRE-COL TO WK-PART(IDX)
+           END-IF
            END-IF
 
-      *    *> ","插入判斷結果
-      *    DISPLAY "IDX : "IDX "/ " TEMP-FLAG
-      *    DISPLAY "CNT : "CNT-NUM(IDX)"/ "CNT-NUM(IDX + 1)
-      *    DISPLAY "PRE : "FUNCTION TRIM(PRE-COL)"/ "PRE-LEN"/ "PRE-FLAG
-      *                 "/"FUNCTION TRIM(TEMP-PART(IDX - 1))
+      *     *> ","插入判斷結果
+      *    DISPLAY "IDX : "IDX "/ " RR-TEMP-FLAG"/ "RR-IDX-PLUS
+      *    DISPLAY "CNT : "PC-CNT-NUM(IDX)"/ "PC-CNT-NUM(IDX + 1)
+      *    DISPLAY "PRE : "FUNCTION TRIM(RR-PRE-COL)"/ "RR-PRE-LEN"/ "
+      *                 RR-PRE-FLAG"/"FUNCTION TRIM(WK-PART(IDX - 1))
       *    DISPLAY "TEMP: "
-      *            FUNCTION TRIM(TEMP-COL) "/ " TEMP-LEN"/ "CNT-NUM(IDX)
-      *            "/"FUNCTION TRIM(TEMP-PART(IDX))"/"
-      *            TEMP-PART-CHECK(IDX)
-      *    DISPLAY "MIX : "NEXT-FLAG
+      *            FUNCTION TRIM(RR-TEMP-COL) "/ " RR-TEMP-LEN
+      *            "/ "PC-CNT-NUM(IDX)
+      *            "/"FUNCTION TRIM(WK-PART(IDX))"/"
+      *            PC-PART-CHECK(IDX)
+      *    DISPLAY "MIX : "RR-NEXT-FLAG
       *    DISPLAY "NEXT: "
-      *          FUNCTION TRIM(NEXT-COL)"/ "NEXT-LEN"/ "CNT-NUM(IDX + 1)
-      *    DISPLAY "DTLS:"DTLS-FLAG"/ "FUNCTION TRIM(DTLS-LF(DTLS-FLAG))
-      *    DISPLAY FUNCTION TRIM(AFTER-DATA)"/ "MATCH-NEW
+      *          FUNCTION TRIM(RR-NEXT-COL)"/ "RR-NEXT-LEN
+      *          "/ "PC-CNT-NUM(IDX + 1)
+      *    DISPLAY "DTLS:"RR-DTLS-FLAG"/ "
+      *             FUNCTION TRIM(DTLS-LF(RR-DTLS-FLAG))
+      *    DISPLAY FUNCTION TRIM(PC-OTHER-ALL)"/ "PC-MATCH-NEW"/ "
+      *            PC-PART-CHECK(IDX)
       *    DISPLAY "------------- ------------- -------------"
 
-           ADD IDX-PLUS TO IDX
-           EVALUATE TEMP-PART-CHECK(IDX)
+           ADD RR-IDX-PLUS TO IDX
+           EVALUATE PC-PART-CHECK(IDX)
              WHEN 3
-               MOVE IDX TO OTHER-CITY
+               MOVE IDX TO PC-OTHER-CITY
              WHEN 4
-               MOVE IDX TO OTHER-DISTRICT
+               MOVE IDX TO PC-OTHER-DISTRICT
              WHEN 5
-               MOVE IDX TO OTHER-STREET
+               MOVE IDX TO PC-OTHER-STREET
              WHEN 16
-               MOVE IDX TO OTHER-PROVINCE
+               MOVE IDX TO PC-OTHER-PROVINCE
+             WHEN 17
+               MOVE IDX TO PC-OTHER-STATE
       *         WHEN OTHER
            END-EVALUATE
            END-PERFORM.
-
       *> ===================== OTHEER =====================
+           *> P.O.-BOX -> P.O. Box
+           INSPECT DTLS-LF(12) REPLACING ALL "P.O.-BOX"
+                                             BY "P.O. Box".
+
       *> ============= 依照相對位置選擇插入欄位 =============
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 16
-             IF TEMP-PART-CHECK(IDX) < 30 AND 
-                TEMP-PART-CHECK(IDX) > 0
-                MOVE TEMP-PART-CHECK(IDX) TO OTHER-PRE
+      *     *> 99: NOT RR-TEMP-Y  -> PC-PART-CHECK(KDX) = 99
+      *    PERFORM VARYING KDX FROM 1 BY 1 UNTIL KDX > 23
+      *      DISPLAY KDX" KDX: "FUNCTION TRIM(DTLS-LF(KDX))
+      *      "/ TEMP: "FUNCTION TRIM(WK-PART(KDX)) "/ "
+      *                PC-PART-CHECK(KDX)
+      *    END-PERFORM.
+
+           *> PC-OTHER-PRE: 前單字塞入欄位
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 30
+             IF PC-PART-CHECK(IDX) < 30 AND 
+                PC-PART-CHECK(IDX) > 0
+                MOVE PC-PART-CHECK(IDX) TO PC-OTHER-PRE
+
+           PERFORM VARYING JDX FROM IDX BY 1 UNTIL JDX > 29
+             IF PC-PART-CHECK(JDX + 1) < 30 AND 
+                PC-PART-CHECK(JDX + 1) > 0
+                MOVE PC-PART-CHECK(JDX + 1) TO PC-OTHER-NEXT
+                EXIT PERFORM 
+             END-IF
+           END-PERFORM
+
              END-IF
 
-             IF TEMP-PART(IDX) NOT = SPACES
-               MOVE "N" TO OTHER-FLAG
-               MOVE FUNCTION TRIM(TEMP-PART(IDX)) TO TEMP-COL
-               MOVE LENGTH OF FUNCTION TRIM(TEMP-COL) TO TEMP-LEN
-               IF TEMP-COL(TEMP-LEN:1) = ","
-                 SUBTRACT 1 FROM TEMP-LEN
-                 MOVE TEMP-COL(1:TEMP-LEN) TO TEMP-COL
+             IF WK-PART(IDX) NOT = SPACES
+               MOVE "N" TO PC-OTHER-FLAG
+               MOVE WK-PART(IDX) TO TD-TEMP
+               PERFORM FA-TRIM
+               MOVE TD-FINISH TO RR-TEMP-COL
+               MOVE TD-L TO RR-TEMP-LEN
+               IF RR-TEMP-COL(RR-TEMP-LEN:1) = ","
+                 SUBTRACT 1 FROM RR-TEMP-LEN
+                 MOVE RR-TEMP-COL(1:RR-TEMP-LEN) TO RR-TEMP-COL
                END-IF
-             
+
              *> ============ of 開頭 ============
-               IF FUNCTION UPPER-CASE(TEMP-COL(1:2)) = "OF"
+               IF RR-TEMP-COL(1:2) = "OF"
                PERFORM VARYING JDX FROM IDX BY -1 UNTIL JDX = 1
-                 IF TEMP-PART-CHECK(JDX - 1) NOT = 0 AND
-                    TEMP-PART-CHECK(JDX - 1) NOT = 99
-                      STRING
-                        FUNCTION TRIM(DTLS-LF(TEMP-PART-CHECK(JDX - 1)))
-                          DELIMITED BY SIZE
-                        " " DELIMITED BY SIZE
-                        FUNCTION TRIM(TEMP-COL) DELIMITED BY SIZE
-                      INTO DTLS-LF(TEMP-PART-CHECK(JDX - 1))
-                      END-STRING
-                      MOVE "Y" TO OTHER-FLAG
-                      EXIT PERFORM
+                 IF PC-PART-CHECK(JDX - 1) NOT = 0 AND
+                    PC-PART-CHECK(JDX - 1) NOT = 99
+
+                    MOVE DTLS-LF(PC-PART-CHECK(JDX - 1)) TO TD-TEMP
+                    PERFORM FA-TRIM
+                    MOVE TD-FINISH TO RR-TEMP-A
+                    MOVE TD-L TO RR-TEMP-A-LEN
+
+                    MOVE RR-TEMP-COL TO TD-TEMP
+                    PERFORM FA-TRIM
+                    MOVE TD-FINISH TO RR-TEMP-B
+                    MOVE TD-L TO RR-TEMP-B-LEN
+
+                    *> "{RR-TEMP-A} {RR-TEMP-B}"
+                    MOVE RR-TEMP-A(1:RR-TEMP-A-LEN) 
+                         TO DTLS-LF(PC-PART-CHECK(JDX - 1))
+                    MOVE " "
+                         TO DTLS-LF(PC-PART-CHECK(JDX - 1))
+                            (RR-TEMP-A-LEN + 1:1)
+                    MOVE RR-TEMP-B(1:RR-TEMP-B-LEN)
+                         TO DTLS-LF(PC-PART-CHECK(JDX - 1))
+                            (RR-TEMP-A-LEN + 2:RR-TEMP-B-LEN)
+                    MOVE "Y" TO PC-OTHER-FLAG
+                    EXIT PERFORM
                  END-IF
                END-PERFORM
                END-IF
 
-      *      DISPLAY IDX" CHECK: "FUNCTION TRIM(TEMP-COL)"/"TEMP-LEN
-      *      "/STREE-CITY-DIS-PRO: "OTHER-STREET"/"
-      *      OTHER-CITY"/"OTHER-DISTRICT"/"OTHER-PROVINCE
              *> ============ CITY ============
-               IF OTHER-FLAG = "N" AND OTHER-CITY = 0
-                  AND IDX > OTHER-STREET
-                 MOVE TEMP-COL TO DTLS-LF(3)
-                 MOVE "Y" TO OTHER-FLAG
-                 MOVE IDX TO OTHER-CITY
+               IF PC-OTHER-FLAG = "N" AND PC-OTHER-CITY = 0
+                  AND IDX > PC-OTHER-STREET
+                 MOVE RR-TEMP-COL TO DTLS-LF(3)
+                 MOVE "Y" TO PC-OTHER-FLAG
+                 MOVE IDX TO PC-OTHER-CITY
+                 MOVE 3 TO PC-OTHER-PRE
+               END-IF
+
+             *> ============ STATE ============
+               *> 若前一欄位為 郵遞區號
+               IF PC-OTHER-FLAG = "N" AND (PC-OTHER-PRE = 1 OR
+                  PC-PART-CHECK(IDX + 1) = 1) AND
+                  PC-OTHER-STATE NOT = 99
+                 *> PROVINCE 若已經有值
+                 IF PC-OTHER-STATE NOT = 0
+                   IF IDX > PC-OTHER-STATE
+                     IF PC-OTHER-PROVINCE NOT = 0
+                       IF PC-OTHER-DISTRICT  NOT = 0
+                         MOVE DTLS-LF(4)    TO DTLS-LF(3)
+                         MOVE PC-OTHER-DISTRICT TO PC-OTHER-CITY
+                       END-IF
+                       MOVE DTLS-LF(16)    TO DTLS-LF(4)
+                       MOVE PC-OTHER-PROVINCE TO PC-OTHER-DISTRICT
+                     END-IF
+                     MOVE DTLS-LF(17)    TO DTLS-LF(16)
+                     MOVE PC-OTHER-STATE TO PC-OTHER-PROVINCE
+                   END-IF
+                 END-IF
+
+                 MOVE RR-TEMP-COL TO DTLS-LF(17)
+                 MOVE "Y" TO PC-OTHER-FLAG
+                 MOVE IDX TO PC-OTHER-STATE
                END-IF
 
              *> ============ PROVINCE ============
-               IF OTHER-FLAG = "N" AND OTHER-PROVINCE = 0
-                  AND IDX > OTHER-CITY
-                 MOVE TEMP-COL TO DTLS-LF(16)
-                 MOVE "Y" TO OTHER-FLAG
-               ELSE
-                 IF OTHER-FLAG = "N" AND OTHER-PROVINCE = 0
-                   MOVE DTLS-LF(3) TO DTLS-LF(16)
-                   MOVE TEMP-COL TO DTLS-LF(16)
-                   MOVE "Y" TO OTHER-FLAG
+               IF PC-OTHER-FLAG = "N" AND IDX > PC-OTHER-PROVINCE
+                 IF PC-OTHER-PROVINCE = 0
+                   MOVE RR-TEMP-COL TO DTLS-LF(16)
+                   MOVE IDX TO PC-OTHER-PROVINCE
+                   MOVE "Y" TO PC-OTHER-FLAG
                  END-IF
+                 IF PC-OTHER-FLAG = "N" AND PC-OTHER-CITY = 0
+                   MOVE DTLS-LF(16) TO DTLS-LF(3)
+                   MOVE PC-OTHER-PROVINCE TO PC-OTHER-CITY
+                   MOVE RR-TEMP-COL TO DTLS-LF(16)
+                   MOVE IDX TO PC-OTHER-PROVINCE
+                   MOVE "Y" TO PC-OTHER-FLAG
+                 ELSE
+                   IF PC-OTHER-FLAG = "N" AND PC-OTHER-DISTRICT = 0
+                     MOVE DTLS-LF(3) TO DTLS-LF(4)
+                     MOVE PC-OTHER-CITY TO PC-OTHER-DISTRICT
+
+                     MOVE DTLS-LF(16) TO DTLS-LF(3)
+                     MOVE PC-OTHER-PROVINCE TO PC-OTHER-CITY
+                     MOVE RR-TEMP-COL TO DTLS-LF(16)
+                     MOVE IDX TO PC-OTHER-PROVINCE
+                     MOVE "Y" TO PC-OTHER-FLAG
+                   END-IF
+                 END-IF
+               END-IF
+
+             *> ============ STATE ============
+               IF PC-OTHER-FLAG = "N" AND IDX > PC-OTHER-PROVINCE AND
+                  PC-OTHER-STATE = 0
+                     MOVE RR-TEMP-COL TO DTLS-LF(17)
+                     MOVE IDX TO PC-OTHER-STATE
+                     MOVE "Y" TO PC-OTHER-FLAG
                END-IF
 
              *> ============ STREET ============
-               IF OTHER-FLAG = "N" AND OTHER-STREET = 0
-                  AND ((OTHER-CITY > 0 AND IDX < OTHER-CITY) OR
-                  (OTHER-PROVINCE > 0 AND IDX < OTHER-PROVINCE))
-                 MOVE TEMP-COL TO DTLS-LF(5)
-                 MOVE "Y" TO OTHER-FLAG
-               ELSE
-                 IF OTHER-FLAG = "N" AND OTHER-PROVINCE = 0
-                    AND OTHER-PRE < IDX
-                   MOVE TEMP-COL TO DTLS-LF(5)
-                   MOVE "Y" TO OTHER-FLAG
+               IF PC-OTHER-FLAG = "N" AND PC-OTHER-STREET = 0
+      *           *> 若 目前欄位 在 目前CITY欄位內容 的右邊
+      *          IF PC-OTHER-CITY > 0 AND IDX > PC-OTHER-CITY
+      *            MOVE DTLS-LF(3) TO DTLS-LF(5)
+      *            MOVE RR-TEMP-COL TO DTLS-LF(3)
+      *            MOVE "Y" TO PC-OTHER-FLAG
+      *            MOVE PC-OTHER-CITY TO PC-OTHER-STREET
+      *            MOVE IDX TO PC-OTHER-CITY
+      *          END-IF
+
+                 MOVE RR-TEMP-COL TO DTLS-LF(5)
+                 *> 若 目前欄位 在 目前CITY欄位內容 的右邊
+                 IF PC-OTHER-CITY > 0 AND IDX > PC-OTHER-CITY
+                   MOVE DTLS-LF(3) TO DTLS-LF(5)
+                   MOVE RR-TEMP-COL TO DTLS-LF(3)
+                   MOVE PC-OTHER-CITY TO PC-OTHER-STREET
+                   MOVE IDX TO PC-OTHER-CITY
                  END-IF
+                 MOVE "Y" TO PC-OTHER-FLAG
+                 MOVE 3 TO PC-OTHER-PRE
                END-IF
 
              *> ============ VILLAGE -> OTHER ============
-               IF OTHER-FLAG = "N" AND DTLS-LF(15) = SPACES
-                   MOVE TEMP-COL TO DTLS-LF(15)
-                   MOVE "Y" TO OTHER-FLAG
+               IF PC-OTHER-FLAG = "N" AND DTLS-LF(15) = SPACES
+                   MOVE RR-TEMP-COL TO DTLS-LF(15)
+                   MOVE "Y" TO PC-OTHER-FLAG
                END-IF
-               IF OTHER-FLAG = "N"
-                   MOVE TEMP-COL TO DTLS-LF(18)
+               IF PC-OTHER-FLAG = "N"
+                   MOVE RR-TEMP-COL TO DTLS-LF(24)
                END-IF
 
+               MOVE RR-DTLS-FLAG TO PC-OTHER-PRE
+
              END-IF
-           
+
            END-PERFORM.
 
 
 
 
 
-           *> OTHER 欄位
-           MOVE AFTER-DATA(1:TEMP-LEN) TO DTLS-LF(18). 
 
 
-      *> ===================== REBUILD =====================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      *******************************************************
+
+      *******************************************************
+      *> FA-REBUILD SECTION 反結構
+      *******************************************************
+       FA-REBUILD.
            MOVE SPACES TO DTLS-LF(23).
       *>   設定順序
-      *>   11[FLOOR] → 13[ROOM] → 14[BUILDING] → 9[NUMBER] → 
+      *>   10[DEPARTMENT] -> 18[SUB-DEPARTMENT] ->
+      *>   13[ROOM] → 11[FLOOR] → 14[BUILDING] → 9[NUMBER] → 
       *>   8[ALLEY] → 7[LANE] → 6[SEC] → 5[SREET] → 
-      *>   18[OTHER] → 15[VILLAGE] →
-      *>   4[DISTRICT] → 3[CITY] → 16[PROVINCE] → 17[STATE] → 
+      *>   15[VILLAGE] → 24[OTHER] → 12[POST-BOX] → 4[DISTRICT]
+      *>   3[CITY] → 16[PROVINCE] → 17[STATE] → 
       *>   1[ZIP] → 2[COUNTRY]
-           MOVE 11 TO CNT-NUM(1).
-           MOVE 13 TO CNT-NUM(2).
-           MOVE 14 TO CNT-NUM(3).
-           MOVE  9 TO CNT-NUM(4).
-
-           MOVE  8 TO CNT-NUM(5).
-           MOVE  7 TO CNT-NUM(6).
-           MOVE  6 TO CNT-NUM(7).
-           MOVE  5 TO CNT-NUM(8).
-
-           MOVE 18 TO CNT-NUM(9).
-           MOVE 15 TO CNT-NUM(10).
-
-           MOVE  4 TO CNT-NUM(11).
-           MOVE  3 TO CNT-NUM(12).
-           MOVE 16 TO CNT-NUM(13).
-           MOVE 17 TO CNT-NUM(14).
-
-           MOVE  1 TO CNT-NUM(15).
-           MOVE  2 TO CNT-NUM(16).
-
+           MOVE 10 TO RB-DTLS-LF(1).
+           MOVE 18 TO RB-DTLS-LF(2).
+       
+           MOVE 13 TO RB-DTLS-LF(3).
+           MOVE 11 TO RB-DTLS-LF(4).
+           MOVE 14 TO RB-DTLS-LF(5).
+           MOVE  9 TO RB-DTLS-LF(6).
+       
+           MOVE  8 TO RB-DTLS-LF(7).
+           MOVE  7 TO RB-DTLS-LF(8).
+           MOVE  6 TO RB-DTLS-LF(9).
+           MOVE  5 TO RB-DTLS-LF(10).
+       
+           MOVE 15 TO RB-DTLS-LF(11).
+           MOVE 24 TO RB-DTLS-LF(12).
+           MOVE 12 TO RB-DTLS-LF(13).
+           MOVE  4 TO RB-DTLS-LF(14).
+       
+           MOVE  3 TO RB-DTLS-LF(15).
+           MOVE 16 TO RB-DTLS-LF(16).
+           MOVE 17 TO RB-DTLS-LF(17).
+       
+           MOVE  1 TO RB-DTLS-LF(18).
+           MOVE  2 TO RB-DTLS-LF(19).
+       
            *> 串聯
-           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 16
-             IF DTLS-LF(CNT-NUM(IDX)) NOT = SPACES
-               MOVE FUNCTION TRIM(DTLS-LF(23)) TO TEMP-A
-               MOVE FUNCTION TRIM(DTLS-LF(CNT-NUM(IDX))) TO TEMP-B
-               MOVE SPACES TO TEMP-COL
-
-               IF CNT-NUM(IDX) = 11 AND TEMP-B(1:1) IS NUMERIC
+           PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 19
+             IF DTLS-LF(RB-DTLS-LF(IDX)) NOT = SPACES
+               MOVE FUNCTION TRIM(DTLS-LF(23)) TO RR-TEMP-A
+               MOVE FUNCTION TRIM(DTLS-LF(RB-DTLS-LF(IDX)))
+                                                  TO RR-TEMP-B
+               MOVE SPACES TO RR-TEMP-COL
+       
+               IF RB-DTLS-LF(IDX) = 11 AND  RR-TEMP-B(1:1) IS NUMERIC
                  STRING
-                   FUNCTION TRIM(TEMP-B) DELIMITED BY SIZE
+                   FUNCTION TRIM(RR-TEMP-B) DELIMITED BY SIZE
                    " Floor" DELIMITED BY SIZE
-                   INTO TEMP-COL
+                   INTO RR-TEMP-COL
                  END-STRING
-                 MOVE TEMP-COL TO TEMP-B
+                 MOVE RR-TEMP-COL TO RR-TEMP-B
                END-IF
-
-               IF CNT-NUM(IDX) = 8 AND FUNCTION TRIM(TEMP-B) IS NUMERIC
+       
+               IF RB-DTLS-LF(IDX) = 8
+                  AND FUNCTION TRIM(RR-TEMP-B) IS NUMERIC
                  STRING
                    "Aly. " DELIMITED BY SIZE
-                   FUNCTION TRIM(TEMP-B) DELIMITED BY SIZE
-                   INTO TEMP-COL
+                   FUNCTION TRIM(RR-TEMP-B) DELIMITED BY SIZE
+                   INTO RR-TEMP-COL
                  END-STRING
-                 MOVE TEMP-COL TO TEMP-B
+                 MOVE RR-TEMP-COL TO RR-TEMP-B
                END-IF
-
-               IF CNT-NUM(IDX) = 7 AND FUNCTION TRIM(TEMP-B) IS NUMERIC
+       
+               IF RB-DTLS-LF(IDX) = 7
+                  AND FUNCTION TRIM(RR-TEMP-B) IS NUMERIC
                  STRING
                    "Ln. " DELIMITED BY SIZE
-                   FUNCTION TRIM(TEMP-B) DELIMITED BY SIZE
-                   INTO TEMP-COL
+                   FUNCTION TRIM(RR-TEMP-B) DELIMITED BY SIZE
+                   INTO RR-TEMP-COL
                  END-STRING
-                 MOVE TEMP-COL TO TEMP-B
+                 MOVE RR-TEMP-COL TO RR-TEMP-B
                END-IF
-
-               IF CNT-NUM(IDX) = 6 AND FUNCTION TRIM(TEMP-B) IS NUMERIC
+       
+               IF RB-DTLS-LF(IDX) = 6
+                  AND FUNCTION TRIM(RR-TEMP-B) IS NUMERIC
                  STRING
                    "Sec. " DELIMITED BY SIZE
-                   FUNCTION TRIM(TEMP-B) DELIMITED BY SIZE
-                   INTO TEMP-COL
+                   FUNCTION TRIM(RR-TEMP-B) DELIMITED BY SIZE
+                   INTO RR-TEMP-COL
                  END-STRING
-                 MOVE TEMP-COL TO TEMP-B
+                 MOVE RR-TEMP-COL TO RR-TEMP-B
                END-IF
-
+       
                STRING
-                 FUNCTION TRIM(TEMP-A) DELIMITED BY SIZE
+                 FUNCTION TRIM(RR-TEMP-A) DELIMITED BY SIZE
                  ", " DELIMITED BY SIZE
-                 FUNCTION TRIM(TEMP-B) DELIMITED BY SIZE
+                 FUNCTION TRIM(RR-TEMP-B) DELIMITED BY SIZE
                  INTO DTLS-LF(23)
                END-STRING
              END-IF
            END-PERFORM.
-           MOVE DTLS-LF(23)(3:LENGTH OF FUNCTION TRIM(DTLS-LF(23)) - 2)
-             TO DTLS-LF(23).
-
-
+           MOVE DTLS-LF(23)(3:
+                LENGTH OF FUNCTION TRIM(DTLS-LF(23)) - 2)
+                TO DTLS-LF(23).
+       
+       
       *******************************************************
-      *> 處理錯誤資料
+      *> FA-ERROR-SECTION SECTION 處理錯誤資料
       *******************************************************
-       ERROR-SECTION.
+       FA-ERROR-SECTION.
            MOVE "N" TO ERROR-FLAG.
            MOVE "PLEASE ENTER" TO ERROR-TEMP.
-           MOVE SPACES TO COMMA-FLAG.
            
            *> ZIP 為空值
            IF DTLS-LF(1) = SPACES
@@ -1328,24 +2090,24 @@
            END-IF.
            
            *> OTHER 有值: PARSING FAILED. PLEASE CHECK INPUT
-           IF DTLS-LF(18) NOT = SPACES
+           IF DTLS-LF(24) NOT = SPACES
              MOVE "PARSING FAILED. PLEASE CHECK INPUT" TO ERROR-TEMP
              MOVE "Y" TO ERROR-FLAG
            END-IF.
-
-
+       
+       
            *> 錯誤分析: 若 TRIM(DTLS-LF(IDX)) 字數 > 35 -> ERROR
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 18
              IF LENGTH OF FUNCTION TRIM(DTLS-LF(IDX)) > 35
                MOVE "ADDRESS DATA IS TOO LONG" TO ERROR-TEMP
              END-IF
            END-PERFORM
-    
+       
            *> 錯誤分析: 若包含特殊字體 -> ERROR
            MOVE "N" TO CHARACTERS-FLAG
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 
              LENGTH OF FUNCTION TRIM(ORIGIN-DATA)
-
+       
              MOVE ORIGIN-DATA(IDX:1) TO WS-CH
              COMPUTE WS-CODE = FUNCTION ORD(WS-CH)
              IF WS-CODE < 32 OR WS-CODE > 126
@@ -1365,7 +2127,7 @@
                END-IF
              END-IF
            END-PERFORM.
-
+       
            IF ERROR-FLAG = "Y"
              STRING 
                FUNCTION TRIM(ERROR-TEMP) DELIMITED BY SIZE
@@ -1378,30 +2140,33 @@
              MOVE SPACES TO DTLS-LF(19)
            END-IF.
 
-
       *******************************************************
-      *> 輸出結果
-      *******************************************************
-       OUTPUT-SECTION.
-      *    DISPLAY "******OTHER:     "FUNCTION TRIM(DTLS-LF(18))
-      *    DISPLAY "******REBUILD:     "FUNCTION TRIM(DTLS-LF(23))
+       FA-TRIM.
+           MOVE      1                    TO    TD-S.
+           MOVE      200                  TO    TD-LEN TD-L.
+           *> 前端空白
+           PERFORM VARYING TD-IDX FROM 1 BY 1 UNTIL TD-IDX > TD-LEN
+             IF TD-TEMP(TD-IDX:1) = SPACES
+               ADD   1                    TO     TD-S
+               SUBTRACT 1                 FROM   TD-L
+             ELSE
+               EXIT PERFORM
+             END-IF
+           END-PERFORM.
 
-      *    IF AFTER-DATA NOT = SPACES
-      *          DISPLAY "MOTO : "FUNCTION TRIM(BEFORE-DATA)
-      *          DISPLAY "OTHER: "FUNCTION TRIM(PROCESSING-DATA)
-      *          DISPLAY "KEKKA: "FUNCTION TRIM(AFTER-DATA)
-      *          DISPLAY "================================="
-      *    END-IF.
+           *> 後端空白
+           PERFORM VARYING TD-IDX FROM TD-LEN BY -1 UNTIL TD-IDX = 0
+             IF TD-TEMP(TD-IDX:1) = SPACES
+               SUBTRACT 1                 FROM   TD-L
+             ELSE
+               EXIT PERFORM
+             END-IF
+           END-PERFORM.
 
-      *    PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 23
-      *      DISPLAY IDX" IDX: "FUNCTION TRIM(DTLS-LF(IDX))
-      *      "/ TEMP: "FUNCTION TRIM(TEMP-PART(IDX)) "/ "
-      *                TEMP-PART-CHECK(IDX)
-      *    END-PERFORM.
-
+           MOVE      TD-TEMP(TD-S:TD-L)   TO    TD-FINISH.
 
       *******************************************************
       *> 結束處理
       *******************************************************
-           EXIT PROGRAM.
-       END PROGRAM FORMATTER-ADDRESS.
+      *    EXIT PROGRAM.
+      *END PROGRAM FORMATTER-ADDRESS.

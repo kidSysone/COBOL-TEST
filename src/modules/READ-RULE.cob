@@ -7,6 +7,9 @@
            SELECT LIST-FILE ASSIGN
               TO "input\CategoryRules.csv"
            ORGANIZATION IS LINE SEQUENTIAL.
+           SELECT COUNTRY-FILE ASSIGN
+              TO "input\CountryList.csv"
+           ORGANIZATION IS LINE SEQUENTIAL.
            SELECT STATE-FILE ASSIGN
               TO "input\StateFullnameList.csv"
            ORGANIZATION IS LINE SEQUENTIAL.
@@ -21,7 +24,13 @@
            RECORD CONTAINS 210 CHARACTERS
            BLOCK CONTAINS 0 RECORDS
            RECORDING MODE IS F.
-       01 LIST-REC PIC X(210).
+       01 LIST-REC PIC X(250).
+
+       FD  COUNTRY-FILE
+           RECORD CONTAINS 50 CHARACTERS
+           BLOCK CONTAINS 0 RECORDS
+           RECORDING MODE IS F.
+       01 COUNTRY-REC PIC X(50).
 
        FD  STATE-FILE
            RECORD CONTAINS 50 CHARACTERS
@@ -35,8 +44,9 @@
       *******************************************************
        WORKING-STORAGE SECTION.
        01 IDX PIC 99999 VALUE 1.
+       01 JDX PIC 99999 VALUE 1.
        01 WS-END-FLAG            PIC X VALUE "N".
-       01 ST-DATA                PIC X(60) OCCURS 3 TIMES.
+       01 DATA-LIST              PIC X(60) OCCURS 3 TIMES.
        01 TEMP-COL               PIC X(40).
 
 
@@ -47,9 +57,13 @@
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
-           05  LS-STATE-NAME-COL    PIC X(45) OCCURS 200 TIMES.
-           05  LS-STATE-CODE-COL    PIC X(10) OCCURS 200 TIMES.
-           05  DIR-NAMES OCCURS 21 TIMES PIC X(8). *> 全方向
+           05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
+           05  LS-COUNTRY-CODE      PIC X(2) OCCURS 500 TIMES.
+           05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
+           05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2) OCCURS 200 TIMES.
+           05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
+           05  DIR-LEN              PIC 99   VALUE 23.
 
 
       *******************************************************
@@ -58,27 +72,34 @@
        PROCEDURE DIVISION USING LS-LIST-REC.
 
            *> DIR-NAMES 初期化
-           MOVE "NORTH"   TO DIR-NAMES(1).
-           MOVE "SOUTH"   TO DIR-NAMES(2).
-           MOVE "EAST"    TO DIR-NAMES(3).
-           MOVE "WEST"    TO DIR-NAMES(4).
-           MOVE "NE"      TO DIR-NAMES(5).
-           MOVE "NW"      TO DIR-NAMES(6).
-           MOVE "SE"      TO DIR-NAMES(7).
-           MOVE "SW"      TO DIR-NAMES(8).
-           MOVE "N"       TO DIR-NAMES(9).
-           MOVE "S"       TO DIR-NAMES(10).
-           MOVE "E"       TO DIR-NAMES(11).
-           MOVE "W"       TO DIR-NAMES(12).
-           MOVE "N."      TO DIR-NAMES(13).
-           MOVE "S."      TO DIR-NAMES(14).
-           MOVE "E."      TO DIR-NAMES(15).
-           MOVE "W."      TO DIR-NAMES(16).
-           MOVE "KITA"    TO DIR-NAMES(17).
-           MOVE "MINAMI"  TO DIR-NAMES(18).
-           MOVE "HIGASHI" TO DIR-NAMES(19).
-           MOVE "NISHI"   TO DIR-NAMES(20).
-           MOVE "LOOP"    TO DIR-NAMES(21).
+           MOVE      "NORTH"             TO DIR-NAMES(1).
+           MOVE      "SOUTH"             TO DIR-NAMES(2).
+           MOVE      "EAST"              TO DIR-NAMES(3).
+           MOVE      "WEST"              TO DIR-NAMES(4).
+
+           MOVE      "NE"                TO DIR-NAMES(5).
+           MOVE      "NW"                TO DIR-NAMES(6).
+           MOVE      "SE"                TO DIR-NAMES(7).
+           MOVE      "SW"                TO DIR-NAMES(8).
+
+           MOVE      "N."                TO DIR-NAMES(9).
+           MOVE      "S."                TO DIR-NAMES(10).
+           MOVE      "E."                TO DIR-NAMES(11).
+           MOVE      "W."                TO DIR-NAMES(12).
+
+           MOVE      "N"                 TO DIR-NAMES(13).
+           MOVE      "S"                 TO DIR-NAMES(14).
+           MOVE      "E"                 TO DIR-NAMES(15).
+           MOVE      "W"                 TO DIR-NAMES(16).
+
+           MOVE      "KITA"              TO DIR-NAMES(17).
+           MOVE      "MINAMI"            TO DIR-NAMES(18).
+           MOVE      "HIGASHI"           TO DIR-NAMES(19).
+           MOVE      "NISHI"             TO DIR-NAMES(20).
+
+           MOVE      "LOOP"              TO DIR-NAMES(21).
+           MOVE      "DEL"               TO DIR-NAMES(22).
+           MOVE      "DE"                TO DIR-NAMES(23).
 
       *******************************************************
       *> LIST.csv 讀取
@@ -140,6 +161,31 @@
            CLOSE LIST-FILE.
 
       *******************************************************
+      *> CountryList.csv 讀取
+      *******************************************************
+           MOVE "N" TO WS-END-FLAG.
+           MOVE 1   TO IDX.
+           OPEN INPUT COUNTRY-FILE.
+
+           PERFORM UNTIL WS-END-FLAG = "Y"
+             READ COUNTRY-FILE
+               AT END
+                 MOVE "Y" TO WS-END-FLAG
+               NOT AT END
+                 UNSTRING COUNTRY-REC DELIMITED BY ";"
+                   INTO DATA-LIST(1) DATA-LIST(2) DATA-LIST(3)
+
+                 MOVE FUNCTION TRIM(DATA-LIST(1))
+                      TO LS-COUNTRY-NAME(IDX)
+                 MOVE FUNCTION TRIM(DATA-LIST(2))
+                      TO LS-COUNTRY-CODE(IDX)
+                 ADD 1 TO IDX
+             END-READ
+           END-PERFORM.
+
+           CLOSE COUNTRY-FILE.
+
+      *******************************************************
       *> StateFullnameList.csv 讀取
       *******************************************************
            MOVE "N" TO WS-END-FLAG.
@@ -152,12 +198,14 @@
                  MOVE "Y" TO WS-END-FLAG
                NOT AT END
                  UNSTRING STATE-REC DELIMITED BY ";"
-                   INTO ST-DATA(1) ST-DATA(2) ST-DATA(3)
+                   INTO DATA-LIST(1) DATA-LIST(2) DATA-LIST(3)
 
-                 MOVE FUNCTION TRIM(ST-DATA(1))
-                      TO LS-STATE-NAME-COL(IDX)
-                 MOVE FUNCTION TRIM(ST-DATA(2))
-                      TO LS-STATE-CODE-COL(IDX)
+                 MOVE FUNCTION TRIM(DATA-LIST(1))
+                      TO LS-STATE-NAME(IDX)
+                 MOVE FUNCTION TRIM(DATA-LIST(2))
+                      TO LS-STATE-CODE(IDX)
+                 MOVE FUNCTION TRIM(DATA-LIST(3))
+                      TO LS-STATE-COUNTRY(IDX)
                  ADD 1 TO IDX
              END-READ
            END-PERFORM.

@@ -75,11 +75,15 @@
        01 IFS.
          05 IN-FILE-STATUS PIC XX VALUE "00".
          05 IF-DATA PIC X(2000) OCCURS 1000 TIMES.
-            *> 1: CUSTOMER_ID
+            *> 1: CIFKEY
             *> 2: ADDR_LINE_ORIG
             *> 3: ADDR_LINE_EN
 
        01 IDX PIC 9999 VALUE 1.
+       *> 計算執行時間
+       01 TIME-START     PIC 9(8).
+       01 TIME-END       PIC 9(8).
+       01 ELAPSED        PIC 9(8).
 
        *> ========= OUT-FILE-CSV =========
        *> === TOTAL ===
@@ -124,9 +128,13 @@
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
-           05  LS-STATE-NAME-COL    PIC X(45) OCCURS 200 TIMES.
-           05  LS-STATE-CODE-COL    PIC X(10) OCCURS 200 TIMES.
-           05  DIR-NAMES OCCURS 21 TIMES PIC X(8). *> 全方向
+           05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
+           05  LS-COUNTRY-CODE      PIC X(2) OCCURS 500 TIMES.
+           05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
+           05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2) OCCURS 200 TIMES.
+           05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
+           05  DIR-LEN              PIC 99   VALUE 23.
 
        *> OUTPUT-ADDRESS 用
        01 LS-OUTPUT.
@@ -147,64 +155,63 @@
        PROCEDURE DIVISION.
        MAIN SECTION.
 
+           *> 開始時間取得
+           ACCEPT TIME-START FROM TIME.
+
            *> 輸出格式設定(欄位寬度/欄位標題)
-              MOVE 35  TO WS-COL-LEN(1).
-              MOVE 35  TO WS-COL-LEN(2).
-              MOVE 100 TO WS-COL-LEN(3).
-              MOVE 100 TO WS-COL-LEN(4).
-              MOVE 50  TO WS-COL-LEN(5).
-              MOVE 35  TO WS-COL-LEN(6).
-              MOVE 50  TO WS-COL-LEN(7).
-              MOVE 35  TO WS-COL-LEN(8).
-              MOVE 35  TO WS-COL-LEN(9).
-              MOVE 35  TO WS-COL-LEN(10).
-              MOVE 35  TO WS-COL-LEN(11).
-              MOVE 35  TO WS-COL-LEN(12).
-              MOVE 35  TO WS-COL-LEN(13).
-              MOVE 35  TO WS-COL-LEN(14).
-              MOVE 35  TO WS-COL-LEN(15).
-              MOVE 35  TO WS-COL-LEN(16).
-              MOVE 10  TO WS-COL-LEN(17).
-              MOVE 35  TO WS-COL-LEN(18).
-              MOVE 40  TO WS-COL-LEN(19).
-              MOVE 15  TO WS-COL-LEN(20).
-              MOVE 150 TO WS-COL-LEN(21).
-              MOVE 100 TO WS-COL-LEN(22).
-              MOVE 100 TO WS-COL-LEN(23).
-
-              MOVE "ZIP"      TO WS-COL-TEXT(1).
-              MOVE "COUNTRY"  TO WS-COL-TEXT(2).
-              MOVE "CITY"     TO WS-COL-TEXT(3).
-              MOVE "DISTRICT" TO WS-COL-TEXT(4).
-              MOVE "STREET"   TO WS-COL-TEXT(5).
-              MOVE "SEC"      TO WS-COL-TEXT(6).
-              MOVE "LANE"     TO WS-COL-TEXT(7).
-              MOVE "ALLEY"    TO WS-COL-TEXT(8).
-              MOVE "NUMBER"   TO WS-COL-TEXT(9).
-              MOVE "NUMBER"   TO WS-COL-TEXT(10).
-              MOVE "FLOOR"    TO WS-COL-TEXT(11).
-              MOVE "FLOOR"    TO WS-COL-TEXT(12).
-              MOVE "ROOM"     TO WS-COL-TEXT(13).
-              MOVE "BUILDING" TO WS-COL-TEXT(14).
-              MOVE "VILLAGE"  TO WS-COL-TEXT(15).
-              MOVE "PROVINCE" TO WS-COL-TEXT(16).
-              MOVE "STATE"    TO WS-COL-TEXT(17).
-              MOVE "OTHER"    TO WS-COL-TEXT(18).
-              MOVE "ERROR_MESSAGE"            TO WS-COL-TEXT(19).
-              MOVE "CUSTOMER_ID"              TO WS-COL-TEXT(20).
-              MOVE "ADDRESS_LINE_ORIGIN"      TO WS-COL-TEXT(21).
-              MOVE "ADDRESS_LINE_EN"          TO WS-COL-TEXT(22).
-              MOVE "ADDRESS_LINE_REBUILD"     TO WS-COL-TEXT(23).
-
-              MOVE WS-COL-LEN(20)  TO WS-COL-LEN-ERROR(1). *> 20 客戶 ID
-              MOVE WS-COL-LEN(21)  TO WS-COL-LEN-ERROR(2). *> 21 讀取_原文
-              MOVE WS-COL-LEN(22)  TO WS-COL-LEN-ERROR(3). *> 22 讀取_英文 
-              MOVE WS-COL-LEN(19)  TO WS-COL-LEN-ERROR(4). *> 19 錯誤
-
-              MOVE "CUSTOMER_ID"           TO WS-COL-TEXT-ERROR(1).
-              MOVE "ADDRESS_LINE_ORIGIN"   TO WS-COL-TEXT-ERROR(2).
-              MOVE "ADDRESS_LINE_EN"       TO WS-COL-TEXT-ERROR(3).
-              MOVE "ERROR_MESSAGE"         TO WS-COL-TEXT-ERROR(4).
+           MOVE 75  TO WS-COL-LEN(1).
+           MOVE 75  TO WS-COL-LEN(2).
+           MOVE 75 TO WS-COL-LEN(3).
+           MOVE 21 TO WS-COL-LEN(4).
+           MOVE 40  TO WS-COL-LEN(5).
+           MOVE 75  TO WS-COL-LEN(6).
+           MOVE 21  TO WS-COL-LEN(7).
+           MOVE 75  TO WS-COL-LEN(8).
+           MOVE 21  TO WS-COL-LEN(9).
+           MOVE 40  TO WS-COL-LEN(10).
+           MOVE 40  TO WS-COL-LEN(11).
+           MOVE 40  TO WS-COL-LEN(12).
+           MOVE 40  TO WS-COL-LEN(13).
+           MOVE 7   TO WS-COL-LEN(14).
+           MOVE 75  TO WS-COL-LEN(15).
+           MOVE 35  TO WS-COL-LEN(18).
+           MOVE 40  TO WS-COL-LEN(19).
+           MOVE 15  TO WS-COL-LEN(20).
+           MOVE 150 TO WS-COL-LEN(21).
+           MOVE 100 TO WS-COL-LEN(22).
+           MOVE 100 TO WS-COL-LEN(23).
+            
+           MOVE "DEPARTMENT"               TO WS-COL-TEXT(1).
+           MOVE "SUB DEPARTMENT"           TO WS-COL-TEXT(2).
+           MOVE "STREET NAME"              TO WS-COL-TEXT(3).
+           MOVE "BUILDING NUMBER"          TO WS-COL-TEXT(4).
+           MOVE "BUILDING NAME"            TO WS-COL-TEXT(5).
+           MOVE "FLOOR"                    TO WS-COL-TEXT(6).
+           MOVE "POST BOX"                 TO WS-COL-TEXT(7).
+           MOVE "ROOM"                     TO WS-COL-TEXT(8).
+           MOVE "POST CODE"                TO WS-COL-TEXT(9).
+           MOVE "TOWN NAME"                TO WS-COL-TEXT(10).
+           MOVE "TOWN LOCATION NAME"       TO WS-COL-TEXT(11).
+           MOVE "DISTRICT NAME"            TO WS-COL-TEXT(12).
+           MOVE "COUNTRY SUB DIVISION"     TO WS-COL-TEXT(13).
+           MOVE "COUNTRY"                  TO WS-COL-TEXT(14).
+           MOVE "ADDRESS LINE"             TO WS-COL-TEXT(15).
+           MOVE "OTHER"                    TO WS-COL-TEXT(18).
+           MOVE "ERROR_MESSAGE"            TO WS-COL-TEXT(19).
+           MOVE "CIFKEY"                   TO WS-COL-TEXT(20).
+           MOVE "ADDRESS_LINE_ORIGIN"      TO WS-COL-TEXT(21).
+           MOVE "ADDRESS_LINE_EN"          TO WS-COL-TEXT(22).
+           MOVE "ADDRESS_LINE_REBUILD"     TO WS-COL-TEXT(23).
+            
+           MOVE WS-COL-LEN(20)  TO WS-COL-LEN-ERROR(1). *> 20 客戶 ID
+           MOVE WS-COL-LEN(21)  TO WS-COL-LEN-ERROR(2). *> 21 讀取_原文
+           MOVE WS-COL-LEN(22)  TO WS-COL-LEN-ERROR(3). *> 22 讀取_英文 
+           MOVE WS-COL-LEN(19)  TO WS-COL-LEN-ERROR(4). *> 19 錯誤
+            
+           MOVE "CIFKEY"                TO WS-COL-TEXT-ERROR(1).
+           MOVE "ADDRESS_LINE_ORIGIN"   TO WS-COL-TEXT-ERROR(2).
+           MOVE "ADDRESS_LINE_EN"       TO WS-COL-TEXT-ERROR(3).
+           MOVE "ERROR_MESSAGE"         TO WS-COL-TEXT-ERROR(4).
 
 
       *******************************************************
@@ -221,7 +228,7 @@
            END-STRING.
 
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 19
-             IF IDX NOT = 10 AND IDX NOT = 12 *> SUB號碼/樓層略過
+             IF IDX NOT = 16 AND IDX NOT = 17 *> 16/17略過
                STRING
                  FUNCTION TRIM(TMP-REC-TOTAL) DELIMITED BY SIZE
                  FUNCTION TRIM(WS-COL-TEXT(IDX)) DELIMITED BY SIZE
@@ -261,7 +268,7 @@
            MOVE "|" TO TMP-REC-TXT.      *> 標題記錄
            MOVE "|" TO DIVIDING-LINE.    *> 分隔線記錄
 
-           *>   ============  CUSTOMER_ID 標題/分隔線  ============
+           *>   ============  CIFKEY 標題/分隔線  ============
                  *> === 計算長度 ===
                  MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(20))
                    TO WS-DATA-LEN *> 取得資料長度
@@ -390,7 +397,7 @@
 
            *> ============  主要欄位 標題/分隔線  ============
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 19
-              IF IDX NOT = 10 AND IDX NOT = 12 *> SUB號碼/樓層略過
+             IF IDX NOT = 16 AND IDX NOT = 17 *> 16/17略過
                  *> === 計算長度 ===
                  MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(IDX))
                    TO WS-DATA-LEN *> 取得資料長度
@@ -589,7 +596,7 @@
                MOVE SPACES TO IF-DATA(1) IF-DATA(2) IF-DATA(3)
 
               *> 儲存各項目
-                *> 1: CUSTOMER_ID
+                *> 1: CIFKEY
                 *> 2: ADDR_LINE_ORIG
                 *> 3: ADDR_LINE_EN
                   UNSTRING IN-FILE-REC
@@ -607,9 +614,10 @@
               DISPLAY "DATA-ORIG: "FUNCTION TRIM(IF-DATA(2))
               DISPLAY "DATA-EN  : "FUNCTION TRIM(IF-DATA(3))
 
-              MOVE IF-DATA(1) TO DTLS-LF(20)
-              MOVE IF-DATA(2) TO DTLS-LF(21)
-              MOVE IF-DATA(3) TO DTLS-LF(22)
+              INITIALIZE LS-FORMATTER
+              MOVE FUNCTION TRIM(IF-DATA(1)) TO DTLS-LF(20)
+              MOVE FUNCTION TRIM(IF-DATA(2)) TO DTLS-LF(21)
+              MOVE FUNCTION TRIM(IF-DATA(3)) TO DTLS-LF(22)
 
 
       *******************************************************
@@ -799,6 +807,13 @@
 
        *> 關閉檔案
            CLOSE ERROR-FILE.
+
+           *> 取得執行時間
+           ACCEPT TIME-END FROM TIME.
+           COMPUTE ELAPSED = TIME-END - TIME-START.
+           DISPLAY " >> RUN TIME = '"ELAPSED"'/ '" 
+           ELAPSED(1:2)":"ELAPSED(3:2)":"ELAPSED(5:2)"."ELAPSED(7:2)
+            "' << ".
 
            *> 程式結束
            STOP RUN.
