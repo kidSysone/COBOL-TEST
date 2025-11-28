@@ -58,13 +58,17 @@
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
            05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
-           05  LS-COUNTRY-CODE      PIC X(2) OCCURS 500 TIMES.
+           05  LS-COUNTRY-CODE      PIC X(2)  OCCURS 500 TIMES.
            05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
            05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
-           05  LS-STATE-COUNTRY     PIC X(2) OCCURS 200 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2)  OCCURS 200 TIMES.
            05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
-           05  DIR-LEN              PIC 99   VALUE 23.
-
+           05  DIR-LEN              PIC 99    VALUE 23.
+           05  EXCEPTION-WORD-TABLE.
+              10  EXCEPTION-WORD    OCCURS 10 TIMES PIC X(20).
+              10  EXCEPTION-FLAG    OCCURS 10 TIMES PIC 9(2).
+              10  EXCEPTION-COUNTRY OCCURS 10 TIMES PIC X(2).
+              10  EXCEPTION-LEN     PIC 99    VALUE 10.
 
       *******************************************************
       *> 程式處理區
@@ -100,6 +104,11 @@
            MOVE      "LOOP"              TO DIR-NAMES(21).
            MOVE      "DEL"               TO DIR-NAMES(22).
            MOVE      "DE"                TO DIR-NAMES(23).
+
+           *> EXCEPTION-WORD-TABLE 初期化
+           MOVE      "TAIPEI 101"        TO EXCEPTION-WORD(1).
+           MOVE      14                  TO EXCEPTION-FLAG(1).
+           MOVE      "TW"                TO EXCEPTION-COUNTRY(1).
 
       *******************************************************
       *> LIST.csv 讀取

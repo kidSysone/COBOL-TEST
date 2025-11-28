@@ -47,6 +47,14 @@
              TO 'output\Fail_Data.txt'
              ORGANIZATION IS LINE SEQUENTIAL.
 
+      *******************************************************
+      *> 檔案名稱：OUTPUT_LOG.csv
+      *> 檔案組織：LINE SEQUENTIAL（以行為單位）
+      *******************************************************
+           SELECT OUTPUT-LOG ASSIGN 
+             TO 'output\OUTPUT_LOG.csv'
+             ORGANIZATION IS LINE SEQUENTIAL.
+
        DATA DIVISION.
       *******************************************************
       *> 資料部、FILE SECTION
@@ -67,23 +75,37 @@
        FD ERROR-FILE.
          01 ERROR-REC PIC X(2000).
 
+       FD OUTPUT-LOG.
+         01 LOG-REC PIC X(2000).
+
       *******************************************************
       *> 資料部、WORKING-STORAGE SECTION
       *******************************************************
        WORKING-STORAGE SECTION.
        *> 單筆資料
        01 IFS.
-         05 IN-FILE-STATUS PIC XX VALUE "00".
-         05 IF-DATA PIC X(2000) OCCURS 1000 TIMES.
-            *> 1: CIFKEY
-            *> 2: ADDR_LINE_ORIG
-            *> 3: ADDR_LINE_EN
+              05 IN-FILE-STATUS PIC XX VALUE "00".
+              05 IF-DATA PIC X(2000) OCCURS 1000 TIMES.
+              *> 1: CIFKEY
+              *> 2: ADDR_LINE_ORIG
+              *> 3: ADDR_LINE_EN
 
-       01 IDX PIC 9999 VALUE 1.
+              05 IDX PIC 9999 VALUE 1.
+       *> 取得時間
+       01 WS-TIME.
+              05 WS-DATE PIC 9(8).
+              05 WS-HH   PIC 9(2).
+              05 WS-MM   PIC 9(2).
+              05 WS-SS   PIC 9(2).
+              05 WS-CC   PIC 9(2).
+
        *> 計算執行時間
-       01 TIME-START     PIC 9(8).
-       01 TIME-END       PIC 9(8).
-       01 ELAPSED        PIC 9(8).
+       01 WS-COUNTTIME.
+              05 TIME-START     PIC 9(16).
+              05 TIME-END       PIC 9(16).
+              05 ELAPSED        PIC 9(16).
+              05 LOG-TEMP       PIC X(66).
+              05 LOG-TIMES      PIC 9(2).
 
        *> ========= OUT-FILE-CSV =========
        *> === TOTAL ===
@@ -129,12 +151,17 @@
            05  LS-LIST-G       OCCURS 18 TIMES.
               10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
            05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
-           05  LS-COUNTRY-CODE      PIC X(2) OCCURS 500 TIMES.
+           05  LS-COUNTRY-CODE      PIC X(2)  OCCURS 500 TIMES.
            05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
            05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
-           05  LS-STATE-COUNTRY     PIC X(2) OCCURS 200 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2)  OCCURS 200 TIMES.
            05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
-           05  DIR-LEN              PIC 99   VALUE 23.
+           05  DIR-LEN              PIC 99    VALUE 23.
+           05  EXCEPTION-WORD-TABLE.
+              10  EXCEPTION-WORD    OCCURS 10 TIMES PIC X(20).
+              10  EXCEPTION-FLAG    OCCURS 10 TIMES PIC 9(2).
+              10  EXCEPTION-COUNTRY OCCURS 10 TIMES PIC X(2).
+              10  EXCEPTION-LEN     PIC 99    VALUE 10.
 
        *> OUTPUT-ADDRESS 用
        01 LS-OUTPUT.
@@ -155,8 +182,36 @@
        PROCEDURE DIVISION.
        MAIN SECTION.
 
+           *> 優化測試TIPS
+           DISPLAY "  A,,A".
+           DISPLAY "( 'w' )    /".
+           DISPLAY "(m9   \\    ENTER A WORD".
+           DISPLAY "  \    \)     STARTING WITH TT.".
+           DISPLAY "   ) )\ \   IT WILL RUN 10 TIMES!".
+           DISPLAY "  / /  \ \ \".
+           DISPLAY " (_)    (_)".
+
+           ACCEPT LOG-TEMP FROM CONSOLE.
+
+           IF LOG-TEMP(1:2) = "TT"
+           PERFORM VARYING LOG-TIMES FROM 1 BY 1 UNTIL LOG-TIMES > 10
+             PERFORM PERFORM-ADDRESS-WORKFLOW
+           END-PERFORM
+           ELSE
+             PERFORM PERFORM-ADDRESS-WORKFLOW
+           END-IF.
+           *> 程式結束
+           STOP RUN.
+
+      *******************************************************
+       PERFORM-ADDRESS-WORKFLOW.
+           INITIALIZE IFS TOTAL-DATA ERROR-DATA
+                          TITLE-ADDRESS-DATA-TXT ERROR-DATA-TXT.
+
            *> 開始時間取得
-           ACCEPT TIME-START FROM TIME.
+           MOVE FUNCTION CURRENT-DATE TO WS-TIME.
+           COMPUTE TIME-START = (WS-HH * 3600 + WS-MM * 60 + WS-SS)
+                         * 100 + WS-CC
 
            *> 輸出格式設定(欄位寬度/欄位標題)
            MOVE 75  TO WS-COL-LEN(1).
@@ -248,7 +303,7 @@
       *******************************************************
       *> 標題設置: Fail_Data.csv
       *******************************************************
-              MOVE SPACES TO ERROR-REC-CSV TMP-REC-ERROR.
+           MOVE SPACES TO ERROR-REC-CSV TMP-REC-ERROR.
 
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 4
                  *> === TMP-REC ===
@@ -259,8 +314,7 @@
                    ";" DELIMITED BY SIZE
                    INTO TMP-REC-ERROR
                  END-STRING
-           END-PERFORM
-
+           END-PERFORM.
 
       *******************************************************
       *> 標題設置: Address_Split.txt
@@ -269,131 +323,127 @@
            MOVE "|" TO DIVIDING-LINE.    *> 分隔線記錄
 
            *>   ============  CIFKEY 標題/分隔線  ============
-                 *> === 計算長度 ===
-                 MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(20))
-                   TO WS-DATA-LEN *> 取得資料長度
-                 MOVE WS-COL-LEN(20) TO WS-FIELD-LEN
-                 *> 左邊空白 = (寬度 - 資料長) / 2
-                 COMPUTE WS-LEFT-PAD = 
-                   FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2)
-                 COMPUTE WS-RIGHT-PAD =
-                   WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD
+           *> === 計算長度 ===
+           MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(20))
+             TO WS-DATA-LEN. *> 取得資料長度
+           MOVE WS-COL-LEN(20) TO WS-FIELD-LEN.
+           *> 左邊空白 = (寬度 - 資料長) / 2
+           COMPUTE WS-LEFT-PAD = 
+             FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2).
+           COMPUTE WS-RIGHT-PAD =
+             WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD.
 
-                 *> === 填入空白 ===
-                 MOVE SPACES TO WS-CENTER-FLD
-                 *> 左側填充
-                 MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD)
-                 *> 文字
-                 MOVE FUNCTION TRIM(WS-COL-TEXT(20)) TO
-                   WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN)
-                 *> 右側填充
-                 MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
-                                        WS-DATA-LEN + 1 : WS-RIGHT-PAD)
+           *> === 填入空白 ===
+           MOVE SPACES TO WS-CENTER-FLD.
+           *> 左側填充
+           MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD).
+           *> 文字
+           MOVE FUNCTION TRIM(WS-COL-TEXT(20)) TO
+             WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN).
+           *> 右側填充
+           MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
+                                  WS-DATA-LEN + 1 : WS-RIGHT-PAD).
 
-                 *> === TMP-REC-TXT ===
-                 STRING
-                   FUNCTION TRIM(TMP-REC-TXT)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   " |" DELIMITED BY SIZE
-                   INTO TMP-REC-TXT
-                 END-STRING
+           *> === TMP-REC-TXT ===
+           STRING
+             FUNCTION TRIM(TMP-REC-TXT)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             " |" DELIMITED BY SIZE
+             INTO TMP-REC-TXT
+           END-STRING.
 
+           MOVE SPACES TO WS-CENTER-FLD.
+           INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-".
 
-                 MOVE SPACES TO WS-CENTER-FLD
-                 INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-"
-
-                 *> === 分隔線 ===
-                 STRING
-                   FUNCTION TRIM(DIVIDING-LINE)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   "-|" DELIMITED BY SIZE
-                   INTO DIVIDING-LINE
-                 END-STRING
+           *> === 分隔線 ===
+           STRING
+             FUNCTION TRIM(DIVIDING-LINE)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             "-|" DELIMITED BY SIZE
+             INTO DIVIDING-LINE
+           END-STRING.
 
            *>   ============  ADDR_LINE_ORIG 標題/分隔線  ============
-                 *> === 計算長度 ===
-                 MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(21))
-                   TO WS-DATA-LEN *> 取得資料長度
-                 MOVE WS-COL-LEN(21) TO WS-FIELD-LEN
-                 *> 左邊空白 = (寬度 - 資料長) / 2
-                 COMPUTE WS-LEFT-PAD = 
-                   FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2)
-                 COMPUTE WS-RIGHT-PAD =
-                   WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD
+           *> === 計算長度 ===
+           MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(21))
+             TO WS-DATA-LEN. *> 取得資料長度
+           MOVE WS-COL-LEN(21) TO WS-FIELD-LEN.
+           *> 左邊空白 = (寬度 - 資料長) / 2
+           COMPUTE WS-LEFT-PAD = 
+             FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2).
+           COMPUTE WS-RIGHT-PAD =
+             WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD.
 
-                 *> === 填入空白 ===
-                 MOVE SPACES TO WS-CENTER-FLD
-                 *> 左側填充
-                 MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD)
-                 *> 文字
-                 MOVE FUNCTION TRIM(WS-COL-TEXT(21)) TO
-                   WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN)
-                 *> 右側填充
-                 MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
-                                        WS-DATA-LEN + 1 : WS-RIGHT-PAD)
+           *> === 填入空白 ===
+           MOVE SPACES TO WS-CENTER-FLD.
+           *> 左側填充
+           MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD).
+           *> 文字
+           MOVE FUNCTION TRIM(WS-COL-TEXT(21)) TO
+             WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN).
+           *> 右側填充
+           MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
+                                  WS-DATA-LEN + 1 : WS-RIGHT-PAD).
 
-                 *> === TMP-REC-TXT ===
-                 STRING
-                   FUNCTION TRIM(TMP-REC-TXT)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   " |" DELIMITED BY SIZE
-                   INTO TMP-REC-TXT
-                 END-STRING
+           *> === TMP-REC-TXT ===
+           STRING
+             FUNCTION TRIM(TMP-REC-TXT)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             " |" DELIMITED BY SIZE
+             INTO TMP-REC-TXT
+           END-STRING.
 
+           MOVE SPACES TO WS-CENTER-FLD.
+           INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-".
 
-                 MOVE SPACES TO WS-CENTER-FLD
-                 INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-"
-
-                 *> === 分隔線 ===
-                 STRING
-                   FUNCTION TRIM(DIVIDING-LINE)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   "-|" DELIMITED BY SIZE
-                   INTO DIVIDING-LINE
-                 END-STRING
+           *> === 分隔線 ===
+           STRING
+             FUNCTION TRIM(DIVIDING-LINE)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             "-|" DELIMITED BY SIZE
+             INTO DIVIDING-LINE
+           END-STRING.
 
            *>   ============  ADDR_LINE_EN 標題/分隔線  ============
-                 *> === 計算長度 ===
-                 MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(22))
-                   TO WS-DATA-LEN *> 取得資料長度
-                 MOVE WS-COL-LEN(22) TO WS-FIELD-LEN
-                 *> 左邊空白 = (寬度 - 資料長) / 2
-                 COMPUTE WS-LEFT-PAD = 
-                   FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2)
-                 COMPUTE WS-RIGHT-PAD =
-                   WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD
+           *> === 計算長度 ===
+           MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(22))
+             TO WS-DATA-LEN. *> 取得資料長度
+           MOVE WS-COL-LEN(22) TO WS-FIELD-LEN
+           *> 左邊空白 = (寬度 - 資料長) / 2
+           COMPUTE WS-LEFT-PAD = 
+             FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2).
+           COMPUTE WS-RIGHT-PAD =
+             WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD.
 
-                 *> === 填入空白 ===
-                 MOVE SPACES TO WS-CENTER-FLD
-                 *> 左側填充
-                 MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD)
-                 *> 文字
-                 MOVE FUNCTION TRIM(WS-COL-TEXT(22)) TO
-                   WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN)
-                 *> 右側填充
-                 MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
-                                        WS-DATA-LEN + 1 : WS-RIGHT-PAD)
+           *> === 填入空白 ===
+           MOVE SPACES TO WS-CENTER-FLD.
+           *> 左側填充
+           MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD).
+           *> 文字
+           MOVE FUNCTION TRIM(WS-COL-TEXT(22)) TO
+             WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN).
+           *> 右側填充
+           MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
+                                  WS-DATA-LEN + 1 : WS-RIGHT-PAD).
 
-                 *> === TMP-REC-TXT ===
-                 STRING
-                   FUNCTION TRIM(TMP-REC-TXT)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   " |" DELIMITED BY SIZE
-                   INTO TMP-REC-TXT
-                 END-STRING
+           *> === TMP-REC-TXT ===
+           STRING
+             FUNCTION TRIM(TMP-REC-TXT)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             " |" DELIMITED BY SIZE
+             INTO TMP-REC-TXT
+           END-STRING.
 
+           MOVE SPACES TO WS-CENTER-FLD.
+           INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-".
 
-                 MOVE SPACES TO WS-CENTER-FLD
-                 INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-"
-
-                 *> === 分隔線 ===
-                 STRING
-                   FUNCTION TRIM(DIVIDING-LINE)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   "-|" DELIMITED BY SIZE
-                   INTO DIVIDING-LINE
-                 END-STRING
-
+           *> === 分隔線 ===
+           STRING
+             FUNCTION TRIM(DIVIDING-LINE)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             "-|" DELIMITED BY SIZE
+             INTO DIVIDING-LINE
+           END-STRING.
 
            *> ============  主要欄位 標題/分隔線  ============
            PERFORM VARYING IDX FROM 1 BY 1 UNTIL IDX > 19
@@ -440,49 +490,48 @@
                  END-STRING
 
               END-IF
-           END-PERFORM
+           END-PERFORM.
 
            *>   ============  ADDR_LINE_REBUILD 標題/分隔線  ============
-                 *> === 計算長度 ===
-                 MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(23))
-                   TO WS-DATA-LEN *> 取得資料長度
-                 MOVE WS-COL-LEN(23) TO WS-FIELD-LEN
-                 *> 左邊空白 = (寬度 - 資料長) / 2
-                 COMPUTE WS-LEFT-PAD = 
-                   FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2)
-                 COMPUTE WS-RIGHT-PAD =
-                   WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD
+           *> === 計算長度 ===
+           MOVE LENGTH OF FUNCTION TRIM(WS-COL-TEXT(23))
+             TO WS-DATA-LEN. *> 取得資料長度
+           MOVE WS-COL-LEN(23) TO WS-FIELD-LEN.
+           *> 左邊空白 = (寬度 - 資料長) / 2
+           COMPUTE WS-LEFT-PAD = 
+             FUNCTION INTEGER((WS-FIELD-LEN - WS-DATA-LEN) / 2).
+           COMPUTE WS-RIGHT-PAD =
+             WS-FIELD-LEN - WS-DATA-LEN - WS-LEFT-PAD.
 
-                 *> === 填入空白 ===
-                 MOVE SPACES TO WS-CENTER-FLD
-                 *> 左側填充
-                 MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD)
-                 *> 文字
-                 MOVE FUNCTION TRIM(WS-COL-TEXT(23)) TO
-                   WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN)
-                 *> 右側填充
-                 MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
-                                        WS-DATA-LEN + 1 : WS-RIGHT-PAD)
+           *> === 填入空白 ===
+           MOVE SPACES TO WS-CENTER-FLD.
+           *> 左側填充
+           MOVE SPACES TO WS-CENTER-FLD(1:WS-LEFT-PAD).
+           *> 文字
+           MOVE FUNCTION TRIM(WS-COL-TEXT(23)) TO
+             WS-CENTER-FLD(WS-LEFT-PAD + 1 : WS-DATA-LEN).
+           *> 右側填充
+           MOVE SPACES TO WS-CENTER-FLD(WS-LEFT-PAD +
+                                  WS-DATA-LEN + 1 : WS-RIGHT-PAD).
 
-                 *> === TMP-REC-TXT ===
-                 STRING
-                   FUNCTION TRIM(TMP-REC-TXT)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   " |" DELIMITED BY SIZE
-                   INTO TMP-REC-TXT
-                 END-STRING
+           *> === TMP-REC-TXT ===
+           STRING
+             FUNCTION TRIM(TMP-REC-TXT)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             " |" DELIMITED BY SIZE
+             INTO TMP-REC-TXT
+           END-STRING.
 
+           MOVE SPACES TO WS-CENTER-FLD.
+           INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-".
 
-                 MOVE SPACES TO WS-CENTER-FLD
-                 INSPECT WS-CENTER-FLD REPLACING ALL " " BY "-"
-
-                 *> === 分隔線 ===
-                 STRING
-                   FUNCTION TRIM(DIVIDING-LINE)
-                   WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
-                   "-|" DELIMITED BY SIZE
-                   INTO DIVIDING-LINE
-                 END-STRING
+           *> === 分隔線 ===
+           STRING
+             FUNCTION TRIM(DIVIDING-LINE)
+             WS-CENTER-FLD(1:WS-FIELD-LEN) DELIMITED BY SIZE
+             "-|" DELIMITED BY SIZE
+             INTO DIVIDING-LINE
+           END-STRING.
 
       *******************************************************
       *> 標題設置: Fail_Data.txt
@@ -530,8 +579,7 @@
                    "-|" DELIMITED BY SIZE
                    INTO DIVIDING-LINE-ERROR
                  END-STRING
-           END-PERFORM
-
+           END-PERFORM.
 
       *******************************************************
       *> 輸出: 標題完成，準備開啟檔案
@@ -547,43 +595,41 @@
 
 
        *> 開啟檔案、ERROR-FILE-CSV
-           OPEN OUTPUT ERROR-FILE-CSV
+           OPEN OUTPUT ERROR-FILE-CSV.
 
            *> === 輸出標題 ===
            MOVE TMP-REC-ERROR(1:
                              LENGTH OF FUNCTION TRIM(TMP-REC-ERROR) - 1) 
-             TO ERROR-REC-CSV
-           WRITE ERROR-REC-CSV
+             TO ERROR-REC-CSV.
+           WRITE ERROR-REC-CSV.
 
         *> 開啟檔案、OUT-FILE
-           OPEN OUTPUT OUT-FILE
+           OPEN OUTPUT OUT-FILE.
        
             *> === 輸出標題 ===
-           MOVE TMP-REC-TXT TO OUT-FILE-REC
-           WRITE OUT-FILE-REC
+           MOVE TMP-REC-TXT TO OUT-FILE-REC.
+           WRITE OUT-FILE-REC.
        
             *> === 輸出分隔線 ===
-           MOVE DIVIDING-LINE TO OUT-FILE-REC
-           WRITE OUT-FILE-REC
+           MOVE DIVIDING-LINE TO OUT-FILE-REC.
+           WRITE OUT-FILE-REC.
        
         *> 開啟檔案、ERROR-FILE
-           OPEN OUTPUT ERROR-FILE
+           OPEN OUTPUT ERROR-FILE.
        
             *> === 輸出標題 ===
-           MOVE TMP-REC-TXT-ERROR TO ERROR-REC
-           WRITE ERROR-REC
+           MOVE TMP-REC-TXT-ERROR TO ERROR-REC.
+           WRITE ERROR-REC.
        
             *> === 輸出分隔線 ===
-           MOVE DIVIDING-LINE-ERROR TO ERROR-REC
-           WRITE ERROR-REC
-
+           MOVE DIVIDING-LINE-ERROR TO ERROR-REC.
+           WRITE ERROR-REC.
 
       *******************************************************
       *>  開始讀取 IN-FILE.csv
       *******************************************************
            *> 呼叫 READ-RULE
            CALL 'READ-RULE' USING LS-LIST-REC.
-
 
            *> ==== 檔案匯入，每次讀取一行到 IN-FILE-REC ====
            OPEN INPUT IN-FILE.
@@ -610,9 +656,9 @@
               END-IF
 
               ADD 1 TO DATA-COUNT
-              DISPLAY "============== NO." DATA-COUNT  " =============="
-              DISPLAY "DATA-ORIG: "FUNCTION TRIM(IF-DATA(2))
-              DISPLAY "DATA-EN  : "FUNCTION TRIM(IF-DATA(3))
+      *       DISPLAY "============== NO." DATA-COUNT  " =============="
+      *       DISPLAY "DATA-ORIG: "FUNCTION TRIM(IF-DATA(2))
+      *       DISPLAY "DATA-EN  : "FUNCTION TRIM(IF-DATA(3))
 
               INITIALIZE LS-FORMATTER
               MOVE FUNCTION TRIM(IF-DATA(1)) TO DTLS-LF(20)
@@ -684,10 +730,8 @@
            MOVE TOTAL-COMMENT TO OUT-FILE-REC-CSV.
            WRITE OUT-FILE-REC-CSV.
 
-
        *> 關閉檔案
            CLOSE OUT-FILE-CSV.
-
 
       *******************************************************
       *> 輸出: Fail_Data.csv
@@ -714,7 +758,6 @@
 
        *> 關閉檔案
            CLOSE ERROR-FILE-CSV.
-
 
       *******************************************************
       *> 輸出: Address_Split.txt
@@ -750,10 +793,8 @@
            MOVE TMP-TOTAL-TXT TO OUT-FILE-REC.
            WRITE OUT-FILE-REC.
 
-
        *> 關閉檔案
            CLOSE OUT-FILE.
-
 
       *******************************************************
       *> 輸出: Fail_Data.csv
@@ -804,16 +845,39 @@
              WRITE ERROR-REC
            END-IF.
 
-
        *> 關閉檔案
            CLOSE ERROR-FILE.
 
-           *> 取得執行時間
-           ACCEPT TIME-END FROM TIME.
+       *> 終了時間取得
+           MOVE FUNCTION CURRENT-DATE TO WS-TIME.
+           COMPUTE TIME-END = (WS-HH * 3600 + WS-MM * 60 + WS-SS)
+                         * 100 + WS-CC
            COMPUTE ELAPSED = TIME-END - TIME-START.
-           DISPLAY " >> RUN TIME = '"ELAPSED"'/ '" 
-           ELAPSED(1:2)":"ELAPSED(3:2)":"ELAPSED(5:2)"."ELAPSED(7:2)
-            "' << ".
+           COMPUTE WS-HH = ELAPSED / 360000.
+           COMPUTE ELAPSED = ELAPSED - (WS-HH * 360000)
+           COMPUTE WS-MM = ELAPSED / 6000
+           COMPUTE ELAPSED = ELAPSED - (WS-MM * 6000)
+           COMPUTE WS-SS = ELAPSED / 100.
+           COMPUTE WS-CC = ELAPSED - (WS-SS * 100).
 
-           *> 程式結束
-           STOP RUN.
+           DISPLAY " >> JIKKOU TAIMU = '"ELAPSED"'/ '"
+           WS-HH":"WS-MM":"WS-SS"."WS-CC
+            "' << ".
+           ADD 11000000 TO TIME-START.
+
+       *> 開啟檔案、OUTPUT-LOG
+           OPEN EXTEND OUTPUT-LOG.
+           STRING
+             LOG-TEMP(1:15)                     ";"
+             ELAPSED                            ";"
+             WS-HH ":" WS-MM ":" WS-SS "." WS-CC";"
+             WS-DATE                            ";"
+             TIME-START(9:6)                    ";"
+             DATA-FMT                           ";"
+             DELIMITED BY SIZE
+             INTO LOG-TEMP
+           END-STRING.
+
+           MOVE LOG-TEMP TO LOG-REC.
+           WRITE LOG-REC.
+           CLOSE OUTPUT-LOG.
