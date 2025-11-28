@@ -213,7 +213,7 @@ EXECUTE.cob: 主程式
 |---|---|---|---|---|
 |1|ZIP|郵遞區號|1. 荷蘭篩選<br> 2. 英式篩選<br> 3. 標準書寫/手寫常見<br>4. 為純數字或"-"所組成的字串(此條件優先度NUMBER > ZIP/ 此欄位+1/2格為國家)<br>5. 若國家為 摩納哥"MC" 或 丹麥"DK" 且 數字字數 <= 2|[詳細劃分規則](#詳細劃分規則)|
 |2|COUNTRY|國家|依照`CountryList.csv`內容尋找國家名稱|-|   
-|3|CITY|縣市|~~依照`WorldCitiesList.csv`內容尋找城市名稱<br>※ 若城市名後面連接"CITY"，視為同段字串<br>※ 若城市名後面連接方向(N/S/E/W等)，視為同段字串~~|-|
+|3|CITY|縣市|1. 依照`CategoryRules.csv`分類<br>2. 判斷對象之最右方之文字串(非COUNTRY/ STATE/ 郵遞區號)|-|
 |4|DISTRICT|市區|依照`CategoryRules.csv`分類<br>≪OTHER CHECK≫<br>1. 若DISRICT為空值，則優先移動OTHER內容至CITY，並將舊CITY資料移動至DISTRICT|-|
 |5|STREET|路|1. 依照`CategoryRules.csv`分類<br>2. "{非關鍵字字串/VIA} {方向關鍵字/LOOP/DE/DEL} {關鍵字字串}"<br>3. 若 STREET 欄位為空值 且 非倒數第1~3位則視為STREET|※ 若判斷對象為`IT`(義大利)，則取至有`,`、數字、已被分類欄位<br>※ 當判斷中欄位和下一個判斷欄位皆包含STREET關鍵字時，跳過目前判斷中對象|
 |6|SEC|段|依照`CategoryRules.csv`分類|~~`欄位中省略關鍵字`~~ <br>為保持資料完整性，目前已取消省略動作|
@@ -233,7 +233,7 @@ EXECUTE.cob: 主程式
 |20|CIFKEY|客戶 ID|-|**因未設定輸入方式，暫設為隨機序號**|
 |23|ADDR_LINE_REBUILD|重組地址|<反結構><br>10[DEPARTMENT] -> 18[SUB-DEPARTMENT] -> 13[ROOM] → 11[FLOOR] → 14[BUILDING] → 9[NUMBER] → 8[ALLEY] → 7[LANE] → 6[SEC] → 5[SREET] → 15[VILLAGE] → 24[OTHER] → 12[POST-BOX] → 4[DISTRICT] → 3[CITY] → 16[PROVINCE] → 17[STATE] → 1[ZIP] → 2[COUNTRY]|-|
 |24|OTHER-COL|其他|-|-|
-|其他分類標準1|-|使用EXCEPTION-WORD-TABLE判斷特殊字串(例:TAIPEI 101若不登錄，則會被判斷成郵遞區號101台北市)|-|-|
+|其他分類標準1|EXCEPTION-WORD-TABLE|例外字典|判斷特殊字串(例:TAIPEI 101若不登錄，則會被判斷成郵遞區號101台北市)|-|
 
 ***
 ### 詳細劃分規則
