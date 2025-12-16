@@ -70,3 +70,20 @@
       *       05  ADDR_LINE_ORIG   PIC X(150). *> 21 讀取_原文
       *       05  ADDR_LINE_EN     PIC X(100). *> 22 讀取_英文 
       *       05  ADDR_LINE_REBUILD     PIC X(100). *> 23 重組地址
+
+
+      *    DEPARTMENT
+      *    SUB_DEPARTMENT
+      *    STREET_NAME
+      *    BUILDING_NUMBER
+      *    BUILDING_NAME
+      *    FLOOR
+      *    POST_BOX
+      *    ROOM
+      *    POST_CODE
+      *    TOWN_NAME
+      *    TOWN_LOCATION_NAME
+      *    DISTRICT_NAME
+      *    COUNTRY_SUB_DIVISION
+      *    COUNTRY
+      *    ADDRESS_LINE

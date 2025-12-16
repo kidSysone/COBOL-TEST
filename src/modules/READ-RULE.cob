@@ -24,7 +24,7 @@
            RECORD CONTAINS 210 CHARACTERS
            BLOCK CONTAINS 0 RECORDS
            RECORDING MODE IS F.
-       01 LIST-REC PIC X(250).
+       01 LIST-REC PIC X(270).
 
        FD  COUNTRY-FILE
            RECORD CONTAINS 50 CHARACTERS
@@ -56,12 +56,12 @@
        LINKAGE SECTION.
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
-              10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
+              10  LS-LIST-COL       PIC X(35) OCCURS 50 TIMES.
            05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
            05  LS-COUNTRY-CODE      PIC X(2)  OCCURS 500 TIMES.
-           05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
-           05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
-           05  LS-STATE-COUNTRY     PIC X(2)  OCCURS 200 TIMES.
+           05  LS-STATE-NAME        PIC X(45) OCCURS 250 TIMES.
+           05  LS-STATE-CODE        PIC X(10) OCCURS 250 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2)  OCCURS 250 TIMES.
            05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
            05  DIR-LEN              PIC 99    VALUE 23.
            05  EXCEPTION-WORD-TABLE.
@@ -108,7 +108,13 @@
            *> EXCEPTION-WORD-TABLE 初期化
            MOVE      "TAIPEI 101"        TO EXCEPTION-WORD(1).
            MOVE      14                  TO EXCEPTION-FLAG(1).
-           MOVE      "TW"                TO EXCEPTION-COUNTRY(1).
+      *    MOVE      "TW"                TO EXCEPTION-COUNTRY(1).
+           MOVE      "WEST BANK"         TO EXCEPTION-WORD(2).
+           MOVE      4                   TO EXCEPTION-FLAG(2).
+           MOVE      "PS"                TO EXCEPTION-COUNTRY(2).
+           MOVE      "GPO"               TO EXCEPTION-WORD(3).
+           MOVE      14                  TO EXCEPTION-FLAG(3).
+      *    MOVE      "-"                 TO EXCEPTION-COUNTRY(3).
 
       *******************************************************
       *> LIST.csv 讀取
@@ -163,6 +169,16 @@
                            LS-LIST-COL (IDX 38)
                            LS-LIST-COL (IDX 39)
                            LS-LIST-COL (IDX 40)
+                           LS-LIST-COL (IDX 41)
+                           LS-LIST-COL (IDX 42)
+                           LS-LIST-COL (IDX 43)
+                           LS-LIST-COL (IDX 44)
+                           LS-LIST-COL (IDX 45)
+                           LS-LIST-COL (IDX 46)
+                           LS-LIST-COL (IDX 47)
+                           LS-LIST-COL (IDX 48)
+                           LS-LIST-COL (IDX 49)
+                           LS-LIST-COL (IDX 50)
                    ADD 1 TO IDX
               END-READ
            END-PERFORM.

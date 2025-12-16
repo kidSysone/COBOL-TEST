@@ -1,4 +1,6 @@
-目前的課題：
+目前の課題：
+* ST.はCITYの場合もある（St. George's）
+* DE LA
 * sa文件
 * チュートリアルの補完
 
@@ -32,6 +34,7 @@ cobc -x -o bin\EXECUTE.exe src\main\EXECUTE.cob src\modules\READ-RULE.cob src\mo
 ```
 EXECUTE.cob: 主程式
   ├─ MAIN SECTION: 若測試名稱為"TT"開頭字串，執行 PERFORM-ADDRESS-WORKFLOW 10次
+  │                若測試名稱為"QQ"開頭字串或(空欄)，執行 1次 但不紀錄 OUTPUT_LOG.csv
   └─ PERFORM-ADDRESS-WORKFLOW: 
       ├─ READ-RULE.cob : 讀取分類規則/ 判斷對象
       │  ├─ 基本設定1  : 方向關鍵字
@@ -73,25 +76,25 @@ EXECUTE.cob: 主程式
         * 資料欄位: `關鍵字名稱`、`關鍵字種類`、`會使用該關鍵字之國家`、`關鍵字總數`
         * 程式變數: `EXCEPTION-WORD`、`EXCEPTION-FLAG`、`EXCEPTION-COUNTRY`、`EXCEPTION-LEN`
         * 預設上限: 10個
-        * 實際資料: 1個
+        * 實際資料: 3個
         * ※ 追加關鍵字時，所有變數需同時新增並更新
         * ※ "國家"若為空欄，表示該關鍵字的使用不限國家
       * `CategoryRules.csv`: 分類標準
         * 程式變數: `LS-LIST-G`(18) -> `LS-LIST-COL`(40)
-        * 預設上限: 40列(共210字) * 18行
-        * 實際資料: 最多37列(STREET) * 18行，單欄最多14字，單行最長214字
+        * 預設上限: 50列(共270字) * 18行
+        * 實際資料: 最多45欄(STREET) * 18行，單欄最多14字，單行最長256字
       * `CountryList.csv`: 國家清單(含ISO簡寫)
         * 資料欄位: `國家名稱`、`ISO代號(2碼)`
         * 程式變數: `LS-COUNTRY-NAME`、`LS-COUNTRY-CODE`
         * 預設上限: 2列(50字) * 500行
-        * 實際資料: 共316列，單欄最多35字
+        * 實際資料: 共385列，單欄最多43字
         * ※ 追加關鍵字時，**依照文字數多->少順序排列**
         * ※ 可為預防表記搖擺狀況，同一ISO重複登錄
       * `StateFullnameList.csv`: 州名稱清單(簡寫)
         * 資料欄位: `州名稱(全名)`、`代號(2~3碼)`、`國家(ISO)`
         * 程式變數: `LS-STATE-NAME`、`LS-STATE-CODE`、`LS-STATE-COUNTRY`
-        * 預設上限: 3列(各40字，總60字) * 200行
-        * 實際資料: 最多字欄位為52字，140列
+        * 預設上限: 3列(各40字，總60字) * 250行
+        * 實際資料: 最多字欄位為49字，205列
         * ※ 追加關鍵字時，**依照國家->文字數多->少順序排列**
 
   * `INPUT-ADDRESS.csv`: 需解讀之地址清單
@@ -171,7 +174,7 @@ EXECUTE.cob: 主程式
         1. 包含特殊字體: **CONTAINS INVALID CHARACTERS.**
         2. 輸入文字過長: **ADDRESS DATA IS TOO LONG.**
         3. OTHER 有值: **PARSING FAILED. PLEASE CHECK INPUT.**
-        4. ZIP 為空值: **PLEASE ENTER POSTAL CODE.**
+        4. ZIP 為空值: **PLEASE ENTER POSTAL CODE/ / POST BOX.**
         5. COUNTRY 為空值: **PLEASE ENTER COUNTRY.**
         6. CITY 或 PROVINCE 為空值: **PLEASE ENTER CITY OR PROVINCE.**  
         * ※ 若ZIP/COUNTRY/(CITY/PROVINCE)有複數個欄位空值，錯誤訊息將直接串聯顯示
@@ -200,8 +203,10 @@ EXECUTE.cob: 主程式
     * DATE: 執行日期
     * TIME: 執行時間(UTC+8)
     * COUNT: 測試資料之筆數
-    * ※ 若 TEST-NEME 輸入"TT"開頭之字串，將會執行相同測試資料10次
-    * ※ TEST-NEME 請以英文輸入(否則有可能會亂碼)
+    * AVG: 1資料處理平均時間(TIME/ COUNT)
+      * ※ 若 TEST-NEME 輸入"TT"開頭之字串，相同測試本次資料`執行10次`
+      * ※ 若 TEST-NEME 輸入"QQ"開頭之字串或(空白)，本次執行`不會記錄資料`
+      * ※ TEST-NEME 請以英文輸入(否則有可能會亂碼)
 
 ***
 ## 分類規則
@@ -237,98 +242,85 @@ EXECUTE.cob: 主程式
 
 ***
 ### 詳細劃分規則
-1. 荷蘭郵遞區號
-  * 前半:4個數字
-  * 後半:大寫英文*2
-```
-*> 荷蘭郵遞區號: 前半:4個數字，後半:大寫英文*2
-IF IDX NOT EQUAL TO 30 AND
-    PC-CNT-NUM(IDX)      = 4 AND
-    PC-CNT-CHAR(IDX + 1) = 2 AND
-    DTLS-LF(2) = "NL"
-    MOVE "Y" TO RR-NEXT-FLAG
-    MOVE 1   TO RR-DTLS-FLAG
-END-IF
-```
+* `一般例（数字のみ）`
 
-2. 英式郵遞區號
-  * 英國
-    * 前半：總字數1~2
-    * 前半：總字數3~4，包含數字*1
-    * 後半：包含數字*1、總字數3
-  * 非英國
-    * 前半：包含數字*1、總字數3
-    * 後半：包含數字*1、總字數3~4  
+| 国名 | ISO | 郵便番号のけた数、文字の種類 |
+| --- | --- | --- |
+| アイスランド | IS | 数字3けた　例：110 |
+| オーストラリア | AU | 数字4けた　例：2060 |
+| オーストリア | AT | 数字4けた　例：1120 |
+| ブルガリア | BG | 数字4けた　例：1278 |
+| リヒテンシュタイン | LI | 数字4けた　例：9485 |
+| ベルギー | BE | 数字4けた　例：1050 |
+| スイス | CH | 数字4けた　例：3008 |
+| スロベニア | SI | 数字4けた　例：1000 |
+| デンマーク | DK | 数字4けた　例：2300 |
+| ノルウェー | NO | 数字4けた　例：0352 |
+| ハンガリー | HU | 数字4けた　例：1011 |
+| イタリア | IT | 数字5けた　例：00184 |
+| エストニア | EE | 数字5けた　例：69501 |
+| 韓国 | KR | 数字5けた　例：01000 |
+| スペイン | ES | 数字5けた　例：28021 |
+| フランス | FR | 数字5けた　例：75001 |
+| ドイツ | DE | 数字5けた　例：10115 |
+| ギリシャ | GR | 数字3+2けた　例：104 32 |
+| スロバキア | SK | 数字3+2けた　例：810 00 |
+| ポーランド | PL | 数字2+3けた　例：02-502 |
+| チェコ | CZ | 数字3+2けた　例：160 00 |
+| シンガポール | SG | 数字6けた　例：546080 |
+| 中国 | CN | 数字6けた　例：853012 |
+| ルーマニア | RO | 数字6けた　例：013696 |
+| ポルトガル | PT | 数字4+3けた　例：1300-016 |
+| 米国 | US | 数字5＋4けた　例：20001-1234 |
 
-標準寫法(有空格區分)("XXX XXX")
-```
-IF (RR-DTLS-FLAG NOT = 1 
-    AND (PC-PART-CHECK(IDX + 1) = 2 OR
-            PC-PART-CHECK(IDX + 2) = 2 OR
-            PC-PART-CHECK(IDX + 3) = 2)
-    AND(
-    *> 1. 非英國 標準寫法
-    (
-    (RR-TEMP-LEN = 3           AND PC-CNT-NUM(IDX) = 1)) AND
-    (RR-NEXT-LEN >= 3 AND RR-NEXT-LEN <= 4 
-                                AND PC-CNT-NUM(IDX + 1) >= 1)
+* `特殊例（パターン固定）`
 
-    OR
+| 国名 | ISO | 郵便番号のけた数、文字の種類 |
+| --- | --- | --- |
+| カナダ | CA | 3番目と4番目の文字の間のスペースで、6文字の英数字　例：H3Z 2Y7 |
+| オランダ | NL | 数字4けた+アルファベット2けた 例：1071 DJ |
+| 英国 | GB | 5～7けたの英数字 例：E4 9RT、CR0 3RL、EC1Y 8SY |
+| マルタ | MT | アルファベット3けた+数字4けた 例：RBT 6023 |
+| アイルランド | IE | 7けたの英数字（Eircodeと呼ばれるコード） 例：T37 F8HK |
+| バミューダ | BM | 英文字２桁　数字2桁　例：FL 07 |
+| アメリカ領ヴァージン諸島 | VI | 英文字２桁+数字5けた |
+| ルクセンブルク | LU | 「L」 + 数字4けた　例：L-1234 |
+| アンドラ | AD | 「AD」 + 数字4けた　例：AD1234 |
+| アゼルバイジャン | AZ | 「AZ」 + 数字4けた　例：AZ 1000 |
+| ブルネイ | BN | 「BT」 + 数字4けた　例：BT2328 |
+| キプロス | CY | 「CY」 + 数字4けた　例：CY-2008 |
+| ハイチ | HT | 「HT」 + 数字4けた　例：HT 6120 |
+| セントルシア | LC | 「LC」 + 数字4けた　例：LC04 101 |
+| ラトビア | LV | 「LV」 + 数字4けた　例：LV-1000 |
+| モルドバ | MD | 「MD」 + 数字4けた　例：MD-2000 |
+| スロベニア | SI | 「SI」 + 数字4けた　例：SI-4000 |
+| サモア | WS | 「WS」 + 数字4けた　例：WS1251 |
+| バルバドス | BB | 「BB」 + 数字5けた　例：BB25001 |
+| キューバ | CU | 「CP」 + 数字5けた　例：CP 10600 |
+| フィンランド | FI | 「FI」 + 数字5けた　例：FI-00100 |
+| ミクロネシア | FM | 「FM」 + 数字5けた　例：FM 96941 |
+| グアム | GU | 「GU」 + 数字5けた　例：GU-96910 |
+| クロアチア | HR | 「HR」 + 数字5けた　例：HR-10000 |
+| ソマリア | SO | 「JH」 + 数字5けた　例：JH 09010 |
+| リトアニア | LT | 「LT」 + 数字5けた　例：LT-04340 |
+| マーシャル諸島 | MH | 「MH」 + 数字5けた　例：MH 96960 |
+| プエルトリコ | PR | 「PR」 + 数字5けた　例：PR-00601 |
+| パラオ | PW | 「PW」 + 数字5けた　例：PW-96940 |
+| スウェーデン | SE | 「SE」 + 数字3+2けた　例：SE-111 81 |
+| アフリカ地域 | AF | 郵便番号はないが、P.O. BOXはある 例：03 BP 1000 |
+| カザフスタン | KZ | 任意7けた 例：Z00Y5M3 |
+| アルゼンチン | AR | 英数字8文字（1文字、4桁と3文字） 例：B1636FDA |
+| ガーナ | GH | 英文字2けた、数字３けた、数字４けた（グリッド範囲）　例：EN-200-1987 |
+| ナウル | NR | NRU68 |
+| セントヘレナ | SH | STHL 1ZZ |
+| タークス・カイコス諸島 | TC | TKCA 1ZZ |
+| フォークランド諸島 | FK | FIQQ 1ZZ |
 
-    *> 2. 英國 標準寫法
-    (DTLS-LF(2) = "GB" AND
-    ((RR-TEMP-LEN >= 1 AND RR-TEMP-LEN <= 2
-                                AND PC-CNT-NUM(IDX) < 2) OR
-    (RR-TEMP-LEN >= 3 AND RR-TEMP-LEN <= 4 
-                                AND PC-CNT-NUM(IDX) = 1)) AND
-    (RR-NEXT-LEN >= 3 AND RR-NEXT-LEN <= 4 
-                                AND PC-CNT-NUM(IDX + 1) = 1))
-    ))
-```
-手寫常見(無空格區分)("XXXXXX")
-```
-IF PC-CNT-NUM(IDX) > 0 AND
-    (RR-DTLS-FLAG NOT = 1 
-    AND (PC-PART-CHECK(IDX + 1) = 2 OR
-            PC-PART-CHECK(IDX + 2) = 2 OR
-            PC-PART-CHECK(IDX + 3) = 2)
-    AND (
-    *> 1. 非英國 手寫常見
-    (RR-TEMP-LEN >= 6 AND RR-TEMP-LEN <= 7 
-                                    AND PC-CNT-NUM(IDX) >= 2)
-    OR
-    (RR-TEMP-LEN >= 8
-                                    AND PC-CNT-NUM(IDX) >= 5)
-
-    OR
-
-    *> 2. 英國 手寫常見
-    (DTLS-LF(2) = "GB" AND
-    ((RR-TEMP-LEN >= 4 AND RR-TEMP-LEN <= 6 
-                                    AND PC-CNT-NUM(IDX) < 3)OR
-    (RR-TEMP-LEN >= 6 AND RR-TEMP-LEN <= 8 
-                                    AND PC-CNT-NUM(IDX) = 2)))
-
-    ))
-```
-
-ChatGPT: ZIP
-| Country             | 標準形式                                 | 手書き・空白なし               | 備考                                |
-| ------------------- | ------------------------------------ | ---------------------- | --------------------------------- |
-| United Kingdom / UK | 前半 1~2文字または3~4文字、後半 3文字（例: SW1A 1AA） | 4~8文字で空白なし（例: SW1A1AA） | チャンネル諸島 JE, GY, IM、海外領 BT, GX に対応 |
-| United States / US  | 5桁（12345）または 5+4桁（12345-6789）        | 9~10桁で空白なし（123456789）  | ZIP+4                             |
-| Canada / CA         | A1A 1A1                              | A1A1A1                 | アルファベット＋数字交互                      |
-| Australia / AU      | 4桁（例: 2000）                          | 4桁                     | 郵便番号は数字4桁                         |
-| New Zealand / NZ    | 4桁（例: 1010）                          | 4桁                     | 郵便番号は数字4桁                         |
-| Singapore / SG      | 6桁（例: 048616）                        | 6桁                     | 国名の前に置かれることが多い                    |
-| Bermuda / BM        | 2文字＋2桁（例: HM08）                      | 4桁                     | 英国海外領、Parish（地区）単位                |
-| Gibraltar / GI      | 2文字＋2桁（例: GX11）                      | 4桁                     | 英国海外領                             |
-| Isle of Man / IM    | 2文字＋数字（例: IM1）                       | 3~4桁                   | 英国海外領                             |
-| Ireland / IE        | A65 1ZZ                              | A651ZZ                 | 郵便番号空白あり／なし両方あり                   |
-
-***
 
 ## 各國差異筆記
+* 參考資料:
+  1. [郵便番号 | ゆうびんばんご](https://ja.m.youbianku.com/?utm_source=chatgpt.com)
+  2. [海外の郵便番号 - 日本郵便](https://www.post.japanpost.jp/int/zipcode/index.html)
 * 英式等郵遞區號差異
 * 新加坡(SG) 英文撰寫順序 [COUNTRY] -> [ZIP]
 * 澳門 香港沒有郵遞區號

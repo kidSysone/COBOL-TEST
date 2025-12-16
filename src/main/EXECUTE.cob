@@ -104,7 +104,9 @@
               05 TIME-START     PIC 9(16).
               05 TIME-END       PIC 9(16).
               05 ELAPSED        PIC 9(16).
-              05 LOG-TEMP       PIC X(66).
+              05 ELAPSED-SEC-AVG PIC 9(2)V9(5).
+              05 ELAPSED-SEC-DIS PIC Z9.99999.
+              05 LOG-TEMP       PIC X(75).
               05 LOG-TIMES      PIC 9(2).
 
        *> ========= OUT-FILE-CSV =========
@@ -149,12 +151,12 @@
        *> READ-RULE 用 (從 LIST.csv 讀取 18行*40列)
        01 LS-LIST-REC.
            05  LS-LIST-G       OCCURS 18 TIMES.
-              10  LS-LIST-COL       PIC X(35) OCCURS 40 TIMES.
+              10  LS-LIST-COL       PIC X(35) OCCURS 50 TIMES.
            05  LS-COUNTRY-NAME      PIC X(50) OCCURS 500 TIMES.
            05  LS-COUNTRY-CODE      PIC X(2)  OCCURS 500 TIMES.
-           05  LS-STATE-NAME        PIC X(45) OCCURS 200 TIMES.
-           05  LS-STATE-CODE        PIC X(10) OCCURS 200 TIMES.
-           05  LS-STATE-COUNTRY     PIC X(2)  OCCURS 200 TIMES.
+           05  LS-STATE-NAME        PIC X(45) OCCURS 250 TIMES.
+           05  LS-STATE-CODE        PIC X(10) OCCURS 250 TIMES.
+           05  LS-STATE-COUNTRY     PIC X(2)  OCCURS 250 TIMES.
            05  DIR-NAMES            OCCURS 23 TIMES PIC X(8). *> 全方向
            05  DIR-LEN              PIC 99    VALUE 23.
            05  EXCEPTION-WORD-TABLE.
@@ -184,11 +186,11 @@
 
            *> 優化測試TIPS
            DISPLAY "  A,,A".
-           DISPLAY "( 'w' )    /".
-           DISPLAY "(m9   \\    ENTER A WORD".
-           DISPLAY "  \    \)     STARTING WITH TT.".
-           DISPLAY "   ) )\ \   IT WILL RUN 10 TIMES!".
-           DISPLAY "  / /  \ \ \".
+           DISPLAY "( 'w' )     \ / \ / \ / \ / \ / \ / \ / \ /".
+           DISPLAY "(m9   \\    >  ENTER A WORD STARTING WITH < ".
+           DISPLAY "  \    \)   >    'TT' TO RUN 10 TIMES!    < ".
+           DISPLAY "   ) )\ \   >    'QQ' TO SKIP LOGGING! OR < ".
+           DISPLAY "  / /  \ \  / \ / \ / \ / \ / \ / \ / \ / \".
            DISPLAY " (_)    (_)".
 
            ACCEPT LOG-TEMP FROM CONSOLE.
@@ -860,24 +862,32 @@
            COMPUTE WS-SS = ELAPSED / 100.
            COMPUTE WS-CC = ELAPSED - (WS-SS * 100).
 
+           COMPUTE ELAPSED-SEC-AVG = ELAPSED /
+                                     FUNCTION NUMVAL(DATA-FMT) / 100.
+           MOVE ELAPSED-SEC-AVG TO ELAPSED-SEC-DIS.
+
            DISPLAY " >> JIKKOU TAIMU = '"ELAPSED"'/ '"
            WS-HH":"WS-MM":"WS-SS"."WS-CC
+           "'/// '"DATA-FMT "'/ '" ELAPSED-SEC-DIS
             "' << ".
            ADD 11000000 TO TIME-START.
 
        *> 開啟檔案、OUTPUT-LOG
-           OPEN EXTEND OUTPUT-LOG.
-           STRING
-             LOG-TEMP(1:15)                     ";"
-             ELAPSED                            ";"
-             WS-HH ":" WS-MM ":" WS-SS "." WS-CC";"
-             WS-DATE                            ";"
-             TIME-START(9:6)                    ";"
-             DATA-FMT                           ";"
-             DELIMITED BY SIZE
-             INTO LOG-TEMP
-           END-STRING.
-
-           MOVE LOG-TEMP TO LOG-REC.
-           WRITE LOG-REC.
-           CLOSE OUTPUT-LOG.
+           IF NOT (LOG-TEMP(1:2) = "QQ" OR LOG-TEMP = SPACES)
+             OPEN EXTEND OUTPUT-LOG
+             STRING
+               LOG-TEMP(1:15)                     ";"
+               ELAPSED                            ";"
+               WS-HH ":" WS-MM ":" WS-SS "." WS-CC";"
+               WS-DATE                            ";"
+               TIME-START(9:6)                    ";"
+               DATA-FMT                           ";"
+               ELAPSED-SEC-DIS                    ";"
+               DELIMITED BY SIZE
+               INTO LOG-TEMP
+             END-STRING
+           
+             MOVE LOG-TEMP TO LOG-REC
+             WRITE LOG-REC
+             CLOSE OUTPUT-LOG
+           END-IF.
